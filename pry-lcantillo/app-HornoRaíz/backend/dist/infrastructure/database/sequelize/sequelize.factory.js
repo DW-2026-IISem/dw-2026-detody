@@ -3,7 +3,9 @@ import { getDbBlock } from '../../../config/environment/index.js';
 import { ClientModel } from '../../../features/business/clients/infrastructure/persistence/models/client.model.js';
 import { ProductTypeModel } from '../../../features/business/product-types/infrastructure/persistence/models/product-type.model.js';
 import { ProductModel } from '../../../features/business/products/infrastructure/persistence/models/product.model.js';
-export const ALL_MODELS = [ClientModel, ProductTypeModel, ProductModel];
+import { SaleModel } from '../../../features/business/sales/infrastructure/persistence/models/sale.model.js';
+import { SaleItemModel } from '../../../features/business/sales/infrastructure/persistence/models/sale-item.model.js';
+export const ALL_MODELS = [ClientModel, ProductTypeModel, ProductModel, SaleModel, SaleItemModel];
 export function sequelizeFactory(cfg) {
     const block = getDbBlock(cfg);
     return new Sequelize({
