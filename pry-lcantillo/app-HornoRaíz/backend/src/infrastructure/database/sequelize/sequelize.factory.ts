@@ -1,7 +1,8 @@
 import { Sequelize } from 'sequelize-typescript';
 import { getDbBlock, IEnvConfig } from '../../../config/environment/index.js';
+import { ClientModel } from '../../../features/business/clients/infrastructure/persistence/models/client.model.js';
 
-export const ALL_MODELS: any[] = [];
+export const ALL_MODELS: any[] = [ClientModel];
 
 export function sequelizeFactory(cfg: IEnvConfig): Sequelize {
   const block = getDbBlock(cfg);
