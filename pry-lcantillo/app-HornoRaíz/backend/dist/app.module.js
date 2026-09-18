@@ -12,13 +12,21 @@ import { ClientsModule } from './features/business/clients/clients.module.js';
 import { ProductTypesModule } from './features/business/product-types/product-types.module.js';
 import { ProductsModule } from './features/business/products/products.module.js';
 import { SalesModule } from './features/business/sales/sales.module.js';
+import { MainSeeder } from './infrastructure/database/sequelize/seeders/main.seeder.js';
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     Module({
-        imports: [EnvironmentModule, SequelizeModule, ClientsModule, ProductTypesModule, ProductsModule, SalesModule],
+        imports: [
+            EnvironmentModule,
+            SequelizeModule,
+            ClientsModule,
+            ProductTypesModule,
+            ProductsModule,
+            SalesModule,
+        ],
         controllers: [HealthController],
-        providers: [],
+        providers: [MainSeeder],
     })
 ], AppModule);
 export { AppModule };
