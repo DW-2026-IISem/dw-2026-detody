@@ -10,11 +10,12 @@ import { SequelizeModule } from './infrastructure/database/sequelize/sequelize.m
 import { HealthController } from './health/health.controller.js';
 import { ClientsModule } from './features/business/clients/clients.module.js';
 import { ProductTypesModule } from './features/business/product-types/product-types.module.js';
+import { ProductsModule } from './features/business/products/products.module.js';
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     Module({
-        imports: [EnvironmentModule, SequelizeModule, ClientsModule, ProductTypesModule],
+        imports: [EnvironmentModule, SequelizeModule, ClientsModule, ProductTypesModule, ProductsModule],
         controllers: [HealthController],
         providers: [],
     })
