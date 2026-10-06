@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,26 +11,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Inject, Injectable } from '@nestjs/common';
-import { SaleNotFoundException } from '../../domain/exceptions/sale.exceptions.js';
-import { SALE_REPOSITORY } from '../../domain/interfaces/sale.repository.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GetSaleByIdUseCase = void 0;
+const common_1 = require("@nestjs/common");
+const sale_exceptions_js_1 = require("../../domain/exceptions/sale.exceptions.js");
+const sale_repository_js_1 = require("../../domain/interfaces/sale.repository.js");
 let GetSaleByIdUseCase = class GetSaleByIdUseCase {
-    saleRepository;
     constructor(saleRepository) {
         this.saleRepository = saleRepository;
     }
     async execute(id) {
         const sale = await this.saleRepository.findById(id);
         if (!sale) {
-            throw new SaleNotFoundException(id);
+            throw new sale_exceptions_js_1.SaleNotFoundException(id);
         }
         return sale;
     }
 };
-GetSaleByIdUseCase = __decorate([
-    Injectable(),
-    __param(0, Inject(SALE_REPOSITORY)),
+exports.GetSaleByIdUseCase = GetSaleByIdUseCase;
+exports.GetSaleByIdUseCase = GetSaleByIdUseCase = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(sale_repository_js_1.SALE_REPOSITORY)),
     __metadata("design:paramtypes", [Object])
 ], GetSaleByIdUseCase);
-export { GetSaleByIdUseCase };
 //# sourceMappingURL=get-sale-by-id.use-case.js.map

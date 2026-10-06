@@ -1,18 +1,24 @@
-export class ApplicationException extends Error {
-    statusCode;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EntityNotFoundException = exports.DomainException = exports.BusinessRuleException = exports.ApplicationException = void 0;
+class ApplicationException extends Error {
     constructor(statusCode, message) {
         super(message);
         this.statusCode = statusCode;
         this.name = this.constructor.name;
     }
 }
-export class BusinessRuleException extends ApplicationException {
+exports.ApplicationException = ApplicationException;
+class BusinessRuleException extends ApplicationException {
     constructor(message) { super(409, message); }
 }
-export class DomainException extends ApplicationException {
+exports.BusinessRuleException = BusinessRuleException;
+class DomainException extends ApplicationException {
     constructor(message) { super(400, message); }
 }
-export class EntityNotFoundException extends ApplicationException {
+exports.DomainException = DomainException;
+class EntityNotFoundException extends ApplicationException {
     constructor(message = 'Entidad no encontrada') { super(404, message); }
 }
+exports.EntityNotFoundException = EntityNotFoundException;
 //# sourceMappingURL=application.exception.js.map

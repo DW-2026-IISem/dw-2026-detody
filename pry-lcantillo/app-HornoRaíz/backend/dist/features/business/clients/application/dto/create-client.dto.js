@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,40 +8,39 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-export class CreateClientDto {
-    name;
-    email;
-    phone;
-    address;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CreateClientDto = void 0;
+const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
+class CreateClientDto {
 }
+exports.CreateClientDto = CreateClientDto;
 __decorate([
-    ApiProperty({ example: 'Panadería Central' }),
-    IsString(),
-    IsNotEmpty({ message: 'name es requerido' }),
-    MaxLength(150),
+    (0, swagger_1.ApiProperty)({ example: 'Panadería Central' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'name es requerido' }),
+    (0, class_validator_1.MaxLength)(150),
     __metadata("design:type", String)
 ], CreateClientDto.prototype, "name", void 0);
 __decorate([
-    ApiPropertyOptional({ example: 'contacto@panaderiacentral.com' }),
-    IsOptional(),
-    IsEmail({}, { message: 'email debe ser un correo válido' }),
-    MaxLength(150),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'contacto@panaderiacentral.com' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEmail)({}, { message: 'email debe ser un correo válido' }),
+    (0, class_validator_1.MaxLength)(150),
     __metadata("design:type", String)
 ], CreateClientDto.prototype, "email", void 0);
 __decorate([
-    ApiPropertyOptional({ example: '3001234567' }),
-    IsOptional(),
-    IsString(),
-    MaxLength(20),
+    (0, swagger_1.ApiPropertyOptional)({ example: '3001234567' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(20),
     __metadata("design:type", String)
 ], CreateClientDto.prototype, "phone", void 0);
 __decorate([
-    ApiPropertyOptional({ example: 'Calle 10 # 5-20' }),
-    IsOptional(),
-    IsString(),
-    MaxLength(255),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Calle 10 # 5-20' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], CreateClientDto.prototype, "address", void 0);
 //# sourceMappingURL=create-client.dto.js.map

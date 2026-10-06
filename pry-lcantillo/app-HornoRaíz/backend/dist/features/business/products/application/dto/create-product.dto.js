@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,45 +8,43 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, MaxLength, Min } from 'class-validator';
-export class CreateProductDto {
-    name;
-    description;
-    price;
-    stock;
-    productTypeId;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CreateProductDto = void 0;
+const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
+class CreateProductDto {
 }
+exports.CreateProductDto = CreateProductDto;
 __decorate([
-    ApiProperty({ example: 'Pan de Masa Madre Tradicional' }),
-    IsString(),
-    IsNotEmpty({ message: 'name es requerido' }),
-    MaxLength(150),
+    (0, swagger_1.ApiProperty)({ example: 'Pan de Masa Madre Tradicional' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'name es requerido' }),
+    (0, class_validator_1.MaxLength)(150),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "name", void 0);
 __decorate([
-    ApiPropertyOptional({ example: 'Pan de fermentación lenta de 24 horas' }),
-    IsOptional(),
-    IsString(),
-    MaxLength(255),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Pan de fermentación lenta de 24 horas' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "description", void 0);
 __decorate([
-    ApiProperty({ example: 12000 }),
-    IsNumber(),
-    IsPositive({ message: 'price debe ser un número positivo' }),
+    (0, swagger_1.ApiProperty)({ example: 12000 }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)({ message: 'price debe ser un número positivo' }),
     __metadata("design:type", Number)
 ], CreateProductDto.prototype, "price", void 0);
 __decorate([
-    ApiProperty({ example: 50 }),
-    IsInt(),
-    Min(0, { message: 'stock no puede ser negativo' }),
+    (0, swagger_1.ApiProperty)({ example: 50 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0, { message: 'stock no puede ser negativo' }),
     __metadata("design:type", Number)
 ], CreateProductDto.prototype, "stock", void 0);
 __decorate([
-    ApiProperty({ example: 1, description: 'ID del tipo de producto' }),
-    IsInt(),
-    IsPositive(),
+    (0, swagger_1.ApiProperty)({ example: 1, description: 'ID del tipo de producto' }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsPositive)(),
     __metadata("design:type", Number)
 ], CreateProductDto.prototype, "productTypeId", void 0);
 //# sourceMappingURL=create-product.dto.js.map

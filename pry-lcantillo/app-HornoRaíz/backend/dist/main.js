@@ -1,19 +1,21 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module.js';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
-import { MainSeeder } from './infrastructure/database/sequelize/seeders/main.seeder.js';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
+const swagger_1 = require("@nestjs/swagger");
+const app_module_js_1 = require("./app.module.js");
+const global_exception_filter_js_1 = require("./common/filters/global-exception.filter.js");
+const response_interceptor_js_1 = require("./common/interceptors/response.interceptor.js");
+const main_seeder_js_1 = require("./infrastructure/database/sequelize/seeders/main.seeder.js");
 async function bootstrap() {
-    const logger = new Logger('Bootstrap');
-    const app = await NestFactory.create(AppModule);
+    const logger = new common_1.Logger('Bootstrap');
+    const app = await core_1.NestFactory.create(app_module_js_1.AppModule);
     app.setGlobalPrefix('api');
     app.enableCors();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-    app.useGlobalFilters(new GlobalExceptionFilter());
-    app.useGlobalInterceptors(new ResponseInterceptor());
-    const config = new DocumentBuilder()
+    app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalFilters(new global_exception_filter_js_1.GlobalExceptionFilter());
+    app.useGlobalInterceptors(new response_interceptor_js_1.ResponseInterceptor());
+    const config = new swagger_1.DocumentBuilder()
         .setTitle('HornoRaíz API')
         .setDescription('Backend modular de gestión para HornoRaíz basado en Clean Architecture y NestJS')
         .setVersion('1.0.0')
@@ -22,10 +24,10 @@ async function bootstrap() {
         .addTag('products', 'Catálogo e inventario de productos')
         .addTag('sales', 'Procesamiento de ventas e historial')
         .build();
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+    const document = swagger_1.SwaggerModule.createDocument(app, config);
+    swagger_1.SwaggerModule.setup('api/docs', app, document);
     if (process.env.NODE_ENV !== 'production') {
-        const seeder = app.get(MainSeeder);
+        const seeder = app.get(main_seeder_js_1.MainSeeder);
         await seeder.run();
     }
     const port = process.env.PORT ?? 3004;
@@ -33,5 +35,5 @@ async function bootstrap() {
     logger.log(`Servidor HornoRaíz corriendo exitosamente en el puerto ${port}`);
     logger.log(`Documentación Swagger disponible en: http://localhost:${port}/api/docs`);
 }
-await bootstrap();
+bootstrap();
 //# sourceMappingURL=main.js.map

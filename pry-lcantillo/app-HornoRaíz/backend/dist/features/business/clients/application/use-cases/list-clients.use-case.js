@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,26 +11,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Inject, Injectable } from '@nestjs/common';
-import { CLIENT_REPOSITORY } from '../../domain/interfaces/client.repository.js';
-import { ClientMapper } from '../mappers/client.mapper.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ListClientsUseCase = void 0;
+const common_1 = require("@nestjs/common");
+const client_repository_js_1 = require("../../domain/interfaces/client.repository.js");
+const client_mapper_js_1 = require("../mappers/client.mapper.js");
 let ListClientsUseCase = class ListClientsUseCase {
-    clientRepository;
     constructor(clientRepository) {
         this.clientRepository = clientRepository;
     }
     async execute(page, limit) {
         const { items, total } = await this.clientRepository.findAll(page, limit);
         return {
-            items: items.map(ClientMapper.toResponse),
+            items: items.map(client_mapper_js_1.ClientMapper.toResponse),
             meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
         };
     }
 };
-ListClientsUseCase = __decorate([
-    Injectable(),
-    __param(0, Inject(CLIENT_REPOSITORY)),
+exports.ListClientsUseCase = ListClientsUseCase;
+exports.ListClientsUseCase = ListClientsUseCase = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(client_repository_js_1.CLIENT_REPOSITORY)),
     __metadata("design:paramtypes", [Object])
 ], ListClientsUseCase);
-export { ListClientsUseCase };
 //# sourceMappingURL=list-clients.use-case.js.map

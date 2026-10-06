@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,18 +11,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Inject, Injectable } from '@nestjs/common';
-import { CLIENT_REPOSITORY } from '../../../clients/domain/interfaces/client.repository.js';
-import { ClientNotFoundException } from '../../../clients/domain/exceptions/client.exceptions.js';
-import { PRODUCT_REPOSITORY } from '../../../products/domain/interfaces/product.repository.js';
-import { ProductNotFoundException } from '../../../products/domain/exceptions/product.exceptions.js';
-import { Sale } from '../../domain/entities/sale.entity.js';
-import { EmptySaleItemsException, InsufficientStockException } from '../../domain/exceptions/sale.exceptions.js';
-import { SALE_REPOSITORY } from '../../domain/interfaces/sale.repository.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CreateSaleUseCase = void 0;
+const common_1 = require("@nestjs/common");
+const client_repository_js_1 = require("../../../clients/domain/interfaces/client.repository.js");
+const client_exceptions_js_1 = require("../../../clients/domain/exceptions/client.exceptions.js");
+const product_repository_js_1 = require("../../../products/domain/interfaces/product.repository.js");
+const product_exceptions_js_1 = require("../../../products/domain/exceptions/product.exceptions.js");
+const sale_entity_js_1 = require("../../domain/entities/sale.entity.js");
+const sale_exceptions_js_1 = require("../../domain/exceptions/sale.exceptions.js");
+const sale_repository_js_1 = require("../../domain/interfaces/sale.repository.js");
 let CreateSaleUseCase = class CreateSaleUseCase {
-    saleRepository;
-    clientRepository;
-    productRepository;
     constructor(saleRepository, clientRepository, productRepository) {
         this.saleRepository = saleRepository;
         this.clientRepository = clientRepository;
@@ -29,20 +29,20 @@ let CreateSaleUseCase = class CreateSaleUseCase {
     }
     async execute(dto) {
         if (!dto.items || dto.items.length === 0) {
-            throw new EmptySaleItemsException();
+            throw new sale_exceptions_js_1.EmptySaleItemsException();
         }
         const clientExists = await this.clientRepository.findById(dto.clientId);
         if (!clientExists) {
-            throw new ClientNotFoundException(dto.clientId);
+            throw new client_exceptions_js_1.ClientNotFoundException(dto.clientId);
         }
         const preparedItems = [];
         for (const itemDto of dto.items) {
             const product = await this.productRepository.findById(itemDto.productId);
             if (!product) {
-                throw new ProductNotFoundException(itemDto.productId);
+                throw new product_exceptions_js_1.ProductNotFoundException(itemDto.productId);
             }
             if (product.stock < itemDto.quantity) {
-                throw new InsufficientStockException(product.name, product.stock, itemDto.quantity);
+                throw new sale_exceptions_js_1.InsufficientStockException(product.name, product.stock, itemDto.quantity);
             }
             preparedItems.push({
                 productId: product.id,
@@ -51,7 +51,7 @@ let CreateSaleUseCase = class CreateSaleUseCase {
                 subtotal: product.price * itemDto.quantity,
             });
         }
-        const newSale = new Sale({
+        const newSale = new sale_entity_js_1.Sale({
             clientId: dto.clientId,
             items: preparedItems,
             status: 'completed',
@@ -59,12 +59,12 @@ let CreateSaleUseCase = class CreateSaleUseCase {
         return this.saleRepository.create(newSale);
     }
 };
-CreateSaleUseCase = __decorate([
-    Injectable(),
-    __param(0, Inject(SALE_REPOSITORY)),
-    __param(1, Inject(CLIENT_REPOSITORY)),
-    __param(2, Inject(PRODUCT_REPOSITORY)),
+exports.CreateSaleUseCase = CreateSaleUseCase;
+exports.CreateSaleUseCase = CreateSaleUseCase = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(sale_repository_js_1.SALE_REPOSITORY)),
+    __param(1, (0, common_1.Inject)(client_repository_js_1.CLIENT_REPOSITORY)),
+    __param(2, (0, common_1.Inject)(product_repository_js_1.PRODUCT_REPOSITORY)),
     __metadata("design:paramtypes", [Object, Object, Object])
 ], CreateSaleUseCase);
-export { CreateSaleUseCase };
 //# sourceMappingURL=create-sale.use-case.js.map

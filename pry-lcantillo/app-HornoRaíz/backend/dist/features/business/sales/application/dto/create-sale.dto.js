@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,41 +8,41 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsInt, IsPositive, ValidateNested } from 'class-validator';
-export class CreateSaleItemDto {
-    productId;
-    quantity;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CreateSaleDto = exports.CreateSaleItemDto = void 0;
+const swagger_1 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
+const class_validator_1 = require("class-validator");
+class CreateSaleItemDto {
 }
+exports.CreateSaleItemDto = CreateSaleItemDto;
 __decorate([
-    ApiProperty({ example: 1 }),
-    IsInt(),
-    IsPositive(),
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsPositive)(),
     __metadata("design:type", Number)
 ], CreateSaleItemDto.prototype, "productId", void 0);
 __decorate([
-    ApiProperty({ example: 2 }),
-    IsInt(),
-    IsPositive(),
+    (0, swagger_1.ApiProperty)({ example: 2 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsPositive)(),
     __metadata("design:type", Number)
 ], CreateSaleItemDto.prototype, "quantity", void 0);
-export class CreateSaleDto {
-    clientId;
-    items;
+class CreateSaleDto {
 }
+exports.CreateSaleDto = CreateSaleDto;
 __decorate([
-    ApiProperty({ example: 1 }),
-    IsInt(),
-    IsPositive(),
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsPositive)(),
     __metadata("design:type", Number)
 ], CreateSaleDto.prototype, "clientId", void 0);
 __decorate([
-    ApiProperty({ type: [CreateSaleItemDto] }),
-    IsArray(),
-    ArrayMinSize(1, { message: 'Debe agregar al menos un ítem a la venta' }),
-    ValidateNested({ each: true }),
-    Type(() => CreateSaleItemDto),
+    (0, swagger_1.ApiProperty)({ type: [CreateSaleItemDto] }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayMinSize)(1, { message: 'Debe agregar al menos un ítem a la venta' }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => CreateSaleItemDto),
     __metadata("design:type", Array)
 ], CreateSaleDto.prototype, "items", void 0);
 //# sourceMappingURL=create-sale.dto.js.map

@@ -1,4 +1,7 @@
-export function getDbBlock(cfg) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getDbBlock = getDbBlock;
+function getDbBlock(cfg) {
     switch (cfg.dbDialect) {
         case 'mysql': return cfg.mysql;
         case 'postgres': return cfg.postgres;

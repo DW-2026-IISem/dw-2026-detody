@@ -1,4 +1,7 @@
-export class SaleMapper {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SaleMapper = void 0;
+class SaleMapper {
     static toResponse(sale) {
         return {
             id: sale.id,
@@ -15,4 +18,5 @@ export class SaleMapper {
         };
     }
 }
+exports.SaleMapper = SaleMapper;
 //# sourceMappingURL=sale.mapper.js.map

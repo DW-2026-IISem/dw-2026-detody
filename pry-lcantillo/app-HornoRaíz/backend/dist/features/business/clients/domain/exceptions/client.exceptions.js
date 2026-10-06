@@ -1,12 +1,17 @@
-import { BusinessRuleException, EntityNotFoundException } from '../../../../../common/exceptions/application.exception.js';
-export class ClientNotFoundException extends EntityNotFoundException {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ClientEmailAlreadyExistsException = exports.ClientNotFoundException = void 0;
+const application_exception_js_1 = require("../../../../../common/exceptions/application.exception.js");
+class ClientNotFoundException extends application_exception_js_1.EntityNotFoundException {
     constructor(id) {
         super(`Cliente con id ${id} no encontrado`);
     }
 }
-export class ClientEmailAlreadyExistsException extends BusinessRuleException {
+exports.ClientNotFoundException = ClientNotFoundException;
+class ClientEmailAlreadyExistsException extends application_exception_js_1.BusinessRuleException {
     constructor(email) {
         super(`Ya existe un cliente con el email ${email}`);
     }
 }
+exports.ClientEmailAlreadyExistsException = ClientEmailAlreadyExistsException;
 //# sourceMappingURL=client.exceptions.js.map

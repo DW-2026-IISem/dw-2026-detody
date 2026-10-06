@@ -1,11 +1,7 @@
-export class Product {
-    id;
-    name;
-    description;
-    price;
-    stock;
-    productTypeId;
-    status;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Product = void 0;
+class Product {
     constructor(props) {
         this.id = props.id ?? null;
         this.name = props.name;
@@ -16,4 +12,5 @@ export class Product {
         this.status = props.status ?? 'active';
     }
 }
+exports.Product = Product;
 //# sourceMappingURL=product.entity.js.map

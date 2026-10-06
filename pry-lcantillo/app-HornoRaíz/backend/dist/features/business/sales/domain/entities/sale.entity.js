@@ -1,10 +1,7 @@
-export class SaleItem {
-    id;
-    saleId;
-    productId;
-    quantity;
-    unitPrice;
-    subtotal;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Sale = exports.SaleItem = void 0;
+class SaleItem {
     constructor(props) {
         this.id = props.id ?? null;
         this.saleId = props.saleId ?? null;
@@ -14,12 +11,8 @@ export class SaleItem {
         this.subtotal = props.subtotal ?? props.quantity * props.unitPrice;
     }
 }
-export class Sale {
-    id;
-    clientId;
-    totalAmount;
-    status;
-    items;
+exports.SaleItem = SaleItem;
+class Sale {
     constructor(props) {
         this.id = props.id ?? null;
         this.clientId = props.clientId;
@@ -28,4 +21,5 @@ export class Sale {
         this.totalAmount = props.totalAmount ?? this.items.reduce((acc, item) => acc + item.subtotal, 0);
     }
 }
+exports.Sale = Sale;
 //# sourceMappingURL=sale.entity.js.map

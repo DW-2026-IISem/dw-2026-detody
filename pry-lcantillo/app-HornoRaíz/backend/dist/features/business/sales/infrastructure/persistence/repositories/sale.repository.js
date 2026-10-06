@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,26 +11,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Inject, Injectable } from '@nestjs/common';
-import { Sequelize } from 'sequelize-typescript';
-import { SEQUELIZE } from '../../../../../../infrastructure/database/sequelize/sequelize.module.js';
-import { ProductModel } from '../../../../products/infrastructure/persistence/models/product.model.js';
-import { Sale, SaleItem } from '../../../domain/entities/sale.entity.js';
-import { SaleItemModel } from '../models/sale-item.model.js';
-import { SaleModel } from '../models/sale.model.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SaleRepository = void 0;
+const common_1 = require("@nestjs/common");
+const sequelize_typescript_1 = require("sequelize-typescript");
+const sequelize_module_js_1 = require("../../../../../../infrastructure/database/sequelize/sequelize.module.js");
+const product_model_js_1 = require("../../../../products/infrastructure/persistence/models/product.model.js");
+const sale_entity_js_1 = require("../../../domain/entities/sale.entity.js");
+const sale_item_model_js_1 = require("../models/sale-item.model.js");
+const sale_model_js_1 = require("../models/sale.model.js");
 let SaleRepository = class SaleRepository {
-    sequelize;
     constructor(sequelize) {
         this.sequelize = sequelize;
     }
     get saleRepo() {
-        return this.sequelize.getRepository(SaleModel);
+        return this.sequelize.getRepository(sale_model_js_1.SaleModel);
     }
     get itemRepo() {
-        return this.sequelize.getRepository(SaleItemModel);
+        return this.sequelize.getRepository(sale_item_model_js_1.SaleItemModel);
     }
     get productRepo() {
-        return this.sequelize.getRepository(ProductModel);
+        return this.sequelize.getRepository(product_model_js_1.ProductModel);
     }
     async create(sale) {
         const transaction = await this.sequelize.transaction();
@@ -67,7 +69,7 @@ let SaleRepository = class SaleRepository {
         const { rows, count } = await this.saleRepo.findAndCountAll({
             limit,
             offset,
-            include: [SaleItemModel],
+            include: [sale_item_model_js_1.SaleItemModel],
         });
         return {
             items: rows.map((m) => this.toDomain(m)),
@@ -75,11 +77,11 @@ let SaleRepository = class SaleRepository {
         };
     }
     async findById(id) {
-        const model = await this.saleRepo.findByPk(id, { include: [SaleItemModel] });
+        const model = await this.saleRepo.findByPk(id, { include: [sale_item_model_js_1.SaleItemModel] });
         return model ? this.toDomain(model) : null;
     }
     toDomain(m) {
-        const items = (m.items ?? []).map((i) => new SaleItem({
+        const items = (m.items ?? []).map((i) => new sale_entity_js_1.SaleItem({
             id: i.id,
             saleId: i.saleId,
             productId: i.productId,
@@ -87,7 +89,7 @@ let SaleRepository = class SaleRepository {
             unitPrice: Number(i.unitPrice),
             subtotal: Number(i.subtotal),
         }));
-        return new Sale({
+        return new sale_entity_js_1.Sale({
             id: m.id,
             clientId: m.clientId,
             totalAmount: Number(m.totalAmount),
@@ -96,10 +98,10 @@ let SaleRepository = class SaleRepository {
         });
     }
 };
-SaleRepository = __decorate([
-    Injectable(),
-    __param(0, Inject(SEQUELIZE)),
-    __metadata("design:paramtypes", [Sequelize])
+exports.SaleRepository = SaleRepository;
+exports.SaleRepository = SaleRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(sequelize_module_js_1.SEQUELIZE)),
+    __metadata("design:paramtypes", [sequelize_typescript_1.Sequelize])
 ], SaleRepository);
-export { SaleRepository };
 //# sourceMappingURL=sale.repository.js.map

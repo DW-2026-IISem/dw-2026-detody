@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,25 +8,27 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { plainToInstance } from 'class-transformer';
-import { IsIn, IsNotEmpty, ValidateIf, validateSync } from 'class-validator';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EnvVariables = void 0;
+exports.validateEnv = validateEnv;
+const class_transformer_1 = require("class-transformer");
+const class_validator_1 = require("class-validator");
 const DIALECTS = ['mysql', 'postgres', 'mssql', 'oracle'];
-export class EnvVariables {
-    DB_DIALECT;
-    DB_MYSQL_HOST;
+class EnvVariables {
 }
+exports.EnvVariables = EnvVariables;
 __decorate([
-    IsIn(DIALECTS, { message: 'DB_DIALECT debe ser mysql | postgres | mssql | oracle' }),
+    (0, class_validator_1.IsIn)(DIALECTS, { message: 'DB_DIALECT debe ser mysql | postgres | mssql | oracle' }),
     __metadata("design:type", String)
 ], EnvVariables.prototype, "DB_DIALECT", void 0);
 __decorate([
-    ValidateIf((o) => o.DB_DIALECT === 'mysql'),
-    IsNotEmpty({ message: 'DB_MYSQL_HOST es requerida' }),
+    (0, class_validator_1.ValidateIf)((o) => o.DB_DIALECT === 'mysql'),
+    (0, class_validator_1.IsNotEmpty)({ message: 'DB_MYSQL_HOST es requerida' }),
     __metadata("design:type", String)
 ], EnvVariables.prototype, "DB_MYSQL_HOST", void 0);
-export function validateEnv(raw) {
-    const config = plainToInstance(EnvVariables, raw);
-    const errors = validateSync(config, { whitelist: false, forbidNonWhitelisted: false });
+function validateEnv(raw) {
+    const config = (0, class_transformer_1.plainToInstance)(EnvVariables, raw);
+    const errors = (0, class_validator_1.validateSync)(config, { whitelist: false, forbidNonWhitelisted: false });
     if (errors.length > 0) {
         const messages = errors.map((e) => Object.values(e.constraints ?? {}).join('; ')).join(' | ');
         throw new Error(`Error de configuración: ${messages}`);

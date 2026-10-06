@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,39 +8,41 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
-import { ProductModel } from '../../../../products/infrastructure/persistence/models/product.model.js';
-import { SaleModel } from './sale.model.js';
-let SaleItemModel = class SaleItemModel extends Model {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SaleItemModel = void 0;
+const sequelize_typescript_1 = require("sequelize-typescript");
+const product_model_js_1 = require("../../../../products/infrastructure/persistence/models/product.model.js");
+const sale_model_js_1 = require("./sale.model.js");
+let SaleItemModel = class SaleItemModel extends sequelize_typescript_1.Model {
 };
+exports.SaleItemModel = SaleItemModel;
 __decorate([
-    Column({ type: DataType.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true }),
     __metadata("design:type", Number)
 ], SaleItemModel.prototype, "id", void 0);
 __decorate([
-    ForeignKey(() => SaleModel),
-    Column({ type: DataType.INTEGER.UNSIGNED, allowNull: false }),
+    (0, sequelize_typescript_1.ForeignKey)(() => sale_model_js_1.SaleModel),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.INTEGER.UNSIGNED, allowNull: false }),
     __metadata("design:type", Number)
 ], SaleItemModel.prototype, "saleId", void 0);
 __decorate([
-    ForeignKey(() => ProductModel),
-    Column({ type: DataType.INTEGER.UNSIGNED, allowNull: false }),
+    (0, sequelize_typescript_1.ForeignKey)(() => product_model_js_1.ProductModel),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.INTEGER.UNSIGNED, allowNull: false }),
     __metadata("design:type", Number)
 ], SaleItemModel.prototype, "productId", void 0);
 __decorate([
-    Column({ type: DataType.INTEGER, allowNull: false }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.INTEGER, allowNull: false }),
     __metadata("design:type", Number)
 ], SaleItemModel.prototype, "quantity", void 0);
 __decorate([
-    Column({ type: DataType.DECIMAL(10, 2), allowNull: false }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.DECIMAL(10, 2), allowNull: false }),
     __metadata("design:type", Number)
 ], SaleItemModel.prototype, "unitPrice", void 0);
 __decorate([
-    Column({ type: DataType.DECIMAL(10, 2), allowNull: false }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.DECIMAL(10, 2), allowNull: false }),
     __metadata("design:type", Number)
 ], SaleItemModel.prototype, "subtotal", void 0);
-SaleItemModel = __decorate([
-    Table({ tableName: 'sale_items', timestamps: true })
+exports.SaleItemModel = SaleItemModel = __decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'sale_items', timestamps: true })
 ], SaleItemModel);
-export { SaleItemModel };
 //# sourceMappingURL=sale-item.model.js.map

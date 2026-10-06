@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -8,22 +9,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var MainSeeder_1;
-import { Injectable, Logger } from '@nestjs/common';
-import { ClientSeeder } from '../../../../features/business/clients/infrastructure/persistence/seeders/client.seeder.js';
-import { ProductTypeSeeder } from '../../../../features/business/product-types/infrastructure/persistence/seeders/product-type.seeder.js';
-import { ProductSeeder } from '../../../../features/business/products/infrastructure/persistence/seeders/product.seeder.js';
-import { SaleSeeder } from '../../../../features/business/sales/infrastructure/persistence/seeders/sale.seeder.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MainSeeder = void 0;
+const common_1 = require("@nestjs/common");
+const client_seeder_js_1 = require("../../../../features/business/clients/infrastructure/persistence/seeders/client.seeder.js");
+const product_type_seeder_js_1 = require("../../../../features/business/product-types/infrastructure/persistence/seeders/product-type.seeder.js");
+const product_seeder_js_1 = require("../../../../features/business/products/infrastructure/persistence/seeders/product.seeder.js");
+const sale_seeder_js_1 = require("../../../../features/business/sales/infrastructure/persistence/seeders/sale.seeder.js");
 let MainSeeder = MainSeeder_1 = class MainSeeder {
-    clientSeeder;
-    productTypeSeeder;
-    productSeeder;
-    saleSeeder;
-    logger = new Logger(MainSeeder_1.name);
     constructor(clientSeeder, productTypeSeeder, productSeeder, saleSeeder) {
         this.clientSeeder = clientSeeder;
         this.productTypeSeeder = productTypeSeeder;
         this.productSeeder = productSeeder;
         this.saleSeeder = saleSeeder;
+        this.logger = new common_1.Logger(MainSeeder_1.name);
     }
     async run() {
         this.logger.log('Iniciando proceso de seeding global...');
@@ -34,12 +33,12 @@ let MainSeeder = MainSeeder_1 = class MainSeeder {
         this.logger.log('Seeding global finalizado exitosamente.');
     }
 };
-MainSeeder = MainSeeder_1 = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [ClientSeeder,
-        ProductTypeSeeder,
-        ProductSeeder,
-        SaleSeeder])
+exports.MainSeeder = MainSeeder;
+exports.MainSeeder = MainSeeder = MainSeeder_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [client_seeder_js_1.ClientSeeder,
+        product_type_seeder_js_1.ProductTypeSeeder,
+        product_seeder_js_1.ProductSeeder,
+        sale_seeder_js_1.SaleSeeder])
 ], MainSeeder);
-export { MainSeeder };
 //# sourceMappingURL=main.seeder.js.map

@@ -1,7 +1,10 @@
-import { Product } from '../../domain/entities/product.entity.js';
-export class ProductMapper {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductMapper = void 0;
+const product_entity_js_1 = require("../../domain/entities/product.entity.js");
+class ProductMapper {
     static toEntity(dto) {
-        return new Product({
+        return new product_entity_js_1.Product({
             name: dto.name,
             description: dto.description ?? null,
             price: dto.price,
@@ -22,4 +25,5 @@ export class ProductMapper {
         };
     }
 }
+exports.ProductMapper = ProductMapper;
 //# sourceMappingURL=product.mapper.js.map

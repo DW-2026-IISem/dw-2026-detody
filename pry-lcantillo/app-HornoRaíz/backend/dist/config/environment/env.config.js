@@ -1,6 +1,13 @@
-import dotenv from 'dotenv';
-import { validateEnv } from './env.validation.js';
-export const ENV_CONFIG = Symbol('ENV_CONFIG');
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ENV_CONFIG = void 0;
+exports.loadEnvConfig = loadEnvConfig;
+const dotenv_1 = __importDefault(require("dotenv"));
+const env_validation_js_1 = require("./env.validation.js");
+exports.ENV_CONFIG = Symbol('ENV_CONFIG');
 function toBlock(prefix, raw, defaultPort) {
     return {
         host: String(raw[`DB_${prefix}_HOST`] ?? 'localhost'),
@@ -10,10 +17,10 @@ function toBlock(prefix, raw, defaultPort) {
         name: String(raw[`DB_${prefix}_NAME`] ?? ''),
     };
 }
-export function loadEnvConfig() {
-    dotenv.config();
+function loadEnvConfig() {
+    dotenv_1.default.config();
     const raw = process.env;
-    validateEnv(raw);
+    (0, env_validation_js_1.validateEnv)(raw);
     return {
         port: Number(raw.PORT ?? 3004),
         nodeEnv: String(raw.NODE_ENV ?? 'development'),

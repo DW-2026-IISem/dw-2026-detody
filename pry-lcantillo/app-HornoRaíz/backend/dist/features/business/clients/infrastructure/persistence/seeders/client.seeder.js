@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11,14 +12,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var ClientSeeder_1;
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Client } from '../../../domain/entities/client.entity.js';
-import { CLIENT_REPOSITORY } from '../../../domain/interfaces/client.repository.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ClientSeeder = void 0;
+const common_1 = require("@nestjs/common");
+const client_entity_js_1 = require("../../../domain/entities/client.entity.js");
+const client_repository_js_1 = require("../../../domain/interfaces/client.repository.js");
 let ClientSeeder = ClientSeeder_1 = class ClientSeeder {
-    clientRepository;
-    logger = new Logger(ClientSeeder_1.name);
     constructor(clientRepository) {
         this.clientRepository = clientRepository;
+        this.logger = new common_1.Logger(ClientSeeder_1.name);
     }
     async seed() {
         const email = 'cliente.demo@hornoraiz.com';
@@ -27,7 +29,7 @@ let ClientSeeder = ClientSeeder_1 = class ClientSeeder {
             this.logger.log('Seeder clients: ya existía el cliente demo');
             return;
         }
-        await this.clientRepository.create(new Client({
+        await this.clientRepository.create(new client_entity_js_1.Client({
             name: 'Cliente HornoRaíz Demo',
             email,
             phone: '3009876543',
@@ -37,10 +39,10 @@ let ClientSeeder = ClientSeeder_1 = class ClientSeeder {
         this.logger.log('Seeder clients: cliente demo creado con éxito');
     }
 };
-ClientSeeder = ClientSeeder_1 = __decorate([
-    Injectable(),
-    __param(0, Inject(CLIENT_REPOSITORY)),
+exports.ClientSeeder = ClientSeeder;
+exports.ClientSeeder = ClientSeeder = ClientSeeder_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(client_repository_js_1.CLIENT_REPOSITORY)),
     __metadata("design:paramtypes", [Object])
 ], ClientSeeder);
-export { ClientSeeder };
 //# sourceMappingURL=client.seeder.js.map

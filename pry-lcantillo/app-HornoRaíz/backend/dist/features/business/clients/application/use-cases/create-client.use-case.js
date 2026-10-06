@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,12 +11,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientEmailAlreadyExistsException } from '../../domain/exceptions/client.exceptions.js';
-import { CLIENT_REPOSITORY } from '../../domain/interfaces/client.repository.js';
-import { ClientMapper } from '../mappers/client.mapper.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CreateClientUseCase = void 0;
+const common_1 = require("@nestjs/common");
+const client_exceptions_js_1 = require("../../domain/exceptions/client.exceptions.js");
+const client_repository_js_1 = require("../../domain/interfaces/client.repository.js");
+const client_mapper_js_1 = require("../mappers/client.mapper.js");
 let CreateClientUseCase = class CreateClientUseCase {
-    clientRepository;
     constructor(clientRepository) {
         this.clientRepository = clientRepository;
     }
@@ -23,16 +25,16 @@ let CreateClientUseCase = class CreateClientUseCase {
         if (dto.email) {
             const existing = await this.clientRepository.findByEmail(dto.email);
             if (existing) {
-                throw new ClientEmailAlreadyExistsException(dto.email);
+                throw new client_exceptions_js_1.ClientEmailAlreadyExistsException(dto.email);
             }
         }
-        return this.clientRepository.create(ClientMapper.toEntity(dto));
+        return this.clientRepository.create(client_mapper_js_1.ClientMapper.toEntity(dto));
     }
 };
-CreateClientUseCase = __decorate([
-    Injectable(),
-    __param(0, Inject(CLIENT_REPOSITORY)),
+exports.CreateClientUseCase = CreateClientUseCase;
+exports.CreateClientUseCase = CreateClientUseCase = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(client_repository_js_1.CLIENT_REPOSITORY)),
     __metadata("design:paramtypes", [Object])
 ], CreateClientUseCase);
-export { CreateClientUseCase };
 //# sourceMappingURL=create-client.use-case.js.map

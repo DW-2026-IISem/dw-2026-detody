@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,17 +11,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { CreateClientDto } from '../../../application/dto/create-client.dto.js';
-import { ClientMapper } from '../../../application/mappers/client.mapper.js';
-import { CreateClientUseCase } from '../../../application/use-cases/create-client.use-case.js';
-import { GetClientByIdUseCase } from '../../../application/use-cases/get-client-by-id.use-case.js';
-import { ListClientsUseCase } from '../../../application/use-cases/list-clients.use-case.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ClientsController = void 0;
+const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
+const create_client_dto_js_1 = require("../../../application/dto/create-client.dto.js");
+const client_mapper_js_1 = require("../../../application/mappers/client.mapper.js");
+const create_client_use_case_js_1 = require("../../../application/use-cases/create-client.use-case.js");
+const get_client_by_id_use_case_js_1 = require("../../../application/use-cases/get-client-by-id.use-case.js");
+const list_clients_use_case_js_1 = require("../../../application/use-cases/list-clients.use-case.js");
 let ClientsController = class ClientsController {
-    createClient;
-    listClients;
-    getClient;
     constructor(createClient, listClients, getClient) {
         this.createClient = createClient;
         this.listClients = listClients;
@@ -28,45 +28,45 @@ let ClientsController = class ClientsController {
     }
     async create(dto) {
         const client = await this.createClient.execute(dto);
-        return ClientMapper.toResponse(client);
+        return client_mapper_js_1.ClientMapper.toResponse(client);
     }
     async list(page = '1', limit = '10') {
         return this.listClients.execute(Number(page), Number(limit));
     }
     async findOne(id) {
         const client = await this.getClient.execute(id);
-        return ClientMapper.toResponse(client);
+        return client_mapper_js_1.ClientMapper.toResponse(client);
     }
 };
+exports.ClientsController = ClientsController;
 __decorate([
-    Post(),
-    HttpCode(201),
-    __param(0, Body()),
+    (0, common_1.Post)(),
+    (0, common_1.HttpCode)(201),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [CreateClientDto]),
+    __metadata("design:paramtypes", [create_client_dto_js_1.CreateClientDto]),
     __metadata("design:returntype", Promise)
 ], ClientsController.prototype, "create", null);
 __decorate([
-    Get(),
-    __param(0, Query('page')),
-    __param(1, Query('limit')),
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], ClientsController.prototype, "list", null);
 __decorate([
-    Get(':id'),
-    __param(0, Param('id', ParseIntPipe)),
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], ClientsController.prototype, "findOne", null);
-ClientsController = __decorate([
-    ApiTags('clients'),
-    Controller('clients'),
-    __metadata("design:paramtypes", [CreateClientUseCase,
-        ListClientsUseCase,
-        GetClientByIdUseCase])
+exports.ClientsController = ClientsController = __decorate([
+    (0, swagger_1.ApiTags)('clients'),
+    (0, common_1.Controller)('clients'),
+    __metadata("design:paramtypes", [create_client_use_case_js_1.CreateClientUseCase,
+        list_clients_use_case_js_1.ListClientsUseCase,
+        get_client_by_id_use_case_js_1.GetClientByIdUseCase])
 ], ClientsController);
-export { ClientsController };
 //# sourceMappingURL=clients.controller.js.map

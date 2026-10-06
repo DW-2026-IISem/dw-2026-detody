@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,18 +11,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Inject, Injectable } from '@nestjs/common';
-import { Sequelize } from 'sequelize-typescript';
-import { SEQUELIZE } from '../../../../../../infrastructure/database/sequelize/sequelize.module.js';
-import { ProductType } from '../../../domain/entities/product-type.entity.js';
-import { ProductTypeModel } from '../models/product-type.model.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductTypeRepository = void 0;
+const common_1 = require("@nestjs/common");
+const sequelize_typescript_1 = require("sequelize-typescript");
+const sequelize_module_js_1 = require("../../../../../../infrastructure/database/sequelize/sequelize.module.js");
+const product_type_entity_js_1 = require("../../../domain/entities/product-type.entity.js");
+const product_type_model_js_1 = require("../models/product-type.model.js");
 let ProductTypeRepository = class ProductTypeRepository {
-    sequelize;
     constructor(sequelize) {
         this.sequelize = sequelize;
     }
     get repo() {
-        return this.sequelize.getRepository(ProductTypeModel);
+        return this.sequelize.getRepository(product_type_model_js_1.ProductTypeModel);
     }
     async create(productType) {
         const created = await this.repo.create({
@@ -47,17 +49,17 @@ let ProductTypeRepository = class ProductTypeRepository {
         return model ? this.toDomain(model) : null;
     }
     toDomain(m) {
-        return new ProductType({
+        return new product_type_entity_js_1.ProductType({
             id: m.id,
             name: m.name,
             description: m.description ?? null,
         });
     }
 };
-ProductTypeRepository = __decorate([
-    Injectable(),
-    __param(0, Inject(SEQUELIZE)),
-    __metadata("design:paramtypes", [Sequelize])
+exports.ProductTypeRepository = ProductTypeRepository;
+exports.ProductTypeRepository = ProductTypeRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(sequelize_module_js_1.SEQUELIZE)),
+    __metadata("design:paramtypes", [sequelize_typescript_1.Sequelize])
 ], ProductTypeRepository);
-export { ProductTypeRepository };
 //# sourceMappingURL=product-type.repository.js.map

@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11,14 +12,15 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var ProductTypeSeeder_1;
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ProductType } from '../../../domain/entities/product-type.entity.js';
-import { PRODUCT_TYPE_REPOSITORY } from '../../../domain/interfaces/product-type.repository.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductTypeSeeder = void 0;
+const common_1 = require("@nestjs/common");
+const product_type_entity_js_1 = require("../../../domain/entities/product-type.entity.js");
+const product_type_repository_js_1 = require("../../../domain/interfaces/product-type.repository.js");
 let ProductTypeSeeder = ProductTypeSeeder_1 = class ProductTypeSeeder {
-    repository;
-    logger = new Logger(ProductTypeSeeder_1.name);
     constructor(repository) {
         this.repository = repository;
+        this.logger = new common_1.Logger(ProductTypeSeeder_1.name);
     }
     async seed() {
         const initialTypes = [
@@ -29,16 +31,16 @@ let ProductTypeSeeder = ProductTypeSeeder_1 = class ProductTypeSeeder {
         for (const t of initialTypes) {
             const exists = await this.repository.findByName(t.name);
             if (!exists) {
-                await this.repository.create(new ProductType(t));
+                await this.repository.create(new product_type_entity_js_1.ProductType(t));
                 this.logger.log(`Seeder product-types: tipo "${t.name}" creado`);
             }
         }
     }
 };
-ProductTypeSeeder = ProductTypeSeeder_1 = __decorate([
-    Injectable(),
-    __param(0, Inject(PRODUCT_TYPE_REPOSITORY)),
+exports.ProductTypeSeeder = ProductTypeSeeder;
+exports.ProductTypeSeeder = ProductTypeSeeder = ProductTypeSeeder_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(product_type_repository_js_1.PRODUCT_TYPE_REPOSITORY)),
     __metadata("design:paramtypes", [Object])
 ], ProductTypeSeeder);
-export { ProductTypeSeeder };
 //# sourceMappingURL=product-type.seeder.js.map

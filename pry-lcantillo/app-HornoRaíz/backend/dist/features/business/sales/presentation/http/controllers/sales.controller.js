@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,17 +11,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { CreateSaleDto } from '../../../application/dto/create-sale.dto.js';
-import { SaleMapper } from '../../../application/mappers/sale.mapper.js';
-import { CreateSaleUseCase } from '../../../application/use-cases/create-sale.use-case.js';
-import { GetSaleByIdUseCase } from '../../../application/use-cases/get-sale-by-id.use-case.js';
-import { ListSalesUseCase } from '../../../application/use-cases/list-sales.use-case.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SalesController = void 0;
+const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
+const create_sale_dto_js_1 = require("../../../application/dto/create-sale.dto.js");
+const sale_mapper_js_1 = require("../../../application/mappers/sale.mapper.js");
+const create_sale_use_case_js_1 = require("../../../application/use-cases/create-sale.use-case.js");
+const get_sale_by_id_use_case_js_1 = require("../../../application/use-cases/get-sale-by-id.use-case.js");
+const list_sales_use_case_js_1 = require("../../../application/use-cases/list-sales.use-case.js");
 let SalesController = class SalesController {
-    createSale;
-    listSales;
-    getSale;
     constructor(createSale, listSales, getSale) {
         this.createSale = createSale;
         this.listSales = listSales;
@@ -28,45 +28,45 @@ let SalesController = class SalesController {
     }
     async create(dto) {
         const sale = await this.createSale.execute(dto);
-        return SaleMapper.toResponse(sale);
+        return sale_mapper_js_1.SaleMapper.toResponse(sale);
     }
     async list(page = '1', limit = '10') {
         return this.listSales.execute(Number(page), Number(limit));
     }
     async findOne(id) {
         const sale = await this.getSale.execute(id);
-        return SaleMapper.toResponse(sale);
+        return sale_mapper_js_1.SaleMapper.toResponse(sale);
     }
 };
+exports.SalesController = SalesController;
 __decorate([
-    Post(),
-    HttpCode(201),
-    __param(0, Body()),
+    (0, common_1.Post)(),
+    (0, common_1.HttpCode)(201),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [CreateSaleDto]),
+    __metadata("design:paramtypes", [create_sale_dto_js_1.CreateSaleDto]),
     __metadata("design:returntype", Promise)
 ], SalesController.prototype, "create", null);
 __decorate([
-    Get(),
-    __param(0, Query('page')),
-    __param(1, Query('limit')),
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], SalesController.prototype, "list", null);
 __decorate([
-    Get(':id'),
-    __param(0, Param('id', ParseIntPipe)),
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], SalesController.prototype, "findOne", null);
-SalesController = __decorate([
-    ApiTags('sales'),
-    Controller('sales'),
-    __metadata("design:paramtypes", [CreateSaleUseCase,
-        ListSalesUseCase,
-        GetSaleByIdUseCase])
+exports.SalesController = SalesController = __decorate([
+    (0, swagger_1.ApiTags)('sales'),
+    (0, common_1.Controller)('sales'),
+    __metadata("design:paramtypes", [create_sale_use_case_js_1.CreateSaleUseCase,
+        list_sales_use_case_js_1.ListSalesUseCase,
+        get_sale_by_id_use_case_js_1.GetSaleByIdUseCase])
 ], SalesController);
-export { SalesController };
 //# sourceMappingURL=sales.controller.js.map

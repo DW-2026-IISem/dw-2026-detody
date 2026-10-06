@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -10,26 +11,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Inject, Injectable } from '@nestjs/common';
-import { ProductTypeNotFoundException } from '../../domain/exceptions/product-type.exceptions.js';
-import { PRODUCT_TYPE_REPOSITORY } from '../../domain/interfaces/product-type.repository.js';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GetProductTypeByIdUseCase = void 0;
+const common_1 = require("@nestjs/common");
+const product_type_exceptions_js_1 = require("../../domain/exceptions/product-type.exceptions.js");
+const product_type_repository_js_1 = require("../../domain/interfaces/product-type.repository.js");
 let GetProductTypeByIdUseCase = class GetProductTypeByIdUseCase {
-    repository;
     constructor(repository) {
         this.repository = repository;
     }
     async execute(id) {
         const item = await this.repository.findById(id);
         if (!item) {
-            throw new ProductTypeNotFoundException(id);
+            throw new product_type_exceptions_js_1.ProductTypeNotFoundException(id);
         }
         return item;
     }
 };
-GetProductTypeByIdUseCase = __decorate([
-    Injectable(),
-    __param(0, Inject(PRODUCT_TYPE_REPOSITORY)),
+exports.GetProductTypeByIdUseCase = GetProductTypeByIdUseCase;
+exports.GetProductTypeByIdUseCase = GetProductTypeByIdUseCase = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(product_type_repository_js_1.PRODUCT_TYPE_REPOSITORY)),
     __metadata("design:paramtypes", [Object])
 ], GetProductTypeByIdUseCase);
-export { GetProductTypeByIdUseCase };
 //# sourceMappingURL=get-product-type-by-id.use-case.js.map

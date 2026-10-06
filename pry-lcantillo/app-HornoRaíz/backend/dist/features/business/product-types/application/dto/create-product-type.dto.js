@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,24 +8,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-export class CreateProductTypeDto {
-    name;
-    description;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CreateProductTypeDto = void 0;
+const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
+class CreateProductTypeDto {
 }
+exports.CreateProductTypeDto = CreateProductTypeDto;
 __decorate([
-    ApiProperty({ example: 'Panes Artesanales' }),
-    IsString(),
-    IsNotEmpty({ message: 'name es requerido' }),
-    MaxLength(100),
+    (0, swagger_1.ApiProperty)({ example: 'Panes Artesanales' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'name es requerido' }),
+    (0, class_validator_1.MaxLength)(100),
     __metadata("design:type", String)
 ], CreateProductTypeDto.prototype, "name", void 0);
 __decorate([
-    ApiPropertyOptional({ example: 'Productos elaborados con masa madre y cocción en horno de piedra' }),
-    IsOptional(),
-    IsString(),
-    MaxLength(255),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Productos elaborados con masa madre y cocción en horno de piedra' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], CreateProductTypeDto.prototype, "description", void 0);
 //# sourceMappingURL=create-product-type.dto.js.map

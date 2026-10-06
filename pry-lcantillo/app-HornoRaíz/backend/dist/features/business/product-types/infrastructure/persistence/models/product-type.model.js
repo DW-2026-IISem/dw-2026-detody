@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,23 +8,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
-let ProductTypeModel = class ProductTypeModel extends Model {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductTypeModel = void 0;
+const sequelize_typescript_1 = require("sequelize-typescript");
+let ProductTypeModel = class ProductTypeModel extends sequelize_typescript_1.Model {
 };
+exports.ProductTypeModel = ProductTypeModel;
 __decorate([
-    Column({ type: DataType.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true }),
     __metadata("design:type", Number)
 ], ProductTypeModel.prototype, "id", void 0);
 __decorate([
-    Column({ type: DataType.STRING(100), allowNull: false, unique: true }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING(100), allowNull: false, unique: true }),
     __metadata("design:type", String)
 ], ProductTypeModel.prototype, "name", void 0);
 __decorate([
-    Column({ type: DataType.STRING(255), allowNull: true }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING(255), allowNull: true }),
     __metadata("design:type", Object)
 ], ProductTypeModel.prototype, "description", void 0);
-ProductTypeModel = __decorate([
-    Table({ tableName: 'product_types', timestamps: true })
+exports.ProductTypeModel = ProductTypeModel = __decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'product_types', timestamps: true })
 ], ProductTypeModel);
-export { ProductTypeModel };
 //# sourceMappingURL=product-type.model.js.map

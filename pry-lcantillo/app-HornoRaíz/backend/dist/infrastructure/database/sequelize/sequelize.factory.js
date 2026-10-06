@@ -1,21 +1,25 @@
-import { Sequelize } from 'sequelize-typescript';
-import { getDbBlock } from '../../../config/environment/index.js';
-import { ClientModel } from '../../../features/business/clients/infrastructure/persistence/models/client.model.js';
-import { ProductTypeModel } from '../../../features/business/product-types/infrastructure/persistence/models/product-type.model.js';
-import { ProductModel } from '../../../features/business/products/infrastructure/persistence/models/product.model.js';
-import { SaleModel } from '../../../features/business/sales/infrastructure/persistence/models/sale.model.js';
-import { SaleItemModel } from '../../../features/business/sales/infrastructure/persistence/models/sale-item.model.js';
-export const ALL_MODELS = [ClientModel, ProductTypeModel, ProductModel, SaleModel, SaleItemModel];
-export function sequelizeFactory(cfg) {
-    const block = getDbBlock(cfg);
-    return new Sequelize({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ALL_MODELS = void 0;
+exports.sequelizeFactory = sequelizeFactory;
+const sequelize_typescript_1 = require("sequelize-typescript");
+const index_js_1 = require("../../../config/environment/index.js");
+const client_model_js_1 = require("../../../features/business/clients/infrastructure/persistence/models/client.model.js");
+const product_type_model_js_1 = require("../../../features/business/product-types/infrastructure/persistence/models/product-type.model.js");
+const product_model_js_1 = require("../../../features/business/products/infrastructure/persistence/models/product.model.js");
+const sale_model_js_1 = require("../../../features/business/sales/infrastructure/persistence/models/sale.model.js");
+const sale_item_model_js_1 = require("../../../features/business/sales/infrastructure/persistence/models/sale-item.model.js");
+exports.ALL_MODELS = [client_model_js_1.ClientModel, product_type_model_js_1.ProductTypeModel, product_model_js_1.ProductModel, sale_model_js_1.SaleModel, sale_item_model_js_1.SaleItemModel];
+function sequelizeFactory(cfg) {
+    const block = (0, index_js_1.getDbBlock)(cfg);
+    return new sequelize_typescript_1.Sequelize({
         dialect: cfg.dbDialect,
         host: block.host,
         port: block.port,
         username: block.username,
         password: block.password,
         database: block.name,
-        models: ALL_MODELS,
+        models: exports.ALL_MODELS,
         logging: false,
     });
 }

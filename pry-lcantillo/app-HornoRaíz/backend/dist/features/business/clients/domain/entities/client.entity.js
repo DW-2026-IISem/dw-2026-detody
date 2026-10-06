@@ -1,10 +1,7 @@
-export class Client {
-    id;
-    name;
-    email;
-    phone;
-    address;
-    status;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Client = void 0;
+class Client {
     constructor(props) {
         this.id = props.id ?? null;
         this.name = props.name;
@@ -14,4 +11,5 @@ export class Client {
         this.status = props.status ?? 'active';
     }
 }
+exports.Client = Client;
 //# sourceMappingURL=client.entity.js.map

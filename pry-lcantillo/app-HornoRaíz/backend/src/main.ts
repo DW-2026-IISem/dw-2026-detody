@@ -42,4 +42,4 @@ async function bootstrap() {
   logger.log(`Servidor HornoRaíz corriendo exitosamente en el puerto ${port}`);
   logger.log(`Documentación Swagger disponible en: http://localhost:${port}/api/docs`);
 }
-await bootstrap();
+bootstrap();

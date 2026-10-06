@@ -1,3 +1,4 @@
+"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -7,35 +8,37 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
-let ClientModel = class ClientModel extends Model {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ClientModel = void 0;
+const sequelize_typescript_1 = require("sequelize-typescript");
+let ClientModel = class ClientModel extends sequelize_typescript_1.Model {
 };
+exports.ClientModel = ClientModel;
 __decorate([
-    Column({ type: DataType.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true }),
     __metadata("design:type", Number)
 ], ClientModel.prototype, "id", void 0);
 __decorate([
-    Column({ type: DataType.STRING(150), allowNull: false }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING(150), allowNull: false }),
     __metadata("design:type", String)
 ], ClientModel.prototype, "name", void 0);
 __decorate([
-    Column({ type: DataType.STRING(150), allowNull: true, unique: true }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING(150), allowNull: true, unique: true }),
     __metadata("design:type", Object)
 ], ClientModel.prototype, "email", void 0);
 __decorate([
-    Column({ type: DataType.STRING(20), allowNull: true }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING(20), allowNull: true }),
     __metadata("design:type", Object)
 ], ClientModel.prototype, "phone", void 0);
 __decorate([
-    Column({ type: DataType.STRING(255), allowNull: true }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.STRING(255), allowNull: true }),
     __metadata("design:type", Object)
 ], ClientModel.prototype, "address", void 0);
 __decorate([
-    Column({ type: DataType.ENUM('active', 'inactive'), defaultValue: 'active' }),
+    (0, sequelize_typescript_1.Column)({ type: sequelize_typescript_1.DataType.ENUM('active', 'inactive'), defaultValue: 'active' }),
     __metadata("design:type", String)
 ], ClientModel.prototype, "status", void 0);
-ClientModel = __decorate([
-    Table({ tableName: 'clients', timestamps: true })
+exports.ClientModel = ClientModel = __decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'clients', timestamps: true })
 ], ClientModel);
-export { ClientModel };
 //# sourceMappingURL=client.model.js.map
