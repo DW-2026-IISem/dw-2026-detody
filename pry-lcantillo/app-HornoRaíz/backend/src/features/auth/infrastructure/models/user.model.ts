@@ -2,7 +2,7 @@
 import { Table, Column, Model, DataType, Unique, BeforeCreate, BeforeUpdate, HasMany, BelongsToMany } from 'sequelize-typescript';
 import { hashPassword } from '../../../../shared/auth/password.util';
 import { RoleModel } from './role.model';
-import { RoleUserModel } from './role-user.model';
+import { RoleUserModel } from '../../roles/dto/role-user.model';
 import { RefreshTokenModel } from './refresh-token.model';
 
 @Table({ tableName: 'users', timestamps: true })

@@ -1,7 +1,7 @@
 // src/features/auth/infrastructure/models/role.model.ts
 import { Table, Column, Model, DataType, Unique, BeforeValidate, BelongsToMany } from 'sequelize-typescript';
 import { UserModel } from './user.model';
-import { RoleUserModel } from './role-user.model';
+import { RoleUserModel } from '../../roles/dto/role-user.model';
 import { ResourceModel } from './resource.model';
 import { ResourceRoleModel } from './resource-role.model';
 
