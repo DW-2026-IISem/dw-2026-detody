@@ -1,0 +1,29 @@
+### Feature Session — REFRESH (Rotación + Reuse Detection)
+@baseUrl = http://localhost:3004
+
+# @name login
+POST {{baseUrl}}/api/sesion/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+@refreshToken = {{login.response.body.$.refresh_token}}
+
+### 1. Rotar token de refresco
+POST {{baseUrl}}/api/sesion/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
+
+### 2. Intentar reutilizar el token anterior (debe retornar 401 y revocar la familia)
+POST {{baseUrl}}/api/sesion/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
