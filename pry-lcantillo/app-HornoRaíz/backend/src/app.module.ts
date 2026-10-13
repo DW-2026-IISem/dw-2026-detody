@@ -1,32 +1,37 @@
+import { AccessModule } from './features/auth/access/access.module';
+import { ProductSeeder } from './features/business/products/infrastructure/persistence/seeders/product.seeder';
+import { ProductTypeSeeder } from './features/business/product-types/infrastructure/persistence/seeders/product-type.seeder';
+import { ClientSeeder } from './features/business/clients/infrastructure/persistence/seeders/client.seeder';
+import { SaleSeeder } from './features/business/sales/infrastructure/persistence/seeders/sale.seeder';
+import { MainSeeder } from './infrastructure/database/sequelize/seeders/main.seeder';
 import { Module } from '@nestjs/common';
-import { EnvironmentModule } from './config/environment/index.js';
-import { SequelizeModule } from './infrastructure/database/sequelize/sequelize.module.js';
-import { HealthController } from './health/health.controller.js';
-import { ClientsModule } from './features/business/clients/clients.module.js';
-import { ProductTypesModule } from './features/business/product-types/product-types.module.js';
-import { ProductsModule } from './features/business/products/products.module.js';
-import { SalesModule } from './features/business/sales/sales.module.js';
-import { MainSeeder } from './infrastructure/database/sequelize/seeders/main.seeder.js';
-import { UserModel } from './features/auth/infrastructure/models/user.model';
-import { RoleModel } from './features/auth/infrastructure/models/role.model';
-import { ResourceModel } from './features/auth/infrastructure/models/resource.model';
-import { RoleUserModel } from './features/auth/infrastructure/models/role-user.model';
-import { ResourceRoleModel } from './features/auth/infrastructure/models/resource-role.model';
-import { RefreshTokenModel } from './features/auth/infrastructure/models/refresh-token.model';
-
-// Asegúrate de agregarlos al array de models de SequelizeModule:
-// models: [..., UserModel, RoleModel, ResourceModel, RoleUserModel, ResourceRoleModel, RefreshTokenModel],
+import { EnvironmentModule } from './config/environment/environment.module';
+import { SequelizeModule } from './infrastructure/database/sequelize/sequelize.module';
+import { ClientsModule } from './features/business/clients/clients.module';
+import { ProductTypesModule } from './features/business/product-types/product-types.module';
+import { ProductsModule } from './features/business/products/products.module';
+import { SalesModule } from './features/business/sales/sales.module';
+import { UsersModule } from './features/auth/users/users.module';
+import { RolesModule } from './features/auth/roles/roles.module';
+import { ResourcesModule } from './features/auth/resources/resources.module';
+import { RoleUsersModule } from './features/auth/role-users/role-users.module';
+import { ResourceRolesModule } from './features/auth/resource-roles/resource-roles.module';
 
 @Module({
+  providers: [ProductSeeder, ProductTypeSeeder, ClientSeeder, SaleSeeder, MainSeeder],
   imports: [
+    AccessModule,
     EnvironmentModule,
     SequelizeModule,
     ClientsModule,
     ProductTypesModule,
     ProductsModule,
     SalesModule,
+    UsersModule,
+    RolesModule,
+    ResourcesModule,
+    RoleUsersModule,
+    ResourceRolesModule,
   ],
-  controllers: [HealthController],
-  providers: [MainSeeder],
 })
 export class AppModule {}
