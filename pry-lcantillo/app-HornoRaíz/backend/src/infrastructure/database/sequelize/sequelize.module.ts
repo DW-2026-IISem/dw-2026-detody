@@ -1,3 +1,4 @@
+import { Sequelize } from 'sequelize-typescript';
 import { Global, Module } from '@nestjs/common';
 import { ENV_CONFIG, IEnvConfig } from '../../../config/environment/index.js';
 import { sequelizeFactory } from './sequelize.factory.js';
@@ -7,6 +8,7 @@ export const SEQUELIZE = 'SEQUELIZE';
 @Global()
 @Module({
   providers: [
+    { provide: Sequelize, useExisting: SEQUELIZE },
     {
       provide: SEQUELIZE,
       inject: [ENV_CONFIG],
@@ -18,6 +20,6 @@ export const SEQUELIZE = 'SEQUELIZE';
       },
     },
   ],
-  exports: [SEQUELIZE],
+  exports: [Sequelize, SEQUELIZE],
 })
 export class SequelizeModule {}
