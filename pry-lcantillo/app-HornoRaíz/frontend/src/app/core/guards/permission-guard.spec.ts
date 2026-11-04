@@ -31,7 +31,9 @@ describe('permissionGuard', () => {
       ],
     });
 
-    const route = { data: { permission: 'GET /api/clientes' } } as unknown as ActivatedRouteSnapshot;
+    const route = {
+      data: { permission: 'GET /api/clientes' },
+    } as unknown as ActivatedRouteSnapshot;
     const result = TestBed.runInInjectionContext(() => permissionGuard(route, {} as any));
 
     expect(result).toBe(true);
@@ -52,7 +54,9 @@ describe('permissionGuard', () => {
       ],
     });
 
-    const route = { data: { permission: 'GET /api/tipos-producto' } } as unknown as ActivatedRouteSnapshot;
+    const route = {
+      data: { permission: 'GET /api/tipos-producto' },
+    } as unknown as ActivatedRouteSnapshot;
     const result = TestBed.runInInjectionContext(() => permissionGuard(route, {} as any));
 
     expect(result).not.toBe(true);

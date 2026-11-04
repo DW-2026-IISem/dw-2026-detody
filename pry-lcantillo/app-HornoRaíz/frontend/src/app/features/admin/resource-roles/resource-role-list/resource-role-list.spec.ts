@@ -39,7 +39,13 @@ describe('ResourceRoleList', () => {
 
     reqGrants.flush({
       grants: [
-        { id: 1, role_id: 1, resource_id: 5, role: { id: 1, name: 'ADMIN' }, resource: { id: 5, method: 'GET', path: '/api/clientes' } },
+        {
+          id: 1,
+          role_id: 1,
+          resource_id: 5,
+          role: { id: 1, name: 'ADMIN' },
+          resource: { id: 5, method: 'GET', path: '/api/clientes' },
+        },
       ],
     });
     reqRoles.flush({ roles: [{ id: 1, name: 'ADMIN' }] });

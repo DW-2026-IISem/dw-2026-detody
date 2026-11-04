@@ -31,8 +31,22 @@ describe('UserList', () => {
     sessionStore.setAccess({
       user: { id: 1, username: 'admin', email: 'admin@hornoraiz.com', status: 'active' },
       permissions: [
-        { resource_id: 1, method: 'GET', path: '/api/usuarios', description: null, role_id: 1, role_name: 'ADMIN' },
-        { resource_id: 2, method: 'POST', path: '/api/usuarios', description: null, role_id: 1, role_name: 'ADMIN' },
+        {
+          resource_id: 1,
+          method: 'GET',
+          path: '/api/usuarios',
+          description: null,
+          role_id: 1,
+          role_name: 'ADMIN',
+        },
+        {
+          resource_id: 2,
+          method: 'POST',
+          path: '/api/usuarios',
+          description: null,
+          role_id: 1,
+          role_name: 'ADMIN',
+        },
       ],
     });
 
@@ -73,7 +87,9 @@ describe('UserList', () => {
 
   it('debe consultar permisos del usuario al invocar viewPermissions', () => {
     const req = httpTesting.expectOne(`${environment.apiUrl}/usuarios`);
-    req.flush({ users: [{ id: 2, username: 'seller', email: 'seller@hornoraiz.com', status: 'active' }] });
+    req.flush({
+      users: [{ id: 2, username: 'seller', email: 'seller@hornoraiz.com', status: 'active' }],
+    });
 
     component.viewPermissions(component.rows()[0]);
     expect(component.accessOpen()).toBe(true);
@@ -82,7 +98,14 @@ describe('UserList', () => {
     expect(permReq.request.method).toBe('GET');
     permReq.flush({
       permissions: [
-        { resource_id: 10, method: 'GET', path: '/api/clientes', description: 'Listar clientes', role_id: 2, role_name: 'SELLER' },
+        {
+          resource_id: 10,
+          method: 'GET',
+          path: '/api/clientes',
+          description: 'Listar clientes',
+          role_id: 2,
+          role_name: 'SELLER',
+        },
       ],
     });
 

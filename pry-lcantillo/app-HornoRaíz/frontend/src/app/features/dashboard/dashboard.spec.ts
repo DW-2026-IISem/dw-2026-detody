@@ -22,8 +22,24 @@ describe('Dashboard', () => {
   const mockClients: Client[] = [{ id: 1, name: 'Cliente HornoRaíz', status: 'active' }];
   const mockTypes: ProductType[] = [{ id: 1, name: 'Panadería', status: 'active' }];
   const mockProducts: Product[] = [
-    { id: 1, name: 'Pan Baguette', price: 8500, stock: 25, quantity: 25, min_stock: 5, status: 'active' },
-    { id: 2, name: 'Torta Chocolate', price: 45000, stock: 2, quantity: 2, min_stock: 5, status: 'active' },
+    {
+      id: 1,
+      name: 'Pan Baguette',
+      price: 8500,
+      stock: 25,
+      quantity: 25,
+      min_stock: 5,
+      status: 'active',
+    },
+    {
+      id: 2,
+      name: 'Torta Chocolate',
+      price: 45000,
+      stock: 2,
+      quantity: 2,
+      min_stock: 5,
+      status: 'active',
+    },
   ];
   const mockSales: Sale[] = [
     { id: 1, client_id: 1, total: 17000, totalAmount: 17000, status: 'completed' },
@@ -32,11 +48,7 @@ describe('Dashboard', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Dashboard],
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideRouter([]),
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     httpTesting = TestBed.inject(HttpTestingController);

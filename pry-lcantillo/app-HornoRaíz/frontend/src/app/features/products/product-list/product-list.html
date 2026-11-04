@@ -63,7 +63,10 @@
         <td>
           <p class="font-medium text-slate-800">{{ row.name }}</p>
           <p class="text-xs text-slate-400">
-            #{{ row.id }} @if (row.brand) { · {{ row.brand }} }
+            #{{ row.id }}
+            @if (row.brand) {
+              · {{ row.brand }}
+            }
           </p>
           @if (row.description) {
             <p class="text-xs text-slate-500 mt-0.5 line-clamp-1">{{ row.description }}</p>
@@ -88,7 +91,13 @@
           <div class="flex items-center gap-2">
             <p-tag
               [value]="(row.quantity ?? row.stock ?? 0).toString()"
-              [severity]="(row.quantity ?? row.stock ?? 0) === 0 ? 'danger' : (row.quantity ?? row.stock ?? 0) <= (row.min_stock ?? 5) ? 'warn' : 'success'"
+              [severity]="
+                (row.quantity ?? row.stock ?? 0) === 0
+                  ? 'danger'
+                  : (row.quantity ?? row.stock ?? 0) <= (row.min_stock ?? 5)
+                    ? 'warn'
+                    : 'success'
+              "
               [rounded]="true"
             />
             <span class="text-xs text-slate-500">

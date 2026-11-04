@@ -49,7 +49,10 @@ export class ResourceForm {
       if (current) {
         this.form.patchValue({
           path: current.path || current.route_path || current.routePath || '',
-          method: (current.method || current.http_method || current.httpMethod || 'GET') as HttpMethod,
+          method: (current.method ||
+            current.http_method ||
+            current.httpMethod ||
+            'GET') as HttpMethod,
           description: current.description ?? '',
           status: current.status ?? 'active',
         });

@@ -7,6 +7,7 @@
       [roleLabel]="roleLabel()"
       [userItems]="userItems()"
       [showSession]="session.isAuthenticated()"
+      [authEnabled]="session.authEnabled"
       (menuRequested)="onMenuToggle()"
     />
   </header>

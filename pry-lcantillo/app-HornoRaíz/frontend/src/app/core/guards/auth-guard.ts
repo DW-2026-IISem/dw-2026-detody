@@ -12,7 +12,7 @@ export const authGuard: CanActivateFn = (_route, state) => {
     return true;
   }
 
-  if (!environment.requireAuth || session.isAuthenticated()) {
+  if (!environment.requireAuth || !session.authEnabled || session.isAuthenticated()) {
     return true;
   }
 

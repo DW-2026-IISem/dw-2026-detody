@@ -74,11 +74,7 @@ export class UserList {
   });
 
   readonly visibleRows = computed(() =>
-    filterRows(this.rows(), this.filter(), (user) => [
-      user.username,
-      user.email,
-      user.status,
-    ]),
+    filterRows(this.rows(), this.filter(), (user) => [user.username, user.email, user.status]),
   );
 
   constructor() {

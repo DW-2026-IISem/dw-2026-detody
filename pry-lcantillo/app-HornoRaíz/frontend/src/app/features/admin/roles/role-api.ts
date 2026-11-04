@@ -26,21 +26,21 @@ export class RoleApi {
   }
 
   get(id: number): Observable<Role> {
-    return this.http.get<any>(`${this.base}/${id}`).pipe(
-      map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res),
-    );
+    return this.http
+      .get<any>(`${this.base}/${id}`)
+      .pipe(map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res));
   }
 
   create(payload: RolePayload): Observable<Role> {
-    return this.http.post<any>(this.base, payload).pipe(
-      map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res),
-    );
+    return this.http
+      .post<any>(this.base, payload)
+      .pipe(map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res));
   }
 
   update(id: number, payload: Partial<RolePayload>): Observable<Role> {
-    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
-      map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res),
-    );
+    return this.http
+      .patch<any>(`${this.base}/${id}`, payload)
+      .pipe(map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res));
   }
 
   deactivate(id: number): Observable<unknown> {

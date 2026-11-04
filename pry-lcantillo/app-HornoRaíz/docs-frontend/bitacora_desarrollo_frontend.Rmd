@@ -1892,4 +1892,123 @@ Control de matriz de autorizaciones RBAC con selector visual enriquecido con bad
 
 ---
 
-*Estado actual: Fase I (Business) y Fase II (Auth con RBAC) completadas al 100% con 43 archivos de prueba (180 unit tests) totalmente verdes, sincronización bidireccional NestJS-Angular y evidencias fotográficas de alta resolución. Próximo paso: ISS-11 (Build, calidad y resolución de problemas).*
+*Estado previo: ISS-00 a ISS-10 completados.*
+## ISS-11: Build, Calidad, Resolución de Problemas y Cierre del Proyecto
+
+### Contexto y Objetivos de la Unidad
+En esta unidad culminante de la ruta **Frontend-Express (Fase II · Cierre del Proyecto)**, se consolidó la infraestructura de calidad, reproducibilidad y despliegue del frontend de `HornoRaíz`.
+
+El objetivo consistió en garantizar que la aplicación cumpla con los más altos estándares de ingeniería de software para Angular 22 Zoneless con Signals, PrimeNG 22 Aura y Tailwind 4:
+1. **Compilación de Producción Optimizada (`ng build`)**: Respeto estricto de los presupuestos de bundle sin advertencias (`maximumWarning: 750kB`, `maximumError: 1MB`), con una carga inicial real de apenas **592.88 kB** (140.36 kB estimados en transferencia gzip).
+2. **Emulación Bidireccional de Fases**: Capacidad de alternar entre el modo completo de Fase II (seguridad RBAC activa) y la emulación de Fase I (modo laboratorio sin autenticación obligatoria y sin Bearer tokens).
+3. **Checklist Funcional de Humo (15 Puntos)**: Validación integral del flujo operativo y de seguridad contra el backend NestJS con base de datos MySQL en contenedor Docker.
+4. **Catálogo de Diagnóstico y Errores Reales**: Sistematización técnica de las incidencias superadas durante la adopción de las últimas versiones de Angular y PrimeNG.
+5. **Verificación Estática y Documental**: Integración de comprobación estática de tipos (`npm run typecheck`), formateo uniforme (`npx prettier --check`) y auditoría de correspondencia documental (`npm run docs:check`).
+6. **Publicación y Fallback SPA**: Validación de la distribución estática en `dist/front-hornoraiz/browser/` asegurando recarga limpia en rutas profundas.
+
+---
+
+### Verificación de Calidad y Scripts del Proyecto
+
+Se incorporaron al `package.json` los scripts de verificación y control de calidad requeridos por el laboratorio:
+
+| Script | Comando | Propósito | Resultado |
+|---|---|---|---|
+| `npm run typecheck` | `tsc --noEmit` | Comprobación estática estricta de TypeScript | **0 errores** |
+| `npm run docs:check` | `node tools/check-docs.mjs` | Trazabilidad documental ISS y mapeo de 177 archivos fuente | **100% mapeado (0 no asignados)** |
+| `npx prettier --check` | `prettier --check "src/**/*.{ts,html,css}"` | Auditoría de estilo y formateo de código | **Todos los archivos formateados** |
+| `npm test` | `ng test --watch=false` | Ejecución de la suite completa de pruebas unitarias | **43 archivos, 180 pruebas aprobadas (100% GREEN)** |
+| `npm run build` | `ng build` | Generación del bundle de producción | **Exit code 0 (0 errores, 0 advertencias)** |
+
+---
+
+### Checklist Funcional de Humo (15 Puntos de Verificación)
+
+| # | Escenario / Acción | Resultado Esperado | Estado Verificado |
+|---|---|---|---|
+| 1 | `/dashboard` sin sesión | Redirige a `/login?returnUrl=/dashboard` mediante `authGuard`. | **Aprobado** |
+| 2 | Login de Administrador | Acceso inmediato al dashboard con sesión activa, menú completo y avatar `AD`. | **Aprobado** |
+| 3 | CRUD de Clientes | Creación con modal, edición en línea, desactivación lógica y filtrado reactivo. | **Aprobado** |
+| 4 | CRUD de Tipos de Producto | Normalización de categorías, diálogo modal con `p-dialog` y confirmaciones. | **Aprobado** |
+| 5 | CRUD de Productos | Selector reactivo de tipos, formateo con `CurrencyPipe` y semáforo de stock numérico + badge. | **Aprobado** |
+| 6 | Nueva Venta Transaccional | Carrito dinámico, líneas reactivas, recálculo instantáneo de totales y descuento de inventario. | **Aprobado** |
+| 7 | Detalle de Ventas | Búsqueda por folio de venta, consulta granular de líneas y auditoría de auditorías. | **Aprobado** |
+| 8 | Dashboard Central | Métricas en tiempo real agregadas desde `/api/ventas` y `/api/productos` sin llamadas duplicadas. | **Aprobado** |
+| 9 | Administración RBAC | Módulos para usuarios, roles, recursos, asignaciones usuario-rol y concesiones rol-recurso. | **Aprobado** |
+| 10 | Diálogo "Ver Permisos" | Desglose reactivo de permisos efectivos por usuario con roles derivados y badges de método HTTP. | **Aprobado** |
+| 11 | Cierre de Sesión (Logout) | `POST /api/sesion/logout`, limpieza de `localStorage` y redirección automática a `/login`. | **Aprobado** |
+| 12 | Login de Vendedor | Menú lateral reducido reactivamente; acceso a `/admin/*` bloqueado con redirección a `/forbidden`. | **Aprobado** |
+| 13 | Persistencia de Sesión | Restauración fluida de tokens, perfil y permisos al recargar el navegador (`localStorage`). | **Aprobado** |
+| 14 | Expiración y Refresco JWT | `authInterceptor` intercepta 401, solicita nuevo par mediante `refreshInFlight` y reintenta la petición. | **Aprobado** |
+| 15 | Revocación de Refresh Token | Cierre forzoso de sesión ante token revocado con notificación toast clara al usuario. | **Aprobado** |
+
+---
+
+### Catálogo de Errores Reales Diagnosticados en Angular 22 y PrimeNG 22
+
+1. **Aviso de Licencia PrimeUI (`@primeui/license-manager`)**:
+   - *Diagnóstico*: `console.warn` benigno emitido por la suite comercial de PrimeUI.
+   - *Solución*: Los componentes esenciales (Table, Dialog, Select, Tag, Toast, ConfirmDialog) pertenecen a la edición community y funcionan perfectamente sin requerir registro de licencia comercial.
+2. **Eliminación del input `text` en `p-message` (PrimeNG 22)**:
+   - *Diagnóstico*: Error `NG8002: Can't bind to 'text' since it isn't a known property of 'p-message'`.
+   - *Solución*: Migración a proyección directa de contenido en el cuerpo del elemento: `<p-message severity="error">{{ error() }}</p-message>`.
+3. **Eliminación de `globalFilter` en `p-table` (PrimeNG 22)**:
+   - *Diagnóstico*: Error `NG8002: Can't bind to 'globalFilter' on 'p-table'`.
+   - *Solución*: Implementación de filtrado reactivo mediante la función utilitaria `filterRows()` y Signals computadas en el componente.
+4. **Selector en kebab-case para ordenamiento (`p-sort-icon`)**:
+   - *Diagnóstico*: Error `NG8001: 'p-sortIcon' is not a known element`.
+   - *Solución*: Actualización de la sintaxis en plantillas al formato canónico `<p-sort-icon field="..." />`.
+5. **Selector del diálogo de confirmación (`p-confirmdialog`)**:
+   - *Diagnóstico*: Error `NG8001: 'p-confirmDialog' is not a known element`.
+   - *Solución*: PrimeNG 22 impone minúsculas estrictas en `<p-confirmdialog />`.
+6. **Manejo de modelos pivote en Sequelize (Backend)**:
+   - *Diagnóstico*: Error `500: UserModel is not associated to RoleUserModel`.
+   - *Solución*: Declaración explícita de decoradores `@BelongsTo(() => UserModel, 'user_id')` y `@BelongsTo(() => RoleModel, 'role_id')` en `role-user.model.ts`.
+
+---
+
+### Evidencias Visuales de la Unidad ISS-11
+
+#### 1. Verificación en Terminal: Build, Pruebas Unitarias, Linters y Tipado Estático (1200 × 900 px)
+Salida consolidada en consola mostrando 0 errores de tipado en `tsc`, 0 archivos sin mapear en `docs:check`, 100% de cumplimiento en `prettier`, 43 archivos con 180 pruebas aprobadas en Vitest y bundle de producción en 3.77 segundos:
+
+![Verificación de terminal en ISS-11: tests, build, prettier y docs:check](capturas/iss-11-terminal-build-tests.png)
+
+#### 2. Emulación de Fase I en Modo Práctica (1280 × 800 px)
+Demostración del frontend con `requireAuth: false` / `demo_auth=fase1`. El Header exhibe el tótem visual **"Fase I · sin auth"**, el menú omite el grupo Seguridad y las rutas de negocio operan libremente sin token Bearer:
+
+![Vista de escritorio de Emulación de Fase I en ISS-11](capturas/iss-11-fase1-emulacion-desktop.png)
+
+#### 3. Checklist de Humo en Fase II con Seguridad RBAC Completa (1280 × 800 px)
+Panel de control con sesión de Administrador activa, KPIs en vivo sincronizados con MySQL, menú lateral íntegro con grupo de Administración y acciones protegidas por permisos:
+
+![Vista de escritorio de Checklist de Humo en Fase II](capturas/iss-11-fase2-checklist-smoke.png)
+
+#### 4. Publicación Estática y Fallback SPA en Rutas Profundas (1280 × 800 px)
+Verificación del build de producción servido desde `dist/front-hornoraiz/browser/` en servidor web con fallback a `index.html`. La recarga directa sobre `/clientes` retorna HTTP 200 sin errores 404:
+
+![Vista de escritorio de Publicación Estática y Fallback SPA](capturas/iss-11-spa-fallback-desktop.png)
+
+---
+
+### Cierre Global de la Bitácora de Desarrollo
+
+Con la culminación de la unidad **ISS-11**, se da por completado el 100% del proyecto **HornoRaíz** a lo largo de sus tres fases formativas:
+
+- **Fase 0 · Fundamentos**:
+  - `ISS-00`: Validación de entorno e infraestructura WSL2 / Node / Docker / MySQL.
+  - `ISS-01`: Arquitectura moderna con Angular 22 Zoneless, Tailwind 4 y PrimeNG 22 Aura.
+  - `ISS-02`: Modelos de datos, diseño del Shell responsive, Header y Aside.
+- **Fase I · Business CRUD**:
+  - `ISS-03`: CRUD de Clientes con Signals reactivas.
+  - `ISS-04`: CRUD de Tipos de Producto y categorías panaderas.
+  - `ISS-05`: CRUD de Productos, relación con tipos y semáforo de inventario (`min_stock`).
+  - `ISS-06`: Ventas transaccionales con carrito reactivo y descuento de existencias.
+  - `ISS-07`: Detalle de ventas independiente, dashboard de KPIs y cierre de Fase I.
+- **Fase II · Autenticación y Autorización con RBAC**:
+  - `ISS-08`: Autenticación JWT, rotación de tokens, perfil y permisos efectivos.
+  - `ISS-09`: Guards de ruta (`authGuard`, `permissionGuard`, `authOnlyGuard`) y directiva estructural `*appHasPermission`.
+  - `ISS-10`: Administración completa de identidades RBAC (usuarios, roles, recursos, asignaciones y concesiones).
+  - `ISS-11`: Build de producción, presupuesto de bundle, checklist de humo, calidad estática y despliegue SPA.
+
+*Proyecto finalizado, probado y desplegado con éxito en el repositorio oficial.*

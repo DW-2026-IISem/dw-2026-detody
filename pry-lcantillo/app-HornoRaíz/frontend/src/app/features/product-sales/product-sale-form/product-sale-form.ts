@@ -12,13 +12,7 @@ import { Sale } from '../../../core/models/sale.model';
 @Component({
   host: { class: 'block' },
   selector: 'app-product-sale-form',
-  imports: [
-    ButtonModule,
-    InputNumberModule,
-    MessageModule,
-    ReactiveFormsModule,
-    SelectModule,
-  ],
+  imports: [ButtonModule, InputNumberModule, MessageModule, ReactiveFormsModule, SelectModule],
   templateUrl: './product-sale-form.html',
   styleUrl: './product-sale-form.css',
 })

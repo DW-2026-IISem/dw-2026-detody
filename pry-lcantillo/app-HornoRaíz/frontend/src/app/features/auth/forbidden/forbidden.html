@@ -1,6 +1,8 @@
 <div class="min-h-screen flex items-center justify-center bg-slate-100 p-4">
   <div class="w-full max-w-md text-center">
-    <div class="w-20 h-20 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl font-black mb-4">
+    <div
+      class="w-20 h-20 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center text-3xl font-black mb-4"
+    >
       <i class="pi pi-lock text-4xl"></i>
     </div>
     <h1 class="text-3xl font-black text-slate-800">403</h1>
@@ -11,7 +13,9 @@
 
     @if (permission) {
       <div class="rounded-xl bg-slate-900 px-4 py-3 my-5 text-left border border-slate-700">
-        <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Permiso requerido</p>
+        <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+          Permiso requerido
+        </p>
         <code class="text-sm text-emerald-400 font-mono font-bold">{{ permission }}</code>
       </div>
     }

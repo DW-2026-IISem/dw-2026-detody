@@ -1,6 +1,8 @@
 <div class="space-y-4">
   <!-- Cabecera de la venta -->
-  <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+  <div
+    class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200"
+  >
     <div>
       <div class="flex items-center gap-2">
         <span class="text-xl font-bold text-slate-800">Venta #{{ sale().id }}</span>
@@ -37,10 +39,12 @@
             <span class="font-medium text-slate-800">
               {{ productName()(item.product_id ?? item.productId) }}
             </span>
-            <span class="text-xs text-slate-400 block">ID: #{{ item.product_id ?? item.productId }}</span>
+            <span class="text-xs text-slate-400 block"
+              >ID: #{{ item.product_id ?? item.productId }}</span
+            >
           </td>
           <td class="text-right text-slate-600">
-            {{ (item.unit_price ?? item.unitPrice ?? 0) | currency: 'USD' : 'symbol' : '1.2-2' }}
+            {{ item.unit_price ?? item.unitPrice ?? 0 | currency: 'USD' : 'symbol' : '1.2-2' }}
           </td>
           <td class="text-right font-semibold text-slate-800">
             {{ item.quantity }}

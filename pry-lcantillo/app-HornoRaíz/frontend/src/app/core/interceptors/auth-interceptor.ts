@@ -40,7 +40,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       // Fase I: no hay refresh ni login; se propaga el error tal cual.
-      if (!environment.requireAuth) {
+      if (!environment.requireAuth || !session.authEnabled) {
         return throwError(() => error);
       }
 

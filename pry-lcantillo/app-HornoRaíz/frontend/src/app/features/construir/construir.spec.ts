@@ -68,13 +68,7 @@ describe('Construir', () => {
   it('should render the five menu options', async () => {
     const { compilado } = await crearPantalla();
     const texto = compilado.textContent ?? '';
-    for (const etiqueta of [
-      'Inicio',
-      'Clientes',
-      'Tipos de producto',
-      'Productos',
-      'Ventas',
-    ]) {
+    for (const etiqueta of ['Inicio', 'Clientes', 'Tipos de producto', 'Productos', 'Ventas']) {
       expect(texto).toContain(etiqueta);
     }
   });

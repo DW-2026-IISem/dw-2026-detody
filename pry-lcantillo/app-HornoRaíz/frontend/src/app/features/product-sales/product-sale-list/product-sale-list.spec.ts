@@ -20,16 +20,22 @@ describe('ProductSaleList', () => {
   const salesUrl = `${environment.apiUrl}/ventas`;
 
   const mockLines: ProductSale[] = [
-    { id: 1, sale_id: 1, product_id: 1, quantity: 2, unit_price: 8500, subtotal: 17000, status: 'active' },
+    {
+      id: 1,
+      sale_id: 1,
+      product_id: 1,
+      quantity: 2,
+      unit_price: 8500,
+      subtotal: 17000,
+      status: 'active',
+    },
   ];
 
   const mockProducts: Product[] = [
     { id: 1, name: 'Pan Baguette Masa Madre', price: 8500, stock: 20, status: 'active' },
   ];
 
-  const mockSales: Sale[] = [
-    { id: 1, client_id: 1, total: 17000, status: 'completed' },
-  ];
+  const mockSales: Sale[] = [{ id: 1, client_id: 1, total: 17000, status: 'completed' }];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

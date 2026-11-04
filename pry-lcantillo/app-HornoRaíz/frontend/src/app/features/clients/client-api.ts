@@ -30,21 +30,21 @@ export class ClientApi {
   }
 
   findById(id: number): Observable<Client> {
-    return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
-      map((res) => res?.data ?? res?.client ?? res?.item ?? res),
-    );
+    return this.http
+      .get<any>(`${this.baseUrl}/${id}`)
+      .pipe(map((res) => res?.data ?? res?.client ?? res?.item ?? res));
   }
 
   create(payload: ClientPayload): Observable<Client> {
-    return this.http.post<any>(this.baseUrl, payload).pipe(
-      map((res) => res?.data ?? res?.client ?? res?.item ?? res),
-    );
+    return this.http
+      .post<any>(this.baseUrl, payload)
+      .pipe(map((res) => res?.data ?? res?.client ?? res?.item ?? res));
   }
 
   update(id: number, payload: Partial<ClientPayload>): Observable<Client> {
-    return this.http.patch<any>(`${this.baseUrl}/${id}`, payload).pipe(
-      map((res) => res?.data ?? res?.client ?? res?.item ?? res),
-    );
+    return this.http
+      .patch<any>(`${this.baseUrl}/${id}`, payload)
+      .pipe(map((res) => res?.data ?? res?.client ?? res?.item ?? res));
   }
 
   /** Baja lógica: cambia el estado del cliente a inactivo en el backend. */

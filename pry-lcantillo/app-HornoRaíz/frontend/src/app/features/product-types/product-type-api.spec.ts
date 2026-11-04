@@ -17,11 +17,7 @@ describe('ProductTypeApi', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        ProductTypeApi,
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting(), ProductTypeApi],
     });
     service = TestBed.inject(ProductTypeApi);
     httpTesting = TestBed.inject(HttpTestingController);
@@ -58,7 +54,11 @@ describe('ProductTypeApi', () => {
   });
 
   it('debe crear un nuevo tipo de producto mediante POST', () => {
-    const payload: ProductTypePayload = { name: 'Gourmet', description: 'Panes especiales', status: 'active' };
+    const payload: ProductTypePayload = {
+      name: 'Gourmet',
+      description: 'Panes especiales',
+      status: 'active',
+    };
     const created: ProductType = { id: 3, ...payload, status: 'active' };
 
     service.create(payload).subscribe((item) => {
@@ -74,7 +74,12 @@ describe('ProductTypeApi', () => {
 
   it('debe actualizar un tipo mediante PATCH', () => {
     const patchPayload: Partial<ProductTypePayload> = { name: 'Panes Rústicos' };
-    const updated: ProductType = { id: 1, name: 'Panes Rústicos', description: 'Panes de uso diario', status: 'active' };
+    const updated: ProductType = {
+      id: 1,
+      name: 'Panes Rústicos',
+      description: 'Panes de uso diario',
+      status: 'active',
+    };
 
     service.update(1, patchPayload).subscribe((item) => {
       expect(item.name).toBe('Panes Rústicos');

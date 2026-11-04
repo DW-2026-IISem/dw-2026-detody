@@ -25,7 +25,9 @@ export class SaleApi {
       quantity: Number(i.quantity ?? 1),
       unit_price: Number(i.unit_price ?? i.unitPrice ?? 0),
       unitPrice: Number(i.unitPrice ?? i.unit_price ?? 0),
-      subtotal: Number(i.subtotal ?? (Number(i.unit_price ?? i.unitPrice ?? 0) * Number(i.quantity ?? 1))),
+      subtotal: Number(
+        i.subtotal ?? Number(i.unit_price ?? i.unitPrice ?? 0) * Number(i.quantity ?? 1),
+      ),
     }));
 
     return {
@@ -63,9 +65,13 @@ export class SaleApi {
   }
 
   get(id: number): Observable<Sale> {
-    return this.http.get<any>(`${this.base}/${id}`).pipe(
-      map((response) => this.normalize(response?.data ?? response?.sale ?? response?.item ?? response)),
-    );
+    return this.http
+      .get<any>(`${this.base}/${id}`)
+      .pipe(
+        map((response) =>
+          this.normalize(response?.data ?? response?.sale ?? response?.item ?? response),
+        ),
+      );
   }
 
   findById(id: number): Observable<Sale> {
@@ -84,15 +90,23 @@ export class SaleApi {
         quantity: Number(i.quantity),
       })),
     };
-    return this.http.post<any>(this.base, body).pipe(
-      map((response) => this.normalize(response?.data ?? response?.sale ?? response?.item ?? response)),
-    );
+    return this.http
+      .post<any>(this.base, body)
+      .pipe(
+        map((response) =>
+          this.normalize(response?.data ?? response?.sale ?? response?.item ?? response),
+        ),
+      );
   }
 
   update(id: number, payload: Partial<SaleUpdatePayload>): Observable<Sale> {
-    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
-      map((response) => this.normalize(response?.data ?? response?.sale ?? response?.item ?? response)),
-    );
+    return this.http
+      .patch<any>(`${this.base}/${id}`, payload)
+      .pipe(
+        map((response) =>
+          this.normalize(response?.data ?? response?.sale ?? response?.item ?? response),
+        ),
+      );
   }
 
   deactivate(id: number): Observable<unknown> {

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 import { DrawerModule } from 'primeng/drawer';
@@ -16,15 +23,7 @@ import { NAV } from './nav.config';
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    DrawerModule,
-    ToastModule,
-    ConfirmDialogModule,
-    Header,
-    Aside,
-    Footer,
-  ],
+  imports: [RouterOutlet, DrawerModule, ToastModule, ConfirmDialogModule, Header, Aside, Footer],
   providers: [MessageService, ConfirmationService],
   templateUrl: './shell.html',
   styleUrl: './shell.css',
@@ -108,7 +107,10 @@ export class Shell {
   handleRefreshPermissions(): void {
     this.auth.me().subscribe({
       next: () => {
-        this.notify.success('Permisos actualizados', 'La matriz de permisos y el menú se han refrescado.');
+        this.notify.success(
+          'Permisos actualizados',
+          'La matriz de permisos y el menú se han refrescado.',
+        );
       },
       error: () => {
         this.notify.error('Error', 'No se pudieron actualizar los permisos.');

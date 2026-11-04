@@ -4,7 +4,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'app-page-header',
   standalone: true,
   template: `
-    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 mb-6 border-b border-slate-200">
+    <header
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 mb-6 border-b border-slate-200"
+    >
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-slate-800">{{ title() }}</h1>
         @if (subtitle()) {

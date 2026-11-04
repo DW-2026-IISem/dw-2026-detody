@@ -6,9 +6,7 @@ import { Status } from '../../../core/models';
   selector: 'app-status-tag',
   standalone: true,
   imports: [Tag],
-  template: `
-    <p-tag [value]="label()" [severity]="severity()" [rounded]="true" />
-  `,
+  template: ` <p-tag [value]="label()" [severity]="severity()" [rounded]="true" /> `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatusTag {

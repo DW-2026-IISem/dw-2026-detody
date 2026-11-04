@@ -123,7 +123,14 @@
   </div>
 
   <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
-    <button pButton type="button" severity="secondary" outlined [disabled]="saving()" (click)="cancelled.emit()">
+    <button
+      pButton
+      type="button"
+      severity="secondary"
+      outlined
+      [disabled]="saving()"
+      (click)="cancelled.emit()"
+    >
       <span pButtonLabel>Cancelar</span>
     </button>
     <button pButton type="submit" [loading]="saving()" severity="primary">

@@ -3,7 +3,12 @@
   subtitle="Catálogo base para la categorización de los productos de panadería y pastelería."
 >
   <p-tag [value]="rows().length + ' activos'" severity="info" [rounded]="true" />
-  <button *appHasPermission="'POST /api/tipos-producto'" pButton type="button" (click)="openCreate()">
+  <button
+    *appHasPermission="'POST /api/tipos-producto'"
+    pButton
+    type="button"
+    (click)="openCreate()"
+  >
     <i pButtonIcon class="pi pi-plus"></i>
     <span pButtonLabel>Nuevo tipo</span>
   </button>

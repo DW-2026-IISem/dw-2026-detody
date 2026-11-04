@@ -12,7 +12,7 @@ export const permissionGuard: CanActivateFn = (route) => {
   const session = inject(SessionStore);
   const router = inject(Router);
 
-  if (!environment.requireAuth) {
+  if (!environment.requireAuth || !session.authEnabled) {
     return true;
   }
 

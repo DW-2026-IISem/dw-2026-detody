@@ -16,9 +16,30 @@ describe('ClientList', () => {
   const baseUrl = `${environment.apiUrl}/clients`;
 
   const CLIENTS: Client[] = [
-    { id: 1, name: 'Panadería Central', email: 'central@pan.com', phone: '3001112233', address: 'Calle 10 # 5', status: 'active' },
-    { id: 2, name: 'Pastelería del Sur', email: 'sur@pan.com', phone: '3004445566', address: 'Carrera 8 # 20', status: 'active' },
-    { id: 3, name: 'Café El Manantial', email: 'cafe@pan.com', phone: '3109998877', address: 'Avenida 4 # 12', status: 'active' },
+    {
+      id: 1,
+      name: 'Panadería Central',
+      email: 'central@pan.com',
+      phone: '3001112233',
+      address: 'Calle 10 # 5',
+      status: 'active',
+    },
+    {
+      id: 2,
+      name: 'Pastelería del Sur',
+      email: 'sur@pan.com',
+      phone: '3004445566',
+      address: 'Carrera 8 # 20',
+      status: 'active',
+    },
+    {
+      id: 3,
+      name: 'Café El Manantial',
+      email: 'cafe@pan.com',
+      phone: '3109998877',
+      address: 'Avenida 4 # 12',
+      status: 'active',
+    },
   ];
 
   beforeEach(async () => {
@@ -154,7 +175,10 @@ describe('ClientList', () => {
     component.save({ name: 'Cliente Error', status: 'active' });
 
     const postReq = httpTesting.expectOne(baseUrl);
-    postReq.flush({ message: 'Error interno al guardar cliente' }, { status: 500, statusText: 'Server Error' });
+    postReq.flush(
+      { message: 'Error interno al guardar cliente' },
+      { status: 500, statusText: 'Server Error' },
+    );
 
     expect(component.saving()).toBe(false);
     expect(component.dialogVisible()).toBe(true);

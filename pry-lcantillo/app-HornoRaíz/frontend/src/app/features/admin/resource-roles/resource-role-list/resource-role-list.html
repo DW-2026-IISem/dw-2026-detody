@@ -37,9 +37,7 @@
           />
         </div>
       </div>
-      <div class="text-sm text-slate-400">
-        Total: {{ visibleRows().length }} concesiones
-      </div>
+      <div class="text-sm text-slate-400">Total: {{ visibleRows().length }} concesiones</div>
     </div>
 
     @if (loading()) {
@@ -69,27 +67,44 @@
 
         <ng-template #body let-grant>
           <tr>
-            <td><span class="text-xs font-mono text-slate-400">#{{ grant.id }}</span></td>
+            <td>
+              <span class="text-xs font-mono text-slate-400">#{{ grant.id }}</span>
+            </td>
             <td>
               <p-tag
-                [value]="grant.role?.name || ('Rol #' + (grant.role_id ?? grant.roleId))"
+                [value]="grant.role?.name || 'Rol #' + (grant.role_id ?? grant.roleId)"
                 severity="info"
                 [rounded]="true"
               />
             </td>
             <td>
               <p-tag
-                [value]="grant.resource?.method || grant.resource?.http_method || grant.resource?.httpMethod || 'GET'"
-                [severity]="methodSeverity(grant.resource?.method || grant.resource?.http_method || grant.resource?.httpMethod)"
+                [value]="
+                  grant.resource?.method ||
+                  grant.resource?.http_method ||
+                  grant.resource?.httpMethod ||
+                  'GET'
+                "
+                [severity]="
+                  methodSeverity(
+                    grant.resource?.method ||
+                      grant.resource?.http_method ||
+                      grant.resource?.httpMethod
+                  )
+                "
                 [rounded]="true"
               />
             </td>
             <td>
               <code class="text-xs text-emerald-400 bg-slate-900 px-2 py-1 rounded">
-                {{ grant.resource?.path || grant.resource?.route_path || grant.resource?.routePath }}
+                {{
+                  grant.resource?.path || grant.resource?.route_path || grant.resource?.routePath
+                }}
               </code>
             </td>
-            <td><span class="text-slate-300 text-xs">{{ grant.resource?.description || '—' }}</span></td>
+            <td>
+              <span class="text-slate-300 text-xs">{{ grant.resource?.description || '—' }}</span>
+            </td>
             <td><app-status-tag [status]="grant.status || 'active'" /></td>
             <td class="text-right">
               <button
@@ -171,7 +186,9 @@
                 [severity]="methodSeverity(resource.method || resource.http_method)"
                 [rounded]="true"
               />
-              <code class="text-xs text-emerald-400">{{ resource.path || resource.route_path }}</code>
+              <code class="text-xs text-emerald-400">{{
+                resource.path || resource.route_path
+              }}</code>
             </div>
             @if (resource.description) {
               <span class="text-xs text-slate-400 mt-1">{{ resource.description }}</span>

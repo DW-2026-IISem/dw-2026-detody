@@ -27,7 +27,7 @@ import { ResourceRoleApi } from '../resource-role-api';
   selector: 'app-resource-role-list',
   standalone: true,
   imports: [
-        FormsModule,
+    FormsModule,
     ButtonModule,
     CardModule,
     ConfirmDialogModule,

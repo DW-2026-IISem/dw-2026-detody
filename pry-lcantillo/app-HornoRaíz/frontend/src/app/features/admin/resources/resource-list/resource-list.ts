@@ -25,7 +25,7 @@ import { ResourceForm } from '../resource-form/resource-form';
   selector: 'app-resource-list',
   standalone: true,
   imports: [
-        FormsModule,
+    FormsModule,
     ButtonModule,
     CardModule,
     ConfirmDialogModule,
@@ -87,8 +87,7 @@ export class ResourceList {
 
     return method
       ? filtered.filter(
-          (row) =>
-            (row.method || row.http_method || row.httpMethod || '').toUpperCase() === method,
+          (row) => (row.method || row.http_method || row.httpMethod || '').toUpperCase() === method,
         )
       : filtered;
   });

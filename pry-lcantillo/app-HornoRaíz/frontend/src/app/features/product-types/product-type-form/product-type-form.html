@@ -1,7 +1,13 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
   <div>
     <label for="type-name" class="mb-1 block text-sm font-medium">Nombre *</label>
-    <input id="type-name" pInputText formControlName="name" placeholder="Panes Especiales" class="w-full" />
+    <input
+      id="type-name"
+      pInputText
+      formControlName="name"
+      placeholder="Panes Especiales"
+      class="w-full"
+    />
     @if (form.controls.name.touched && form.controls.name.invalid) {
       <p-message severity="error" size="small" variant="simple" styleClass="mt-1">
         El nombre es obligatorio (máximo 120 caracteres).

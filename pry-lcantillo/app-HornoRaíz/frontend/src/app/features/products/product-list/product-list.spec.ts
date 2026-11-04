@@ -174,7 +174,9 @@ describe('ProductList', () => {
     postReq.flush({ product: { id: 4, ...newProdPayload } });
 
     // Recarga posterior en paralelo
-    httpTesting.expectOne(productsUrl).flush({ products: [...mockProducts, { id: 4, ...newProdPayload }] });
+    httpTesting
+      .expectOne(productsUrl)
+      .flush({ products: [...mockProducts, { id: 4, ...newProdPayload }] });
     httpTesting.expectOne(typesUrl).flush({ product_types: mockTypes });
 
     expect(component.dialogVisible()).toBe(false);

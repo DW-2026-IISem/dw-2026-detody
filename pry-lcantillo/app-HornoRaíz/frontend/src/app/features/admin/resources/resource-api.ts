@@ -26,21 +26,21 @@ export class ResourceApi {
   }
 
   get(id: number): Observable<Resource> {
-    return this.http.get<any>(`${this.base}/${id}`).pipe(
-      map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res),
-    );
+    return this.http
+      .get<any>(`${this.base}/${id}`)
+      .pipe(map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res));
   }
 
   create(payload: ResourcePayload): Observable<Resource> {
-    return this.http.post<any>(this.base, payload).pipe(
-      map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res),
-    );
+    return this.http
+      .post<any>(this.base, payload)
+      .pipe(map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res));
   }
 
   update(id: number, payload: Partial<ResourcePayload>): Observable<Resource> {
-    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
-      map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res),
-    );
+    return this.http
+      .patch<any>(`${this.base}/${id}`, payload)
+      .pipe(map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res));
   }
 
   deactivate(id: number): Observable<unknown> {

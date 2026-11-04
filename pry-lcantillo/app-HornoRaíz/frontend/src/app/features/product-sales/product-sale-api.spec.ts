@@ -25,9 +25,7 @@ describe('ProductSaleApi', () => {
   it('debe listar líneas de detalle normalizando datos', () => {
     const raw = {
       data: {
-        items: [
-          { id: 1, saleId: 1, productId: 1, quantity: 2, unitPrice: 8500, subtotal: 17000 },
-        ],
+        items: [{ id: 1, saleId: 1, productId: 1, quantity: 2, unitPrice: 8500, subtotal: 17000 }],
       },
     };
 
@@ -69,7 +67,9 @@ describe('ProductSaleApi', () => {
     const req = http.expectOne(base);
     expect(req.request.method).toBe('POST');
     expect(req.request.body.productId).toBe(2);
-    req.flush({ data: { id: 3, saleId: 1, productId: 2, quantity: 1, unitPrice: 45000, subtotal: 45000 } });
+    req.flush({
+      data: { id: 3, saleId: 1, productId: 2, quantity: 1, unitPrice: 45000, subtotal: 45000 },
+    });
   });
 
   it('debe actualizar cantidad vía PATCH', () => {

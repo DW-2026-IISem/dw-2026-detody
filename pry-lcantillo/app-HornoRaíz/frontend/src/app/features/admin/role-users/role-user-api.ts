@@ -17,7 +17,8 @@ export class RoleUserApi {
       map((res) => {
         if (Array.isArray(res)) return res;
         if (res?.assignments && Array.isArray(res.assignments)) return res.assignments;
-        if (res?.data?.assignments && Array.isArray(res.data.assignments)) return res.data.assignments;
+        if (res?.data?.assignments && Array.isArray(res.data.assignments))
+          return res.data.assignments;
         if (res?.items && Array.isArray(res.items)) return res.items;
         if (res?.data && Array.isArray(res.data)) return res.data;
         return [];
@@ -26,9 +27,9 @@ export class RoleUserApi {
   }
 
   create(payload: RoleUserPayload): Observable<RoleUser> {
-    return this.http.post<any>(this.base, payload).pipe(
-      map((res) => res?.assignment ?? res?.data?.assignment ?? res?.data ?? res),
-    );
+    return this.http
+      .post<any>(this.base, payload)
+      .pipe(map((res) => res?.assignment ?? res?.data?.assignment ?? res?.data ?? res));
   }
 
   deactivate(id: number): Observable<unknown> {

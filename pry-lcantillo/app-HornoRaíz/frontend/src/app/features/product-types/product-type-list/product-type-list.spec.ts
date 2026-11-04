@@ -16,9 +16,24 @@ describe('ProductTypeList', () => {
   const baseUrl = `${environment.apiUrl}/tipos-producto`;
 
   const TYPES: ProductType[] = [
-    { id: 1, name: 'Panadería Tradicional', description: 'Panes de uso diario, aliñados', status: 'active' },
-    { id: 2, name: 'Pastelería y Repostería', description: 'Tortas y postres finos', status: 'active' },
-    { id: 3, name: 'Bebidas e Infusiones', description: 'Cafés y jugos naturales', status: 'active' },
+    {
+      id: 1,
+      name: 'Panadería Tradicional',
+      description: 'Panes de uso diario, aliñados',
+      status: 'active',
+    },
+    {
+      id: 2,
+      name: 'Pastelería y Repostería',
+      description: 'Tortas y postres finos',
+      status: 'active',
+    },
+    {
+      id: 3,
+      name: 'Bebidas e Infusiones',
+      description: 'Cafés y jugos naturales',
+      status: 'active',
+    },
   ];
 
   beforeEach(async () => {
@@ -57,7 +72,10 @@ describe('ProductTypeList', () => {
 
   it('debe manejar error de carga vaciando las filas y mostrando mensaje en error signal', () => {
     const req = httpTesting.expectOne(baseUrl);
-    req.flush({ message: 'Error de servidor' }, { status: 500, statusText: 'Internal Server Error' });
+    req.flush(
+      { message: 'Error de servidor' },
+      { status: 500, statusText: 'Internal Server Error' },
+    );
 
     expect(component.rows().length).toBe(0);
     expect(component.loading()).toBe(false);
@@ -150,7 +168,10 @@ describe('ProductTypeList', () => {
     component.save({ name: 'Tipo Error', status: 'active' });
 
     const postReq = httpTesting.expectOne(baseUrl);
-    postReq.flush({ message: 'Error interno en la BD' }, { status: 500, statusText: 'Server Error' });
+    postReq.flush(
+      { message: 'Error interno en la BD' },
+      { status: 500, statusText: 'Server Error' },
+    );
 
     expect(component.saving()).toBe(false);
     expect(component.dialogVisible()).toBe(true);

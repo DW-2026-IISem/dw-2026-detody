@@ -19,7 +19,8 @@ export class ProductTypeApi {
       map((response) => {
         if (Array.isArray(response)) return response;
         if (response?.data?.items && Array.isArray(response.data.items)) return response.data.items;
-        if (response?.product_types && Array.isArray(response.product_types)) return response.product_types;
+        if (response?.product_types && Array.isArray(response.product_types))
+          return response.product_types;
         if (response?.items && Array.isArray(response.items)) return response.items;
         return [];
       }),
@@ -31,9 +32,18 @@ export class ProductTypeApi {
   }
 
   get(id: number): Observable<ProductType> {
-    return this.http.get<any>(`${this.base}/${id}`).pipe(
-      map((response) => response?.data ?? response?.product_type ?? response?.productType ?? response?.item ?? response),
-    );
+    return this.http
+      .get<any>(`${this.base}/${id}`)
+      .pipe(
+        map(
+          (response) =>
+            response?.data ??
+            response?.product_type ??
+            response?.productType ??
+            response?.item ??
+            response,
+        ),
+      );
   }
 
   findById(id: number): Observable<ProductType> {
@@ -41,15 +51,33 @@ export class ProductTypeApi {
   }
 
   create(payload: ProductTypePayload): Observable<ProductType> {
-    return this.http.post<any>(this.base, payload).pipe(
-      map((response) => response?.data ?? response?.product_type ?? response?.productType ?? response?.item ?? response),
-    );
+    return this.http
+      .post<any>(this.base, payload)
+      .pipe(
+        map(
+          (response) =>
+            response?.data ??
+            response?.product_type ??
+            response?.productType ??
+            response?.item ??
+            response,
+        ),
+      );
   }
 
   update(id: number, payload: Partial<ProductTypePayload>): Observable<ProductType> {
-    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
-      map((response) => response?.data ?? response?.product_type ?? response?.productType ?? response?.item ?? response),
-    );
+    return this.http
+      .patch<any>(`${this.base}/${id}`, payload)
+      .pipe(
+        map(
+          (response) =>
+            response?.data ??
+            response?.product_type ??
+            response?.productType ??
+            response?.item ??
+            response,
+        ),
+      );
   }
 
   deactivate(id: number): Observable<unknown> {

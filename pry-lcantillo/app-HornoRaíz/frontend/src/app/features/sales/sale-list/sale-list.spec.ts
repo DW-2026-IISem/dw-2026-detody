@@ -21,9 +21,7 @@ describe('SaleList', () => {
   const clientsUrl = `${environment.apiUrl}/clients`;
   const productsUrl = `${environment.apiUrl}/productos`;
 
-  const mockClients: Client[] = [
-    { id: 1, name: 'Cliente HornoRaíz Demo', status: 'active' },
-  ];
+  const mockClients: Client[] = [{ id: 1, name: 'Cliente HornoRaíz Demo', status: 'active' }];
 
   const mockProducts: Product[] = [
     { id: 1, name: 'Pan Baguette', price: 8500, stock: 20, status: 'active' },

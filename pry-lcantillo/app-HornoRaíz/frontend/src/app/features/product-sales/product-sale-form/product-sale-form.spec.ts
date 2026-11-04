@@ -12,9 +12,7 @@ describe('ProductSaleForm', () => {
     { id: 1, name: 'Pan Baguette', price: 8500, stock: 20, status: 'active' },
   ];
 
-  const mockSales: Sale[] = [
-    { id: 1, client_id: 1, total: 17000, status: 'completed' },
-  ];
+  const mockSales: Sale[] = [{ id: 1, client_id: 1, total: 17000, status: 'completed' }];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

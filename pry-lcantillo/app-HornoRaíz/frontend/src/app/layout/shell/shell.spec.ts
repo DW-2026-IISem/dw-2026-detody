@@ -14,12 +14,7 @@ describe('Shell', () => {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [Shell],
-      providers: [
-        provideRouter([]),
-        provideHttpClient(),
-        MessageService,
-        ConfirmationService,
-      ],
+      providers: [provideRouter([]), provideHttpClient(), MessageService, ConfirmationService],
     }).compileComponents();
 
     sessionStore = TestBed.inject(SessionStore);

@@ -4,7 +4,11 @@
 >
   <div class="flex items-center gap-2">
     <p-tag [value]="rows().length + ' ventas registradas'" severity="info" [rounded]="true" />
-    <p-tag [value]="'Ingresos: ' + (totalRevenue() | currency: 'USD' : 'symbol' : '1.2-2')" severity="success" [rounded]="true" />
+    <p-tag
+      [value]="'Ingresos: ' + (totalRevenue() | currency: 'USD' : 'symbol' : '1.2-2')"
+      severity="success"
+      [rounded]="true"
+    />
     <button *appHasPermission="'POST /api/ventas'" pButton type="button" routerLink="/ventas/nueva">
       <i pButtonIcon class="pi pi-plus"></i>
       <span pButtonLabel>Nueva venta</span>
@@ -75,11 +79,7 @@
         </td>
 
         <td class="text-center">
-          <p-tag
-            [value]="itemsCount(row) + ' unid.'"
-            severity="secondary"
-            [rounded]="true"
-          />
+          <p-tag [value]="itemsCount(row) + ' unid.'" severity="secondary" [rounded]="true" />
         </td>
 
         <td class="text-right">

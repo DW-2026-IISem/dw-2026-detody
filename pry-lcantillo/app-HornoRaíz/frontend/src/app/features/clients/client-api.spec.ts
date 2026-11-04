@@ -12,11 +12,7 @@ describe('ClientApi', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        ClientApi,
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting(), ClientApi],
     });
     service = TestBed.inject(ClientApi);
     httpTesting = TestBed.inject(HttpTestingController);
@@ -47,9 +43,7 @@ describe('ClientApi', () => {
   });
 
   it('debe listar clientes cuando la respuesta es un arreglo directo', () => {
-    const mockClients: Client[] = [
-      { id: 1, name: 'Panadería Central', status: 'active' },
-    ];
+    const mockClients: Client[] = [{ id: 1, name: 'Panadería Central', status: 'active' }];
 
     service.findAll().subscribe((clients) => {
       expect(clients.length).toBe(1);
@@ -75,7 +69,11 @@ describe('ClientApi', () => {
   });
 
   it('debe crear un nuevo cliente', () => {
-    const payload: ClientPayload = { name: 'Horno La Unión', email: 'union@horno.com', status: 'active' };
+    const payload: ClientPayload = {
+      name: 'Horno La Unión',
+      email: 'union@horno.com',
+      status: 'active',
+    };
     const createdClient: Client = { id: 10, ...payload, status: 'active' };
 
     service.create(payload).subscribe((client) => {
@@ -91,7 +89,12 @@ describe('ClientApi', () => {
 
   it('debe actualizar un cliente existente mediante PATCH', () => {
     const updatePayload: Partial<ClientPayload> = { phone: '3001234567' };
-    const updatedClient: Client = { id: 10, name: 'Horno La Unión', phone: '3001234567', status: 'active' };
+    const updatedClient: Client = {
+      id: 10,
+      name: 'Horno La Unión',
+      phone: '3001234567',
+      status: 'active',
+    };
 
     service.update(10, updatePayload).subscribe((client) => {
       expect(client.phone).toBe('3001234567');

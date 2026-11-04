@@ -2,7 +2,13 @@
   title="Dashboard"
   subtitle="Métricas globales, alertas de inventario y actividad transaccional en tiempo real."
 >
-  <button *appHasPermission="'POST /api/ventas'" pButton type="button" severity="primary" routerLink="/ventas/nueva">
+  <button
+    *appHasPermission="'POST /api/ventas'"
+    pButton
+    type="button"
+    severity="primary"
+    routerLink="/ventas/nueva"
+  >
     <i pButtonIcon class="pi pi-plus"></i>
     <span pButtonLabel>Registrar venta</span>
   </button>
@@ -24,49 +30,80 @@
   <!-- Tarjetas KPI -->
   <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
     <!-- KPI Clientes -->
-    <div *appHasPermission="'GET /api/clientes'" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+    <div
+      *appHasPermission="'GET /api/clientes'"
+      class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between"
+    >
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Clientes activos</p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Clientes activos
+        </p>
         <p class="text-3xl font-black text-slate-800 mt-1">{{ clients().length }}</p>
         <p class="text-xs text-blue-600 mt-1 font-medium">Base fidelizada</p>
       </div>
-      <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+      <div
+        class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"
+      >
         <i class="pi pi-users"></i>
       </div>
     </div>
 
     <!-- KPI Categorías -->
-    <div *appHasPermission="'GET /api/tipos-producto'" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+    <div
+      *appHasPermission="'GET /api/tipos-producto'"
+      class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between"
+    >
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Categorías de panadería</p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Categorías de panadería
+        </p>
         <p class="text-3xl font-black text-slate-800 mt-1">{{ typeCount() }}</p>
         <p class="text-xs text-purple-600 mt-1 font-medium">Líneas de producción</p>
       </div>
-      <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+      <div
+        class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl"
+      >
         <i class="pi pi-tags"></i>
       </div>
     </div>
 
     <!-- KPI Catálogo -->
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+    <div
+      class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between"
+    >
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Productos en catálogo</p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Productos en catálogo
+        </p>
         <p class="text-3xl font-black text-slate-800 mt-1">{{ products().length }}</p>
         <p class="text-xs text-emerald-600 mt-1 font-medium">Panes, tortas y postres</p>
       </div>
-      <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+      <div
+        class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl"
+      >
         <i class="pi pi-box"></i>
       </div>
     </div>
 
     <!-- KPI Ingresos -->
-    <div *appHasPermission="'GET /api/ventas'" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+    <div
+      *appHasPermission="'GET /api/ventas'"
+      class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between"
+    >
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Ingresos acumulados</p>
-        <p class="text-2xl font-black text-slate-900 mt-1">{{ revenue() | currency: 'USD' : 'symbol' : '1.0-0' }}</p>
-        <p class="text-xs text-amber-600 mt-1 font-medium">{{ sales().length }} ventas procesadas</p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Ingresos acumulados
+        </p>
+        <p class="text-2xl font-black text-slate-900 mt-1">
+          {{ revenue() | currency: 'USD' : 'symbol' : '1.0-0' }}
+        </p>
+        <p class="text-xs text-amber-600 mt-1 font-medium">
+          {{ sales().length }} ventas procesadas
+        </p>
       </div>
-      <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+      <div
+        class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl"
+      >
         <i class="pi pi-dollar"></i>
       </div>
     </div>

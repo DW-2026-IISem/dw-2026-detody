@@ -24,9 +24,7 @@
           class="w-full"
         />
       </div>
-      <div class="text-sm text-slate-400">
-        Total: {{ rows().length }} roles
-      </div>
+      <div class="text-sm text-slate-400">Total: {{ rows().length }} roles</div>
     </div>
 
     @if (loading()) {
@@ -55,11 +53,15 @@
 
         <ng-template #body let-role>
           <tr>
-            <td><span class="text-xs font-mono text-slate-400">#{{ role.id }}</span></td>
+            <td>
+              <span class="text-xs font-mono text-slate-400">#{{ role.id }}</span>
+            </td>
             <td>
               <p-tag [value]="role.name" severity="info" [rounded]="true" />
             </td>
-            <td><span class="text-slate-300">{{ role.description || '—' }}</span></td>
+            <td>
+              <span class="text-slate-300">{{ role.description || '—' }}</span>
+            </td>
             <td><app-status-tag [status]="role.status || 'active'" /></td>
             <td>
               <span class="text-xs text-slate-400">

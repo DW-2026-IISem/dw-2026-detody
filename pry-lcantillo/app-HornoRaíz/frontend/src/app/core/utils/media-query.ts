@@ -13,8 +13,7 @@ export function watchMediaQuery(query: string): Signal<boolean> {
   const matches = signal(media?.matches ?? false);
 
   if (media) {
-    const listener = (event: MediaQueryListEvent): void =>
-      matches.set(event.matches);
+    const listener = (event: MediaQueryListEvent): void => matches.set(event.matches);
     media.addEventListener('change', listener);
     destroyRef.onDestroy(() => media.removeEventListener('change', listener));
   }

@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "docs:check": "node tools/check-docs.mjs",
+    "typecheck": "tsc --noEmit"
   },
   "private": true,
   "packageManager": "npm@12.2.0",

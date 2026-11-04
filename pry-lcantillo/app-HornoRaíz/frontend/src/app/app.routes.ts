@@ -8,23 +8,20 @@ export const routes: Routes = [
   // Ruta pública de demostración didáctica de ISS-01 / ISS-02
   {
     path: 'construir',
-    loadComponent: () =>
-      import('./features/construir/construir').then((m) => m.Construir),
+    loadComponent: () => import('./features/construir/construir').then((m) => m.Construir),
   },
   // Pantalla de Login (guestGuard: si ya está autenticado redirige a /dashboard)
   {
     path: 'login',
     title: 'Iniciar Sesión · HornoRaíz',
     canActivate: [guestGuard],
-    loadComponent: () =>
-      import('./features/auth/login/login').then((m) => m.Login),
+    loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
   },
   // Pantalla de Acceso Prohibido (403)
   {
     path: 'forbidden',
     title: 'Acceso Denegado · HornoRaíz',
-    loadComponent: () =>
-      import('./features/auth/forbidden/forbidden').then((m) => m.Forbidden),
+    loadComponent: () => import('./features/auth/forbidden/forbidden').then((m) => m.Forbidden),
   },
   // Rutas internas protegidas dentro del Shell con authGuard
   {
@@ -42,15 +39,13 @@ export const routes: Routes = [
         title: 'Panel de Control · HornoRaíz',
         canActivate: [permissionGuard],
         data: { permission: 'GET /api/ventas' },
-        loadComponent: () =>
-          import('./features/dashboard/dashboard').then((m) => m.Dashboard),
+        loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
         path: 'perfil',
         title: 'Mi Perfil y Permisos · HornoRaíz',
         canActivate: [authOnlyGuard],
-        loadComponent: () =>
-          import('./features/auth/profile/profile').then((m) => m.Profile),
+        loadComponent: () => import('./features/auth/profile/profile').then((m) => m.Profile),
       },
       {
         path: 'clientes',
@@ -58,9 +53,7 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
         data: { permission: 'GET /api/clientes' },
         loadComponent: () =>
-          import('./features/clients/client-list/client-list').then(
-            (m) => m.ClientList,
-          ),
+          import('./features/clients/client-list/client-list').then((m) => m.ClientList),
       },
       {
         path: 'tipos-producto',
@@ -78,25 +71,21 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
         data: { permission: 'GET /api/productos' },
         loadComponent: () =>
-          import('./features/products/product-list/product-list').then(
-            (m) => m.ProductList,
-          ),
+          import('./features/products/product-list/product-list').then((m) => m.ProductList),
       },
       {
         path: 'ventas',
         title: 'Historial de Ventas · HornoRaíz',
         canActivate: [permissionGuard],
         data: { permission: 'GET /api/ventas' },
-        loadComponent: () =>
-          import('./features/sales/sale-list/sale-list').then((m) => m.SaleList),
+        loadComponent: () => import('./features/sales/sale-list/sale-list').then((m) => m.SaleList),
       },
       {
         path: 'ventas/nueva',
         title: 'Registrar Nueva Venta · HornoRaíz',
         canActivate: [permissionGuard],
         data: { permission: 'POST /api/ventas' },
-        loadComponent: () =>
-          import('./features/sales/sale-form/sale-form').then((m) => m.SaleForm),
+        loadComponent: () => import('./features/sales/sale-form/sale-form').then((m) => m.SaleForm),
       },
       {
         path: 'detalle-ventas',
@@ -104,9 +93,9 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
         data: { permission: 'GET /api/detalle-ventas' },
         loadComponent: () =>
-          import(
-            './features/product-sales/product-sale-list/product-sale-list'
-          ).then((m) => m.ProductSaleList),
+          import('./features/product-sales/product-sale-list/product-sale-list').then(
+            (m) => m.ProductSaleList,
+          ),
       },
       // ========================================================================
       // FASE II - ISS-10: Administración RBAC
@@ -143,9 +132,9 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
         data: { permission: 'GET /api/asignaciones-rol' },
         loadComponent: () =>
-          import(
-            './features/admin/role-users/role-user-list/role-user-list'
-          ).then((m) => m.RoleUserList),
+          import('./features/admin/role-users/role-user-list/role-user-list').then(
+            (m) => m.RoleUserList,
+          ),
       },
       {
         path: 'admin/permisos',
@@ -153,9 +142,9 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
         data: { permission: 'GET /api/concesiones-rol' },
         loadComponent: () =>
-          import(
-            './features/admin/resource-roles/resource-role-list/resource-role-list'
-          ).then((m) => m.ResourceRoleList),
+          import('./features/admin/resource-roles/resource-role-list/resource-role-list').then(
+            (m) => m.ResourceRoleList,
+          ),
       },
     ],
   },

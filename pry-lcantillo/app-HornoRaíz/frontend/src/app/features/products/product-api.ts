@@ -50,9 +50,13 @@ export class ProductApi {
   }
 
   get(id: number): Observable<Product> {
-    return this.http.get<any>(`${this.base}/${id}`).pipe(
-      map((response) => this.normalize(response?.data ?? response?.product ?? response?.item ?? response)),
-    );
+    return this.http
+      .get<any>(`${this.base}/${id}`)
+      .pipe(
+        map((response) =>
+          this.normalize(response?.data ?? response?.product ?? response?.item ?? response),
+        ),
+      );
   }
 
   findById(id: number): Observable<Product> {
@@ -67,9 +71,13 @@ export class ProductApi {
       stock: payload.stock ?? payload.quantity ?? 0,
       price: Number(payload.price),
     };
-    return this.http.post<any>(this.base, body).pipe(
-      map((response) => this.normalize(response?.data ?? response?.product ?? response?.item ?? response)),
-    );
+    return this.http
+      .post<any>(this.base, body)
+      .pipe(
+        map((response) =>
+          this.normalize(response?.data ?? response?.product ?? response?.item ?? response),
+        ),
+      );
   }
 
   update(id: number, payload: Partial<ProductPayload>): Observable<Product> {
@@ -83,9 +91,13 @@ export class ProductApi {
     if (payload.price !== undefined) {
       body.price = Number(payload.price);
     }
-    return this.http.patch<any>(`${this.base}/${id}`, body).pipe(
-      map((response) => this.normalize(response?.data ?? response?.product ?? response?.item ?? response)),
-    );
+    return this.http
+      .patch<any>(`${this.base}/${id}`, body)
+      .pipe(
+        map((response) =>
+          this.normalize(response?.data ?? response?.product ?? response?.item ?? response),
+        ),
+      );
   }
 
   deactivate(id: number): Observable<unknown> {

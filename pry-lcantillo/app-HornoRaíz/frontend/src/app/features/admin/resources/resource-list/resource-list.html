@@ -15,25 +15,37 @@
 
   <!-- Métodos contadores resumen -->
   <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+    <div
+      class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between"
+    >
       <span class="text-xs text-sky-400 font-semibold">GET</span>
       <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('GET') || 0 }}</span>
     </div>
-    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+    <div
+      class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between"
+    >
       <span class="text-xs text-emerald-400 font-semibold">POST</span>
       <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('POST') || 0 }}</span>
     </div>
-    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+    <div
+      class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between"
+    >
       <span class="text-xs text-amber-400 font-semibold">PUT</span>
       <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('PUT') || 0 }}</span>
     </div>
-    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+    <div
+      class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between"
+    >
       <span class="text-xs text-orange-400 font-semibold">PATCH</span>
       <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('PATCH') || 0 }}</span>
     </div>
-    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+    <div
+      class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between"
+    >
       <span class="text-xs text-rose-400 font-semibold">DELETE</span>
-      <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('DELETE') || 0 }}</span>
+      <span class="text-lg font-bold text-slate-200">{{
+        countsByMethod().get('DELETE') || 0
+      }}</span>
     </div>
   </div>
 
@@ -92,7 +104,9 @@
 
         <ng-template #body let-res>
           <tr>
-            <td><span class="text-xs font-mono text-slate-400">#{{ res.id }}</span></td>
+            <td>
+              <span class="text-xs font-mono text-slate-400">#{{ res.id }}</span>
+            </td>
             <td>
               <p-tag
                 [value]="res.method || res.http_method || res.httpMethod || 'GET'"
@@ -105,7 +119,9 @@
                 {{ res.path || res.route_path || res.routePath }}
               </code>
             </td>
-            <td><span class="text-slate-300">{{ res.description || '—' }}</span></td>
+            <td>
+              <span class="text-slate-300">{{ res.description || '—' }}</span>
+            </td>
             <td><app-status-tag [status]="res.status || 'active'" /></td>
             <td class="text-right">
               <div class="flex justify-end gap-1">

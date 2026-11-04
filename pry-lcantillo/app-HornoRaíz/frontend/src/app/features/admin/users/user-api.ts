@@ -26,21 +26,21 @@ export class UserApi {
   }
 
   get(id: number): Observable<User> {
-    return this.http.get<any>(`${this.base}/${id}`).pipe(
-      map((res) => res?.user ?? res?.data?.user ?? res?.data ?? res),
-    );
+    return this.http
+      .get<any>(`${this.base}/${id}`)
+      .pipe(map((res) => res?.user ?? res?.data?.user ?? res?.data ?? res));
   }
 
   create(payload: UserPayload): Observable<User> {
-    return this.http.post<any>(this.base, payload).pipe(
-      map((res) => res?.user ?? res?.data?.user ?? res?.data ?? res),
-    );
+    return this.http
+      .post<any>(this.base, payload)
+      .pipe(map((res) => res?.user ?? res?.data?.user ?? res?.data ?? res));
   }
 
   update(id: number, payload: Partial<UserPayload>): Observable<User> {
-    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
-      map((res) => res?.user ?? res?.data?.user ?? res?.data ?? res),
-    );
+    return this.http
+      .patch<any>(`${this.base}/${id}`, payload)
+      .pipe(map((res) => res?.user ?? res?.data?.user ?? res?.data ?? res));
   }
 
   permissions(id: number): Observable<EffectivePermission[]> {
@@ -48,7 +48,8 @@ export class UserApi {
       map((res) => {
         if (Array.isArray(res)) return res;
         if (res?.permissions && Array.isArray(res.permissions)) return res.permissions;
-        if (res?.data?.permissions && Array.isArray(res.data.permissions)) return res.data.permissions;
+        if (res?.data?.permissions && Array.isArray(res.data.permissions))
+          return res.data.permissions;
         if (res?.data && Array.isArray(res.data)) return res.data;
         return [];
       }),

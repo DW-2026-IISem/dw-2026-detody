@@ -39,9 +39,7 @@
           />
         </div>
       </div>
-      <div class="text-sm text-slate-400">
-        Total: {{ visibleRows().length }} asignaciones
-      </div>
+      <div class="text-sm text-slate-400">Total: {{ visibleRows().length }} asignaciones</div>
     </div>
 
     @if (loading()) {
@@ -71,19 +69,23 @@
 
         <ng-template #body let-row>
           <tr>
-            <td><span class="text-xs font-mono text-slate-400">#{{ row.id }}</span></td>
+            <td>
+              <span class="text-xs font-mono text-slate-400">#{{ row.id }}</span>
+            </td>
             <td>
               <div class="flex items-center gap-2">
                 <i class="pi pi-user text-emerald-400 bg-slate-800 p-2 rounded-full"></i>
                 <span class="font-medium text-slate-200">
-                  {{ row.user?.username || ('Usuario #' + (row.user_id ?? row.userId)) }}
+                  {{ row.user?.username || 'Usuario #' + (row.user_id ?? row.userId) }}
                 </span>
               </div>
             </td>
-            <td><span class="text-slate-300">{{ row.user?.email || '—' }}</span></td>
+            <td>
+              <span class="text-slate-300">{{ row.user?.email || '—' }}</span>
+            </td>
             <td>
               <p-tag
-                [value]="row.role?.name || ('Rol #' + (row.role_id ?? row.roleId))"
+                [value]="row.role?.name || 'Rol #' + (row.role_id ?? row.roleId)"
                 severity="info"
                 [rounded]="true"
               />

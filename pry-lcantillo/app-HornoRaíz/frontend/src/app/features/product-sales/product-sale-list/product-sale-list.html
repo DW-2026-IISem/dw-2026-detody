@@ -4,7 +4,12 @@
 >
   <div class="flex items-center gap-2">
     <p-tag [value]="rows().length + ' líneas registradas'" severity="info" [rounded]="true" />
-    <button *appHasPermission="'POST /api/detalle-ventas'" pButton type="button" (click)="openCreate()">
+    <button
+      *appHasPermission="'POST /api/detalle-ventas'"
+      pButton
+      type="button"
+      (click)="openCreate()"
+    >
       <i pButtonIcon class="pi pi-plus"></i>
       <span pButtonLabel>Nueva línea</span>
     </button>

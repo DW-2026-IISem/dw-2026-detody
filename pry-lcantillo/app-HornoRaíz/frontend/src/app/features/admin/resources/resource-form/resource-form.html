@@ -21,12 +21,17 @@
       [fluid]="true"
     />
     @if (form.controls.path.invalid && form.controls.path.touched) {
-      <p-message severity="error" text="La ruta es obligatoria y debe comenzar con / (ej: /api/recursos)" />
+      <p-message
+        severity="error"
+        text="La ruta es obligatoria y debe comenzar con / (ej: /api/recursos)"
+      />
     }
   </div>
 
   <div class="flex flex-col gap-1">
-    <label for="description" class="text-sm font-semibold text-slate-300">Descripción del Recurso</label>
+    <label for="description" class="text-sm font-semibold text-slate-300"
+      >Descripción del Recurso</label
+    >
     <input
       pInputText
       id="description"

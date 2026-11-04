@@ -26,7 +26,14 @@ describe('ProductApi', () => {
     const raw = {
       data: {
         items: [
-          { id: 1, name: 'Pan Baguette', price: 8500, stock: 28, productTypeId: 1, status: 'active' },
+          {
+            id: 1,
+            name: 'Pan Baguette',
+            price: 8500,
+            stock: 28,
+            productTypeId: 1,
+            status: 'active',
+          },
         ],
       },
     };
@@ -46,7 +53,14 @@ describe('ProductApi', () => {
   it('debe listar productos extrayendo response.products', () => {
     const raw = {
       products: [
-        { id: 2, name: 'Croissant', price: 7000, quantity: 15, product_type_id: 1, status: 'active' },
+        {
+          id: 2,
+          name: 'Croissant',
+          price: 7000,
+          quantity: 15,
+          product_type_id: 1,
+          status: 'active',
+        },
       ],
     };
 

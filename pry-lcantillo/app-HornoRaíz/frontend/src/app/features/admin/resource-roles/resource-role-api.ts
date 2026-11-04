@@ -34,9 +34,9 @@ export class ResourceRoleApi {
   }
 
   create(payload: ResourceRolePayload): Observable<ResourceRole> {
-    return this.http.post<any>(this.base, payload).pipe(
-      map((res) => res?.grant ?? res?.data?.grant ?? res?.data ?? res),
-    );
+    return this.http
+      .post<any>(this.base, payload)
+      .pipe(map((res) => res?.grant ?? res?.data?.grant ?? res?.data ?? res));
   }
 
   deactivate(id: number): Observable<unknown> {
@@ -60,6 +60,8 @@ export class ResourceRoleApi {
   }
 
   revokePermission(roleId: number, resourceId: number): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}/resource-roles?role_id=${roleId}&resource_id=${resourceId}`);
+    return this.http.delete(
+      `${environment.apiUrl}/resource-roles?role_id=${roleId}&resource_id=${resourceId}`,
+    );
   }
 }

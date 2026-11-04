@@ -39,7 +39,13 @@ describe('RoleUserList', () => {
 
     reqAssignments.flush({
       assignments: [
-        { id: 1, user_id: 1, role_id: 1, user: { id: 1, username: 'admin' }, role: { id: 1, name: 'ADMIN' } },
+        {
+          id: 1,
+          user_id: 1,
+          role_id: 1,
+          user: { id: 1, username: 'admin' },
+          role: { id: 1, name: 'ADMIN' },
+        },
       ],
     });
     reqUsers.flush({ users: [{ id: 1, username: 'admin' }] });

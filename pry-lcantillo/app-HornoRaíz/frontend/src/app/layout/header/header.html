@@ -15,12 +15,10 @@
 
   <div class="min-w-0 flex-1">
     <p class="truncate text-sm font-semibold text-slate-900">{{ appName() }}</p>
-    <p class="truncate text-xs text-slate-500">
-      Gestión de clientes, productos y ventas
-    </p>
+    <p class="truncate text-xs text-slate-500">Gestión de clientes, productos y ventas</p>
   </div>
 
-  @if (showSession() && !authEnabled()) {
+  @if (!authEnabled()) {
     <p-tag value="Fase I · sin auth" severity="warn" [rounded]="true" />
   }
 

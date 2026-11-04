@@ -55,9 +55,7 @@ export class Login {
       next: () => {
         const requested = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
         const returnUrl =
-          requested.startsWith('/') && !requested.startsWith('/login')
-            ? requested
-            : '/dashboard';
+          requested.startsWith('/') && !requested.startsWith('/login') ? requested : '/dashboard';
         void this.router.navigateByUrl(returnUrl);
       },
       error: (err: unknown) => {

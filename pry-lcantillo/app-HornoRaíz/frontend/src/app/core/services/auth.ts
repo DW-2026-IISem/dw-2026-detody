@@ -1,6 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, finalize, forkJoin, map, of, switchMap, tap, throwError } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  finalize,
+  forkJoin,
+  map,
+  of,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AccessPayload,
@@ -79,12 +89,10 @@ export class AuthService {
     if (!refresh_token) {
       return throwError(() => new Error('No hay refresh token en la sesión'));
     }
-    return this.http
-      .post<any>(`${this.base}/refresh`, { refresh_token })
-      .pipe(
-        map((res: any) => (res?.data ?? res) as SessionTokens),
-        tap((tokens) => this.session.setTokens(tokens)),
-      );
+    return this.http.post<any>(`${this.base}/refresh`, { refresh_token }).pipe(
+      map((res: any) => (res?.data ?? res) as SessionTokens),
+      tap((tokens) => this.session.setTokens(tokens)),
+    );
   }
 
   /**
