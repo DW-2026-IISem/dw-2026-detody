@@ -44,6 +44,33 @@ export class ProductRepository implements IProductRepository {
     return model ? this.toDomain(model) : null;
   }
 
+
+  async update(id: number, data: Partial<Product>): Promise<Product | null> {
+    const model = await this.repo.findByPk(id);
+    if (!model) return null;
+    await model.update({
+      name: data.name ?? model.name,
+      description: data.description !== undefined ? data.description : model.description,
+      price: data.price !== undefined ? data.price : model.price,
+      stock: data.stock !== undefined ? data.stock : model.stock,
+      productTypeId: data.productTypeId !== undefined ? data.productTypeId : model.productTypeId,
+      status: data.status ?? model.status,
+    });
+    return this.toDomain(model);
+  }
+
+  async deactivate(id: number): Promise<Product | null> {
+    const model = await this.repo.findByPk(id);
+    if (!model) return null;
+    await model.update({ status: 'inactive' });
+    return this.toDomain(model);
+  }
+
+  async delete(id: number): Promise<boolean> {
+    const deleted = await this.repo.destroy({ where: { id } });
+    return deleted > 0;
+  }
+
   private toDomain(m: ProductModel): Product {
     return new Product({
       id: m.id,

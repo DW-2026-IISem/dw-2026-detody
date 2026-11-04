@@ -1,0 +1,184 @@
+<app-page-header
+  title="Productos"
+  subtitle="Catálogo de panadería y repostería con control de stock y tipos."
+>
+  <div class="flex items-center gap-2">
+    <p-tag [value]="rows().length + ' productos'" severity="info" [rounded]="true" />
+    <p-tag [value]="lowStockCount() + ' con stock bajo'" severity="warn" [rounded]="true" />
+    <button pButton type="button" (click)="openCreate()">
+      <i pButtonIcon class="pi pi-plus"></i>
+      <span pButtonLabel>Nuevo producto</span>
+    </button>
+  </div>
+</app-page-header>
+
+@if (error()) {
+  <p-message severity="error" styleClass="mb-4 w-full">
+    {{ error() }}
+  </p-message>
+}
+
+<div class="rounded-xl border border-slate-200 bg-white">
+  <p-table
+    [value]="visibleRows()"
+    [loading]="loading()"
+    [paginator]="visibleRows().length > 10"
+    [rows]="10"
+    dataKey="id"
+    tableStyleClass="min-w-3xl"
+  >
+    <ng-template #caption>
+      <div class="flex items-center gap-2">
+        <i class="pi pi-search text-slate-400"></i>
+        <input
+          pInputText
+          type="search"
+          aria-label="Buscar productos"
+          placeholder="Buscar por nombre, tipo o marca…"
+          [value]="filter()"
+          (input)="filter.set($any($event.target).value)"
+          class="w-full"
+        />
+      </div>
+      @if (filter()) {
+        <p class="mt-2 text-xs text-slate-500">
+          {{ visibleRows().length }} de {{ rows().length }} coinciden con «{{ filter() }}».
+        </p>
+      }
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th style="min-width: 14rem">Producto</th>
+        <th style="min-width: 10rem">Tipo</th>
+        <th style="min-width: 8rem">Precio</th>
+        <th style="min-width: 10rem">Stock</th>
+        <th style="min-width: 6rem">Estado</th>
+        <th style="width: 8rem" class="text-right">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-row>
+      <tr>
+        <td>
+          <p class="font-medium text-slate-800">{{ row.name }}</p>
+          <p class="text-xs text-slate-400">
+            #{{ row.id }} @if (row.brand) { · {{ row.brand }} }
+          </p>
+          @if (row.description) {
+            <p class="text-xs text-slate-500 mt-0.5 line-clamp-1">{{ row.description }}</p>
+          }
+        </td>
+
+        <td>
+          <p-tag
+            [value]="typeName()(row.product_type_id ?? row.productTypeId)"
+            severity="secondary"
+            [rounded]="true"
+          />
+        </td>
+
+        <td>
+          <span class="font-semibold text-slate-800">
+            {{ row.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+          </span>
+        </td>
+
+        <td>
+          <div class="flex items-center gap-2">
+            <p-tag
+              [value]="(row.quantity ?? row.stock ?? 0).toString()"
+              [severity]="(row.quantity ?? row.stock ?? 0) === 0 ? 'danger' : (row.quantity ?? row.stock ?? 0) <= (row.min_stock ?? 5) ? 'warn' : 'success'"
+              [rounded]="true"
+            />
+            <span class="text-xs text-slate-500">
+              @if ((row.quantity ?? row.stock ?? 0) === 0) {
+                Agotado
+              } @else if ((row.quantity ?? row.stock ?? 0) <= (row.min_stock ?? 5)) {
+                Reponer (min {{ row.min_stock ?? 5 }})
+              } @else {
+                Saludable
+              }
+            </span>
+          </div>
+        </td>
+
+        <td>
+          <app-status-tag [status]="row.status" />
+        </td>
+
+        <td>
+          <div class="flex justify-end gap-1">
+            <button
+              pButton
+              type="button"
+              text
+              rounded
+              severity="secondary"
+              icon="pi pi-pencil"
+              aria-label="Editar producto"
+              pTooltip="Editar"
+              (click)="openEdit(row)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              text
+              rounded
+              severity="warn"
+              icon="pi pi-ban"
+              aria-label="Dar de baja al producto"
+              pTooltip="Baja lógica"
+              (click)="deactivate(row)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              text
+              rounded
+              severity="danger"
+              icon="pi pi-trash"
+              aria-label="Eliminar producto"
+              pTooltip="Eliminar"
+              (click)="remove(row)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6" class="p-8 text-center">
+          <app-empty-state
+            icon="pi pi-box"
+            title="Sin productos"
+            message="No se encontraron productos en el catálogo."
+          />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  [header]="title()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  styleClass="w-full max-w-2xl mx-4"
+>
+  @if (dialogVisible()) {
+    <app-product-form
+      [key]="resetKey()"
+      [product]="editing()"
+      [productTypes]="types()"
+      [saving]="saving()"
+      (saved)="save($event)"
+      (cancelled)="dialogVisible.set(false)"
+    />
+  }
+</p-dialog>

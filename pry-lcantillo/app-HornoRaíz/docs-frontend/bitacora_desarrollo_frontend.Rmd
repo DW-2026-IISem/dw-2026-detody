@@ -798,3 +798,211 @@ Diseño responsive con cabecera apilada, tabla desplazable y menú integrado en 
 ---
 
 *Estado actual: ISS-00, ISS-01, ISS-01A, ISS-01B, ISS-02, ISS-03 e ISS-04 completados satisfactoriamente. Próximo paso: ISS-05 (CRUD de Productos con selector de categoría).*
+
+
+---
+
+## ISS-05: CRUD de Productos y Relación Many-to-One con Tipos (Catálogo y Semáforo de Stock)
+
+### Descripción y Alcance
+En esta unidad se implementó el catálogo completo de productos para **HornoRaíz** (`/productos`), introduciendo la primera relación Many-to-One de la plataforma: cada producto pertenece a una categoría o tipo (`product_type_id` $ightarrow$ `ProductType`). 
+
+El módulo resuelve tres desafíos técnicos centrales:
+1. **Carga en paralelo con `forkJoin`**: Se obtienen simultáneamente los productos y el catálogo de tipos activos, evitando cascadas secuenciales HTTP y repintados redundantes de la tabla.
+2. **Resolución en tiempo constante $O(1)$ con `computed`**: Para evitar búsquedas $O(n^2)$ en arrays dentro de la plantilla HTML, se memoriza una función basada en un `Map<number, string>` que traduce el `product_type_id` al nombre de la categoría inmediatamente.
+3. **Semáforo de stock reactivo**: Mediante señales calculadas (`computed()`), se categoriza dinámicamente el estado del inventario (Agotado / Reponer / Saludable) y se expone la métrica `lowStockCount()` en la cabecera del módulo para advertir sobre productos por debajo de su umbral mínimo.
+
+---
+
+### Implementación del Modelo y Relación (`product.model.ts`)
+Se enriqueció el contrato de datos para soportar tanto las propiedades del backend NestJS (`productTypeId`, `stock`) como las interfaces del cliente frontend (`product_type_id`, `quantity`, `min_stock`):
+
+```typescript
+export interface Product extends Timestamps {
+  id: number;
+  name: string;
+  brand?: string;
+  description?: string | null;
+  price: Money;
+  min_stock?: number;
+  quantity?: number;
+  stock?: number;
+  product_type_id?: number;
+  productTypeId?: number;
+  status: Status;
+  product_type?: ProductType;
+  productType?: ProductType;
+}
+
+export interface ProductPayload {
+  name: string;
+  brand?: string;
+  description?: string | null;
+  price: Money;
+  min_stock?: number;
+  quantity?: number;
+  stock?: number;
+  product_type_id?: number;
+  productTypeId?: number;
+  status?: Status;
+}
+```
+
+---
+
+### Servicio API (`ProductApi`)
+Ubicado en `src/app/features/products/product-api.ts`. Ofrece abstracción total sobre `/api/productos` normalizando las envolturas `{ data: { items: [...] } }` de NestJS y sincronizando los nombres de campos entre MySQL y el frontend:
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class ProductApi {
+  private readonly http = inject(HttpClient);
+  private readonly base = `${environment.apiUrl}/productos`;
+
+  list(): Observable<Product[]> {
+    return this.http.get<any>(this.base).pipe(
+      map((response) => {
+        const raw = response?.data?.items ?? response?.products ?? response?.items ?? response ?? [];
+        return raw.map((item: any) => this.normalize(item));
+      }),
+    );
+  }
+
+  create(payload: ProductPayload): Observable<Product> {
+    const body = {
+      ...payload,
+      productTypeId: payload.productTypeId ?? payload.product_type_id,
+      stock: payload.stock ?? payload.quantity ?? 0,
+      price: Number(payload.price),
+    };
+    return this.http.post<any>(this.base, body).pipe(
+      map((res) => this.normalize(res?.data ?? res?.product ?? res)),
+    );
+  }
+
+  update(id: number, payload: Partial<ProductPayload>): Observable<Product> {
+    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
+      map((res) => this.normalize(res?.data ?? res?.product ?? res)),
+    );
+  }
+
+  deactivate(id: number): Observable<unknown> {
+    return this.http.patch(`${this.base}/${id}/deactivate`, {});
+  }
+
+  remove(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/${id}`);
+  }
+}
+```
+
+---
+
+### Coordinación Reactiva con Signals en la Lista (`ProductList`)
+
+#### 1. Carga Simultánea con `forkJoin`
+```typescript
+load(): void {
+  this.loading.set(true);
+  this.error.set(null);
+
+  forkJoin({
+    products: this.api.list(),
+    types: this.typesApi.list(),
+  }).subscribe({
+    next: ({ products, types }) => {
+      this.rows.set(products);
+      this.types.set(types);
+      this.loading.set(false);
+    },
+    error: (error: unknown) => {
+      this.rows.set([]);
+      this.types.set([]);
+      this.error.set(toApiMessage(error));
+      this.loading.set(false);
+    },
+  });
+}
+```
+
+#### 2. Mapa Memorizado $O(1)$ y Semáforo de Stock
+```typescript
+/** Resuelve el nombre del tipo por id usando un Map memorizado con computed (O(1)). */
+readonly typeName = computed(() => {
+  const map = new Map(this.types().map((type) => [type.id, type.name]));
+  return (id: number) => map.get(id) ?? `Tipo #${id}`;
+});
+
+/** Semáforo de stock bajo: cuenta productos con cantidad <= min_stock. */
+readonly lowStockCount = computed(
+  () => this.rows().filter((p) => (p.quantity ?? p.stock ?? 0) <= (p.min_stock ?? 5)).length,
+);
+```
+
+#### 3. Plantilla HTML con Semáforo Visual
+```html
+<td>
+  <div class="flex items-center gap-2">
+    <p-tag
+      [value]="(row.quantity ?? row.stock ?? 0).toString()"
+      [severity]="(row.quantity ?? row.stock ?? 0) === 0 ? 'danger' : (row.quantity ?? row.stock ?? 0) <= (row.min_stock ?? 5) ? 'warn' : 'success'"
+      [rounded]="true"
+    />
+    <span class="text-xs text-slate-500">
+      @if ((row.quantity ?? row.stock ?? 0) === 0) {
+        Agotado
+      } @else if ((row.quantity ?? row.stock ?? 0) <= (row.min_stock ?? 5)) {
+        Reponer (min {{ row.min_stock ?? 5 }})
+      } @else {
+        Saludable
+      }
+    </span>
+  </div>
+</td>
+```
+
+---
+
+### Formulario Reactivo con Selector Many-to-One (`ProductForm`)
+Se utilizó `<p-select>` con `optionValue="id"`, garantizando que el formulario mantenga y envíe el identificador numérico de la categoría sin sobrecargar el payload con el objeto anidado completo:
+
+```html
+<p-select
+  [fluid]="true"
+  inputId="product-type"
+  formControlName="product_type_id"
+  [options]="productTypes()"
+  optionLabel="name"
+  optionValue="id"
+  placeholder="Selecciona un tipo activo"
+  [filter]="true"
+/>
+```
+
+---
+
+### Evidencias de Verificación y Pruebas Automatizadas
+
+#### 1. Resultados de la Suite de Pruebas Unitarias (Vitest)
+Se incorporaron 23 nuevas pruebas unitarias cubriendo el servicio, formulario y componente de lista de productos:
+1. `src/app/features/products/product-api.spec.ts` (7 casos: `list`, normalización de `quantity` y `product_type_id`, `get`, `create`, `update`, `deactivate`, `remove`).
+2. `src/app/features/products/product-form/product-form.spec.ts` (6 casos: creación, poblar campos en edición, desactivar status en edición, validaciones de precio y tipo, emisiones de evento).
+3. `src/app/features/products/product-list/product-list.spec.ts` (10 casos: carga coordinada `forkJoin`, traducción $O(1)$ con `typeName`, cálculo de `lowStockCount`, filtro, diálogos de creación y edición, peticiones HTTP y confirmaciones).
+
+**Total de la suite completa: 17 suites pasadas, 103 pruebas aprobadas (100% de éxito).**
+
+![Resultados de pruebas unitarias y compilación de ISS-05](capturas/iss-05-terminal-tests.png)
+
+#### 2. Evidencia Visual del Catálogo de Productos en Escritorio (1280 × 800 px)
+Carga real de productos desde MySQL con categorías resueltas (`Panadería Tradicional`, `Pastelería y Repostería`), precios formateados y semáforos de stock saludables, agotados y por reponer:
+
+![Vista de escritorio del Catálogo de Productos en ISS-05](capturas/iss-05-productos-desktop.png)
+
+#### 3. Evidencia Visual Adaptable en Móvil (390 × 844 px)
+Diseño responsivo optimizado para pantallas estrechas con indicadores de stock compactos y acciones contextuales:
+
+![Vista móvil del Catálogo de Productos en ISS-05](capturas/iss-05-productos-mobile.png)
+
+---
+
+*Estado actual: ISS-00 a ISS-05 completados satisfactoriamente. Próximo paso: ISS-06 (Ventas y Detalle de Líneas Transaccionales).*

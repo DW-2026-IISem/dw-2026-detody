@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 /**
  * Rutas de la aplicación.
  *
- * ISS-04 incorpora la ruta para el catálogo de tipos de producto (ProductTypeList).
+ * ISS-05 incorpora la ruta para el catálogo de productos (ProductList).
  */
 export const routes: Routes = [
   {
@@ -34,6 +34,18 @@ export const routes: Routes = [
           import('./features/product-types/product-type-list/product-type-list').then(
             (m) => m.ProductTypeList,
           ),
+      },
+      {
+        path: 'productos',
+        title: 'Productos · HornoRaíz',
+        loadComponent: () =>
+          import('./features/products/product-list/product-list').then(
+            (m) => m.ProductList,
+          ),
+      },
+      {
+        path: 'products',
+        redirectTo: 'productos',
       },
     ],
   },

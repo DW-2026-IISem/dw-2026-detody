@@ -1,0 +1,134 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+  <div>
+    <label for="product-name" class="block text-sm font-medium text-slate-700 mb-1">
+      Nombre del producto *
+    </label>
+    <input
+      pInputText
+      id="product-name"
+      formControlName="name"
+      placeholder="Ej. Pan Baguette Masa Madre"
+      class="w-full"
+    />
+    @if (form.controls.name.invalid && form.controls.name.touched) {
+      <p-message severity="error" variant="simple" size="small" class="mt-1">
+        El nombre es requerido (máximo 120 caracteres).
+      </p-message>
+    }
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label for="product-type" class="block text-sm font-medium text-slate-700 mb-1">
+        Tipo de producto *
+      </label>
+      <p-select
+        [fluid]="true"
+        inputId="product-type"
+        formControlName="product_type_id"
+        [options]="productTypes()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Selecciona un tipo activo"
+        [filter]="true"
+      />
+      @if (form.controls.product_type_id.invalid && form.controls.product_type_id.touched) {
+        <p-message severity="error" variant="simple" size="small" class="mt-1">
+          Debes seleccionar un tipo de producto.
+        </p-message>
+      }
+    </div>
+
+    <div>
+      <label for="product-brand" class="block text-sm font-medium text-slate-700 mb-1">
+        Marca / Línea *
+      </label>
+      <input
+        pInputText
+        id="product-brand"
+        formControlName="brand"
+        placeholder="Ej. HornoRaíz Tradicional"
+        class="w-full"
+      />
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <label for="product-price" class="block text-sm font-medium text-slate-700 mb-1">
+        Precio de venta *
+      </label>
+      <p-inputnumber
+        [fluid]="true"
+        inputId="product-price"
+        formControlName="price"
+        mode="decimal"
+        [min]="0.01"
+        [minFractionDigits]="2"
+        [maxFractionDigits]="2"
+      />
+      @if (form.controls.price.invalid && form.controls.price.touched) {
+        <p-message severity="error" variant="simple" size="small" class="mt-1">
+          El precio debe ser mayor a 0.
+        </p-message>
+      }
+    </div>
+
+    <div>
+      <label for="product-quantity" class="block text-sm font-medium text-slate-700 mb-1">
+        Stock actual *
+      </label>
+      <p-inputnumber
+        [fluid]="true"
+        inputId="product-quantity"
+        formControlName="quantity"
+        [min]="0"
+      />
+      @if (form.controls.quantity.invalid && form.controls.quantity.touched) {
+        <p-message severity="error" variant="simple" size="small" class="mt-1">
+          El stock no puede ser negativo.
+        </p-message>
+      }
+    </div>
+
+    <div>
+      <label for="product-min-stock" class="block text-sm font-medium text-slate-700 mb-1">
+        Stock mínimo (alerta) *
+      </label>
+      <p-inputnumber
+        [fluid]="true"
+        inputId="product-min-stock"
+        formControlName="min_stock"
+        [min]="0"
+      />
+      @if (form.controls.min_stock.invalid && form.controls.min_stock.touched) {
+        <p-message severity="error" variant="simple" size="small" class="mt-1">
+          El stock mínimo no puede ser negativo.
+        </p-message>
+      }
+    </div>
+  </div>
+
+  <div>
+    <label for="product-desc" class="block text-sm font-medium text-slate-700 mb-1">
+      Descripción
+    </label>
+    <input
+      pInputText
+      id="product-desc"
+      formControlName="description"
+      placeholder="Ej. Pan de fermentación lenta de 24 horas"
+      class="w-full"
+    />
+  </div>
+
+  <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+    <button pButton type="button" severity="secondary" outlined [disabled]="saving()" (click)="cancelled.emit()">
+      <span pButtonLabel>Cancelar</span>
+    </button>
+    <button pButton type="submit" [loading]="saving()" severity="primary">
+      <i pButtonIcon class="pi pi-check"></i>
+      <span pButtonLabel>{{ saving() ? 'Guardando...' : 'Guardar producto' }}</span>
+    </button>
+  </div>
+</form>
