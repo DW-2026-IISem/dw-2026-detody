@@ -36,7 +36,7 @@ describe('ClientApi', () => {
       { id: 2, name: 'Pastelería Dulce', status: 'active' },
     ];
 
-    service.findAll().subscribe((clients) => {
+    service.list().subscribe((clients) => {
       expect(clients.length).toBe(2);
       expect(clients[0].name).toBe('Panadería Central');
     });
@@ -89,7 +89,7 @@ describe('ClientApi', () => {
     req.flush({ client: createdClient });
   });
 
-  it('debe actualizar un cliente existente', () => {
+  it('debe actualizar un cliente existente mediante PATCH', () => {
     const updatePayload: Partial<ClientPayload> = { phone: '3001234567' };
     const updatedClient: Client = { id: 10, name: 'Horno La Unión', phone: '3001234567', status: 'active' };
 
@@ -98,12 +98,22 @@ describe('ClientApi', () => {
     });
 
     const req = httpTesting.expectOne(`${baseUrl}/10`);
-    expect(req.request.method).toBe('PUT');
+    expect(req.request.method).toBe('PATCH');
     req.flush({ client: updatedClient });
   });
 
-  it('debe eliminar un cliente por id', () => {
-    service.delete(10).subscribe();
+  it('debe realizar la baja lógica mediante PATCH /:id/deactivate', () => {
+    service.deactivate(10).subscribe((res) => {
+      expect(res.message).toBe('Client deactivated');
+    });
+
+    const req = httpTesting.expectOne(`${baseUrl}/10/deactivate`);
+    expect(req.request.method).toBe('PATCH');
+    req.flush({ message: 'Client deactivated' });
+  });
+
+  it('debe eliminar un cliente definitivamente por id', () => {
+    service.remove(10).subscribe();
 
     const req = httpTesting.expectOne(`${baseUrl}/10`);
     expect(req.request.method).toBe('DELETE');

@@ -440,4 +440,199 @@ Comportamiento responsive con ocultamiento automático del Aside lateral, dispos
 
 ---
 
-*Estado actual: ISS-00, ISS-01, ISS-01A, ISS-01B e ISS-02 completados satisfactoriamente. Próximo paso: ISS-03 (CRUD de Clientes con backend y tablas reactivas).*
+# Fase I · Business (Negocio sin Autenticación)
+
+## ISS-03: CRUD de Clientes con Signals
+
+### Objetivo del ISS
+Construir el primer módulo CRUD completo del negocio, aplicando la arquitectura basada en **Signals**, **PrimeNG 22** y **Tailwind 4** sin CSS de negocio:
+1. Implementar la función de filtrado puro `filterRows<T>()` en `src/app/core/utils/filter-rows.ts` (desacoplada de tablas o el DOM).
+2. Desarrollar el formulario reactivo `ClientForm` con `NonNullableFormBuilder`, `effect()` con `resetKey` explícito para reapertura limpia de modales, y emisiones desacopladas (`saved` / `cancelled`).
+3. Construir la pantalla principal `ClientList` con signals (`rows`, `loading`, `saving`, `error`, `filter`), valores memorizados con `computed()` (`visibleRows`, `title`), y tabla `p-table` compatible con PrimeNG 22 (`#caption`, `#header`, `#body`, `#emptymessage`).
+4. Conectar todas las operaciones REST:
+   - Lectura: `GET /api/clients`.
+   - Creación: `POST /api/clients`.
+   - Edición: `PATCH /api/clients/:id` (sin sobreescribir el campo `status`).
+   - Baja lógica: confirmación modal y llamada `PATCH /api/clients/:id/deactivate`.
+   - Baja física: confirmación destructiva y llamada `DELETE /api/clients/:id`.
+5. Manejo de errores en dos niveles: `p-message` persistente para fallos de carga inicial, y alertas `toast` (`NotificationService`) para errores puntuales de mutación (403, 404, 500).
+
+---
+
+### Criterios de Aceptación (ISS-03) — Estado Consolidado
+
+| Criterio | Descripción | Estado | Resultado Obtenido |
+| :--- | :--- | :---: | :--- |
+| **3.1 Listado GET** | Carga inicial contra `/api/clients` y renderizado de clientes activos | **Cumplido** | `ClientApi.list()` invocado; maneja formatos planos o envueltos (`items`, `clients`) |
+| **3.2 Creación POST** | Botón «Nuevo cliente» abre modal, valida campos obligatorios y envía `POST` | **Cumplido** | Formulario valida `name` requerido (máx 120) y email; emite payload completo con `status: active` |
+| **3.3 Edición PATCH** | «Editar» carga datos existentes, deshabilita `status` y envía `PATCH /:id` | **Cumplido** | El formulario bloquea edición de status (gobernada por deactivate) y envía solo atributos mutables |
+| **3.4 Filtro en Memoria** | Buscador filtra en tiempo real sin peticiones HTTP adicionales | **Cumplido** | `filterRows` memorizado mediante `computed(() => visibleRows())`; 0 peticiones de red al tipear |
+| **3.5 Baja Lógica** | Botón advertencia confirma y ejecuta `PATCH /:id/deactivate` | **Cumplido** | Diálogo `ConfirmationService` con botón warning; el cliente desactivado desaparece de la tabla |
+| **3.6 Baja Física** | Botón peligro confirma eliminación irrevocable con `DELETE /:id` | **Cumplido** | Diálogo destructivo; confirmación ejecuta borrado definitivo y recarga la tabla |
+| **3.7 Manejo de Errores** | Error en carga muestra `p-message`; error de mutación muestra `toast` | **Cumplido** | Fallo 401/500 en GET vacía tabla y muestra alerta roja; fallo al guardar mantiene modal abierto y lanza toast |
+
+---
+
+### Implementación Técnica Paso a Paso
+
+#### 1. Utilidad Pura de Filtrado (`src/app/core/utils/filter-rows.ts`)
+
+En PrimeNG 22 se eliminó el input `globalFilter` de `p-table`. Se adoptó el patrón de función pura:
+
+```typescript
+export function filterRows<T>(
+  rows: readonly T[],
+  query: string,
+  pick: (row: T) => Array<string | number | null | undefined>,
+): T[] {
+  const term = query.trim().toLowerCase();
+  if (!term) {
+    return [...rows]; // Devuelve copia sin compartir referencia
+  }
+  return rows.filter((row) =>
+    pick(row).some((value) => (value ?? '').toString().toLowerCase().includes(term)),
+  );
+}
+```
+
+#### 2. Formulario Reactivo Reutilizable (`src/app/features/clients/client-form/`)
+
+El componente no inyecta servicios HTTP; opera exclusivamente como presentación desacoplada:
+* Recibe el cliente mediante `client = input<Client | null>(null)`.
+* Emite `saved = output<ClientPayload>()` y `cancelled = output<void>()`.
+* Resuelve el problema de retención de estado en PrimeNG 22 con un `resetKey = input(0)` que fuerza la ejecución del `effect()` cada vez que el diálogo se abre:
+
+```typescript
+// Fragmento clave de client-form.ts
+constructor() {
+  effect(() => {
+    const current = this.client();
+    this.resetKey(); // Forzar suscripción al signal de reinicio
+
+    this.form.reset({
+      name: current?.name ?? '',
+      address: current?.address ?? '',
+      phone: current?.phone ?? '',
+      email: current?.email ?? '',
+      status: current?.status ?? 'active',
+    });
+
+    if (current) {
+      this.form.controls.status.disable(); // El status solo cambia con deactivate
+    } else {
+      this.form.controls.status.enable();
+    }
+  });
+}
+```
+
+#### 3. Lista Coordinadora y Operaciones CRUD (`src/app/features/clients/client-list/`)
+
+* Las filas filtradas se calculan de forma declarativa:
+
+```typescript
+readonly visibleRows = computed(() =>
+  filterRows(this.rows(), this.filter(), (client) => [
+    client.name,
+    client.email,
+    client.phone,
+    client.address,
+  ]),
+);
+```
+
+* Operaciones de baja lógica y física protegidas con diálogos de confirmación:
+
+```typescript
+deactivate(client: Client): void {
+  this.confirmation.confirm({
+    header: 'Baja lógica',
+    message: `¿Desactivar a ${client.name}? Su estado pasará a inactivo.`,
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Desactivar',
+    acceptButtonStyleClass: 'p-button-warning',
+    accept: () => {
+      this.api.deactivate(client.id).subscribe({
+        next: () => {
+          this.notify.warn('Cliente desactivado');
+          this.load();
+        },
+        error: (error: unknown) => {
+          this.notify.error('No se pudo desactivar', toApiMessage(error));
+        },
+      });
+    },
+  });
+}
+```
+
+#### 4. Plantilla de Tabla con PrimeNG 22 (`client-list.html`)
+
+Se implementó con variables de plantilla (`#caption`, `#header`, `#body`, `#emptymessage`), descartando la sintaxis obsoleta de `pTemplate`:
+
+```html
+<p-table [value]="visibleRows()" [loading]="loading()" [paginator]="visibleRows().length > 10" [rows]="10">
+  <ng-template #caption>
+    <div class="flex items-center gap-2">
+      <i class="pi pi-search text-slate-400"></i>
+      <input pInputText type="search" placeholder="Buscar clientes..." [value]="filter()" (input)="filter.set($any($event.target).value)" />
+    </div>
+  </ng-template>
+
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="name">Nombre <p-sort-icon field="name" /></th>
+      <th pSortableColumn="email">Contacto <p-sort-icon field="email" /></th>
+      <th>Dirección</th>
+      <th>Estado</th>
+      <th class="w-40 text-right">Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-client>
+    <tr>
+      <td><p class="font-medium text-slate-800">{{ client.name }}</p></td>
+      <td>{{ client.email || '—' }}</td>
+      <td>{{ client.address || '—' }}</td>
+      <td><app-status-tag [status]="client.status" /></td>
+      <td>
+        <!-- Botones de Editar, Desactivar y Eliminar -->
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template #emptymessage>
+    <tr><td colspan="5"><app-empty-state /></td></tr>
+  </ng-template>
+</p-table>
+```
+
+---
+
+### Evidencias de Verificación y Pruebas Automatizadas
+
+#### 1. Resultados de la Suite de Pruebas Unitarias (Vitest)
+Se ejecutaron las pruebas unitarias completas validando la utilidad de filtro puro, el formulario reactivo y la coordinación de la lista:
+
+1. `src/app/core/utils/filter-rows.spec.ts` (5 casos aprobados: copias independientes, insensible a mayúsculas, campos nulos, sin coincidencias).
+2. `src/app/features/clients/client-form/client-form.spec.ts` (7 casos aprobados: inicialización vacía, validaciones, emisión de payload, modo edición, resetKey, cancelación).
+3. `src/app/features/clients/client-list/client-list.spec.ts` (10 casos aprobados: carga inicial, captura de error en p-message, filtrado local en computed, apertura de modal crear/editar, POST, PATCH, control de errores con toast, baja lógica PATCH /:id/deactivate y baja física DELETE /:id).
+4. Pruebas anteriores consolidadas: `client-api.spec.ts` (8 casos), `shell.spec.ts` (3 casos), `construir.spec.ts` (7 casos), `status-tag.spec.ts` (4 casos), `ejemplo.spec.ts` (4 casos), `media-query.spec.ts` (3 casos), `api-error.spec.ts` (3 casos), `app.spec.ts` (2 casos).
+
+**Total: 11 archivos pasados, 56 casos de prueba aprobados (100% de éxito).**
+
+![Resultados de pruebas unitarias y compilación de ISS-03](capturas/iss-03-terminal-tests.png)
+
+#### 2. Evidencia Visual del Módulo de Clientes en Escritorio (1280 × 800 px)
+Layout montado dentro de `Shell`, cabecera `PageHeader`, botón «Nuevo cliente», mensaje de control de acceso de Fase II (`401 Missing Bearer token`), tabla estilizada con Aura y pie de página:
+
+![Vista de escritorio de Clientes en ISS-03](capturas/iss-03-crud-clientes-desktop.png)
+
+#### 3. Evidencia Visual Adaptable en Móvil (390 × 844 px)
+Comportamiento responsivo con reorganización de la cabecera, tabla con scroll horizontal suave (`min-w-3xl`) y aside integrado en Drawer:
+
+![Vista móvil de Clientes en ISS-03](capturas/iss-03-crud-clientes-mobile.png)
+
+---
+
+*Estado actual: ISS-00, ISS-01, ISS-01A, ISS-01B, ISS-02 e ISS-03 completados satisfactoriamente. Próximo paso: ISS-04 (CRUD de Tipos de Producto).*
