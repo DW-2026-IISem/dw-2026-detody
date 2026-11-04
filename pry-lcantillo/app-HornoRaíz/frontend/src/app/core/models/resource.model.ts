@@ -5,7 +5,9 @@ export const HTTP_METHODS: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'PATC
 
 export interface Resource extends Timestamps {
   id: number;
-  name: string;
+  name?: string;
+  method?: HttpMethod;
+  path?: string;
   route_path?: string;
   routePath?: string;
   http_method?: HttpMethod;
@@ -15,7 +17,9 @@ export interface Resource extends Timestamps {
 }
 
 export interface ResourcePayload {
-  name: string;
+  name?: string;
+  method?: HttpMethod;
+  path?: string;
   route_path?: string;
   routePath?: string;
   http_method?: HttpMethod;

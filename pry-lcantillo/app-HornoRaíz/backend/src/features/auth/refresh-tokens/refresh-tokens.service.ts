@@ -1,12 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
 import { Transaction } from 'sequelize';
 import { randomUUID } from 'node:crypto';
-import { RefreshTokenResponseDto, toRefreshTokenResponse } from './dto';
-import { RefreshTokensRepository } from './refresh-tokens.repository';
-import { RefreshTokenModel } from './refresh-token.model';
-import { generateOpaqueToken, sha256Hex } from '../../../shared/auth/password';
+import { RefreshTokensRepository } from './refresh-tokens.repository.js';
+import { RefreshTokenModel } from '../infrastructure/models/refresh-token.model.js';
+import { generateOpaqueToken, sha256Hex } from '../../../shared/auth/password.js';
 
 const REFRESH_TTL_DAYS = Number(process.env.JWT_REFRESH_TTL_DAYS ?? 7);
 
@@ -24,25 +21,20 @@ export type RotationOutcome =
 
 @Injectable()
 export class RefreshTokensService {
-  constructor(
-    private readonly repository: RefreshTokensRepository,
-    @InjectConnection() private readonly sequelize: Sequelize
-  ) {}
+  constructor(private readonly repository: RefreshTokensRepository) {}
 
-  // ================== GESTIÓN (sesiones propias) ==================
-  public async getAllMine(userId: number): Promise<RefreshTokenResponseDto[]> {
-    const tokens = await this.repository.findAllByUser(userId);
-    return tokens.map((token) => toRefreshTokenResponse(token));
+  public async getAllMine(userId: number) {
+    return this.repository.findAllByUser(userId);
   }
 
-  public async getMine(userId: number, id: number): Promise<RefreshTokenResponseDto> {
-    return toRefreshTokenResponse(await this.findMineOrFail(userId, id));
+  public async getMine(userId: number, id: number) {
+    return this.findMineOrFail(userId, id);
   }
 
-  public async revokeMine(userId: number, id: number): Promise<RefreshTokenResponseDto> {
+  public async revokeMine(userId: number, id: number) {
     const token = await this.findMineOrFail(userId, id);
-    await this.repository.update(token, { revoked: true });
-    return toRefreshTokenResponse(token);
+    await this.repository.update(token, { status: 'inactive' });
+    return token;
   }
 
   public async revokeAllMine(userId: number): Promise<number> {
@@ -57,7 +49,6 @@ export class RefreshTokensService {
     return this.repository.countActiveByUser(userId);
   }
 
-  // ================== CICLO DE VIDA ==================
   public async issue(
     userId: number,
     deviceInfo: string | null,
@@ -74,7 +65,7 @@ export class RefreshTokensService {
         family_id: familyId,
         device_info: deviceInfo,
         expires_at: expiresAt,
-        revoked: false,
+        status: 'active',
       },
       transaction
     );
@@ -84,56 +75,51 @@ export class RefreshTokensService {
 
   public async rotate(rawToken: string, deviceInfo: string | null): Promise<RotationOutcome> {
     const hash = sha256Hex(rawToken);
+    const current = await this.repository.findByHash(hash);
 
-    return this.sequelize.transaction(async (t) => {
-      const current = await this.repository.findByHash(hash, t, true);
-      if (!current) {
-        return { kind: 'invalid' };
-      }
+    if (!current) {
+      return { kind: 'invalid' };
+    }
 
-      // REUSE DETECTION: el token existía pero ya está revocado
-      if (current.revoked) {
-        const revoked = await this.repository.revokeFamily(current.family_id, t);
-        return { kind: 'reuse', familyId: current.family_id, revoked };
-      }
+    // REUSE DETECTION: el token ya no está activo
+    if (current.status === 'inactive') {
+      const revoked = await this.repository.revokeFamily(current.family_id);
+      return { kind: 'reuse', familyId: current.family_id, revoked };
+    }
 
-      if (new Date(current.expires_at).getTime() <= Date.now()) {
-        await this.repository.update(current, { revoked: true }, t);
-        return { kind: 'expired' };
-      }
+    if (new Date(current.expires_at).getTime() <= Date.now()) {
+      await this.repository.update(current, { status: 'inactive' });
+      return { kind: 'expired' };
+    }
 
-      // Rotación
-      await this.repository.update(current, { revoked: true }, t);
-      const rawNext = generateOpaqueToken();
-      const expiresAt = expiryFromNow();
+    // Rotación
+    await this.repository.update(current, { status: 'inactive' });
+    const rawNext = generateOpaqueToken();
+    const expiresAt = expiryFromNow();
 
-      await this.repository.create(
-        {
-          user_id: current.user_id,
-          token_hash: sha256Hex(rawNext),
-          family_id: current.family_id,
-          device_info: deviceInfo ?? current.device_info,
-          expires_at: expiresAt,
-          revoked: false,
-        },
-        t
-      );
-
-      return {
-        kind: 'rotated',
-        userId: current.user_id,
-        rawToken: rawNext,
-        familyId: current.family_id,
-        expiresAt,
-      };
+    await this.repository.create({
+      user_id: current.user_id,
+      token_hash: sha256Hex(rawNext),
+      family_id: current.family_id,
+      device_info: deviceInfo ?? current.device_info,
+      expires_at: expiresAt,
+      status: 'active',
     });
+
+    return {
+      kind: 'rotated',
+      userId: current.user_id,
+      rawToken: rawNext,
+      familyId: current.family_id,
+      expiresAt,
+    };
   }
 
   public async revokeByToken(rawToken: string): Promise<boolean> {
     const token = await this.repository.findByHash(sha256Hex(rawToken));
     if (!token) return false;
-    if (token.revoked) return true;
-    await this.repository.update(token, { revoked: true });
+    if (token.status === 'inactive') return true;
+    await this.repository.update(token, { status: 'inactive' });
     return true;
   }
 

@@ -1,26 +1,42 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards, Req } from '@nestjs/common';
 import { SessionService } from './session.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { JwtAuthGuard } from '../access/jwt-auth.guard.js';
 
-@Controller('session')
+@Controller(['sesion', 'session'])
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto) {
-    return this.sessionService.login(dto);
+  async login(@Body() dto: LoginDto, @Req() req: any) {
+    const userAgent = req.headers['user-agent'] || null;
+    return this.sessionService.login(dto, userAgent);
   }
 
-  // Protegido solo con JWT, sin RBAC, para que el Operador sí pueda entrar
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body() dto: { refresh_token: string }, @Req() req: any) {
+    const userAgent = req.headers['user-agent'] || null;
+    return this.sessionService.rotate(dto.refresh_token, userAgent);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Body() dto: { refresh_token?: string }) {
+    return this.sessionService.logout(dto?.refresh_token || '');
+  }
+
   @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req: any) {
+  @Get(['perfil', 'profile'])
+  getProfile(@Req() req: any) {
     return {
-      statusCode: 200,
-      message: 'Perfil recuperado del token',
-      data: req.user,
+      user: {
+        id: req.auth.id,
+        username: req.auth.username,
+        email: req.auth.email,
+        status: 'active',
+      },
     };
   }
 }

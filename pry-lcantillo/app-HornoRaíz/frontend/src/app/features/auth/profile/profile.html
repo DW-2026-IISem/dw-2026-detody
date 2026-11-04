@@ -1,0 +1,110 @@
+<div class="space-y-6">
+  <!-- Encabezado -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Perfil de Usuario y Permisos</h1>
+      <p class="text-sm text-slate-500">
+        Información de la sesión activa, roles asignados y matriz de permisos efectivos.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <p-button
+        label="Actualizar Permisos"
+        icon="pi pi-refresh"
+        [loading]="refreshing()"
+        (onClick)="refresh()"
+        styleClass="p-button-outlined p-button-sm text-amber-700 border-amber-600 hover:bg-amber-50"
+      />
+      <p-button
+        label="Cerrar Sesión"
+        icon="pi pi-power-off"
+        severity="danger"
+        styleClass="p-button-sm"
+        (onClick)="logout()"
+      />
+    </div>
+  </div>
+
+  <!-- Tarjeta de Identidad y Roles -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <p-card styleClass="md:col-span-1 shadow-sm border border-slate-200 rounded-xl">
+      <div class="flex flex-col items-center text-center p-4">
+        <div class="w-20 h-20 rounded-full bg-amber-600 text-white flex items-center justify-center text-2xl font-black shadow-md mb-4">
+          {{ (session.user()?.username ?? 'U').slice(0, 2).toUpperCase() }}
+        </div>
+        <h2 class="text-lg font-bold text-slate-800">{{ session.user()?.username }}</h2>
+        <p class="text-xs text-slate-500 mb-3">{{ session.user()?.email }}</p>
+        <div class="flex flex-wrap gap-1 justify-center mb-4">
+          @for (role of session.roleNames(); track role) {
+            <p-tag [value]="role" severity="info" />
+          }
+        </div>
+        <p-tag [value]="'Estado: ' + (session.user()?.status ?? 'active')" severity="success" />
+      </div>
+    </p-card>
+
+    <!-- Resumen de Métricas de Seguridad -->
+    <p-card styleClass="md:col-span-2 shadow-sm border border-slate-200 rounded-xl">
+      <h3 class="text-md font-bold text-slate-700 mb-4">Métricas de Acceso de la Sesión</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
+          <span class="text-xs text-slate-500 uppercase font-semibold">Permisos Totales</span>
+          <p class="text-2xl font-black text-amber-600 mt-1">{{ session.permissionCount() }}</p>
+        </div>
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
+          <span class="text-xs text-slate-500 uppercase font-semibold">Roles Asignados</span>
+          <p class="text-2xl font-black text-blue-600 mt-1">{{ session.roleNames().length }}</p>
+        </div>
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center col-span-2 sm:col-span-1">
+          <span class="text-xs text-slate-500 uppercase font-semibold">Modo de Seguridad</span>
+          <p class="text-xl font-bold text-emerald-600 mt-1">Fase II (RBAC)</p>
+        </div>
+      </div>
+      <div class="mt-6 text-xs text-slate-500 bg-amber-50 border border-amber-200 p-3 rounded-lg">
+        <i class="pi pi-info-circle text-amber-600 mr-1"></i>
+        Los permisos son evaluados y autorizados directamente por el backend en cada petición REST con token Bearer rotado.
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Matriz de Permisos Efectivos -->
+  <p-card styleClass="shadow-sm border border-slate-200 rounded-xl">
+    <h3 class="text-md font-bold text-slate-700 mb-4">Matriz de Permisos Efectivos</h3>
+    <p-table
+      [value]="session.permissions()"
+      [paginator]="true"
+      [rows]="8"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Método</th>
+          <th>Ruta de Recurso</th>
+          <th>Descripción</th>
+          <th>Rol que lo otorga</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-perm>
+        <tr>
+          <td>
+            <p-tag
+              [value]="perm.method"
+              [severity]="perm.method === 'GET' ? 'info' : (perm.method === 'POST' ? 'success' : (perm.method === 'DELETE' ? 'danger' : 'warn'))"
+            />
+          </td>
+          <td class="font-mono text-xs font-semibold text-slate-800">{{ perm.path }}</td>
+          <td class="text-slate-600 text-xs">{{ perm.description ?? 'Sin descripción' }}</td>
+          <td><p-tag [value]="perm.role_name" severity="secondary" /></td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="4" class="text-center py-4 text-slate-400">
+            No hay permisos asignados para esta sesión.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>

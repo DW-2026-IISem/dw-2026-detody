@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { SessionController } from './session.controller.js';
 import { SessionService } from './session.service.js';
+import { RefreshTokensModule } from '../refresh-tokens/refresh-tokens.module.js';
 
 @Module({
   imports: [
@@ -9,6 +10,7 @@ import { SessionService } from './session.service.js';
       secret: process.env.JWT_SECRET || 'hornoraiz-secret-key-change-me-0123456789',
       signOptions: { expiresIn: '15m' },
     }),
+    RefreshTokensModule,
   ],
   controllers: [SessionController],
   providers: [SessionService],

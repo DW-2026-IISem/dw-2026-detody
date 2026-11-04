@@ -1441,3 +1441,170 @@ Comportamiento fluido y apilamiento responsivo de los paneles de métricas e inv
 ---
 
 *Estado final de Fase I: Todas las unidades comerciales ISS-00 a ISS-07 se encuentran concluidas, verificadas y documentadas con pruebas automáticas al 100%. El sistema queda preparado para la Fase II (ISS-08: Autenticación JWT, Interceptores HTTP y Sesión).*
+
+
+## ISS-08: Autenticación JWT, Perfil, Permisos Efectivos y Refresh Single-Flight
+
+### Objetivo y Alcance de la Unidad (Fase II · Bloque 1 de 3)
+La unidad **ISS-08** inicia la **Fase II (Seguridad con RBAC y Gestión de Sesión)** del sistema panificador *HornoRaíz*. En esta unidad se implementó la arquitectura completa de autenticación contra el contrato real del backend, garantizando el control de acceso, la rotación de tokens y la persistencia de identidad:
+
+1. **Interruptor Simétrico de Seguridad**:
+   - Se activó `environment.requireAuth = true` en el frontend y `AUTH_ENABLED=true` en el `.env` del backend NestJS.
+   - Con ambas mitades sincronizadas, las peticiones HTTP a los módulos de negocio sin cabecera `Authorization: Bearer <token>` reciben inmediatamente `401 Unauthorized`.
+2. **Contrato Real de Sesión**:
+   - `POST /api/sesion/login`: Endpoint público. Recibe `identifier` (username o email) y `password`. Devuelve exclusivamente los tokens `{ access_token, token_type, expires_in, refresh_token, refresh_expires_in }`.
+   - `GET /api/sesion/perfil`: Endpoint protegido con JWT. Retorna `{ user }`.
+   - `GET /api/permisos`: Endpoint protegido con JWT. Retorna `{ permissions: EffectivePermission[] }` calculados a partir de los roles asignados al usuario.
+   - `POST /api/sesion/refresh`: Endpoint público (refresh token en cuerpo). Rota el token presentado, reinicia la ventana deslizante y aplica *reuse detection* (si un token ya revocado se reutiliza, se revoca la familia completa).
+   - `POST /api/sesion/logout`: Revoca el refresh token presentado y garantiza la limpieza local en el frontend.
+3. **SessionStore**:
+   - Única fuente de verdad de la sesión en el cliente basada en Signals y valores computados (`computed()`).
+   - Mantiene en memoria y sincroniza en `localStorage` (`storelab.session.v1`): `accessToken`, `refreshToken`, `user` y `permissions`.
+   - Expone métodos de consulta en tiempo constante: `can()`, `canPermission()`, `hasRole()`, `permissionCount()` y `roleNames()`.
+4. **AuthService con Carga Encadenada**:
+   - El método `login()` almacena los tokens recibidos y encadena automáticamente mediante `switchMap()` la invocación a `me()` (`forkJoin` de `/perfil` y `/permisos`). La promesa de login solo se completa cuando la identidad y la matriz de permisos están disponibles, evitando parpadeos de interfaz.
+5. **Interceptor Funcional con Refresh Single-Flight (`authInterceptor`)**:
+   - Inyecta `Authorization: Bearer <accessToken>` en todas las peticiones a rutas protegidas.
+   - Gestiona fallos concurrentes `401 Unauthorized` mediante una única llamada de renovación en vuelo (`refreshInFlight ??= ...`), compartida con `shareReplay({ bufferSize: 1, refCount: false })`.
+   - Reintenta las peticiones originales con el nuevo `access_token` una vez completada la rotación.
+   - Redirige al login con `returnUrl` en caso de expiración irreversible o reuse detection.
+6. **Formulario de Login, Pantalla de Perfil y Protección de Rutas**:
+   - `Login`: formulario reactivo con validaciones, compatibilidad con `returnUrl` y estética PrimeNG Card + Tailwind.
+   - `Profile`: visualización del usuario, badges de roles, métricas de seguridad y tabla paginada con la matriz de permisos efectivos.
+   - `Forbidden`: pantalla amigable para errores de autorización HTTP 403.
+   - Rutas protegidas mediante `authGuard` para el Shell y `guestGuard` para el inicio de sesión.
+
+---
+
+### Implementación del Almacén de Sesión Reactivo (`SessionStore`)
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class SessionStore {
+  readonly authEnabled = environment.requireAuth;
+
+  private readonly _accessToken = signal<string | null>(null);
+  private readonly _refreshToken = signal<string | null>(null);
+  private readonly _user = signal<User | null>(null);
+  private readonly _permissions = signal<EffectivePermission[]>([]);
+
+  readonly accessToken = this._accessToken.asReadonly();
+  readonly refreshToken = this._refreshToken.asReadonly();
+  readonly user = this._user.asReadonly();
+  readonly permissions = this._permissions.asReadonly();
+  readonly isAuthenticated = computed(() => this._accessToken() !== null);
+
+  readonly roleNames = computed(() =>
+    [...new Set(this._permissions().map((p) => p.role_name))].sort(),
+  );
+
+  readonly permissionCount = computed(() => this._permissions().length);
+
+  can(method: HttpMethod | string, path: string): boolean {
+    if (!this.authEnabled) return true;
+    const verb = method.toUpperCase();
+    const requestPath = path.split('?')[0];
+    return this._permissions().some(
+      (permission) => permission.method === verb && pathMatches(permission.path, requestPath),
+    );
+  }
+}
+```
+
+---
+
+### Interceptor con Renovación Única en Vuelo (`authInterceptor`)
+
+```typescript
+let refreshInFlight: Observable<SessionTokens> | null = null;
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const session = inject(SessionStore);
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  const isPublicAuthCall =
+    req.url.includes('/sesion/login') ||
+    req.url.includes('/sesion/refresh') ||
+    req.url.includes('/sesion/logout');
+
+  const accessToken = session.accessToken();
+  const request =
+    accessToken && !isPublicAuthCall
+      ? req.clone({ setHeaders: { Authorization: `Bearer ${accessToken}` } })
+      : req;
+
+  return next(request).pipe(
+    catchError((error: unknown) => {
+      if (!(error instanceof HttpErrorResponse) || error.status !== 401 || isPublicAuthCall) {
+        return throwError(() => error);
+      }
+      if (!environment.requireAuth) {
+        return throwError(() => error);
+      }
+      if (!session.refreshToken()) {
+        redirectToLogin(session, router);
+        return throwError(() => error);
+      }
+
+      refreshInFlight ??= auth.refresh().pipe(
+        catchError((refreshError: unknown) => {
+          redirectToLogin(session, router);
+          return throwError(() => refreshError);
+        }),
+        finalize(() => {
+          refreshInFlight = null;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+
+      return refreshInFlight.pipe(
+        switchMap(() => {
+          const renewed = session.accessToken();
+          const retried = req.clone({
+            setHeaders: renewed ? { Authorization: `Bearer ${renewed}` } : {},
+          });
+          return next(retried);
+        }),
+      );
+    }),
+  );
+};
+```
+
+---
+
+### Evidencias de Verificación y Pruebas Automatizadas
+
+#### 1. Resultados de la Suite de Pruebas Unitarias (Vitest) y Compilación
+Se añadieron 20 nuevas pruebas unitarias para cubrir toda la capa de seguridad y sesión:
+- `src/app/core/services/session-store.spec.ts` (5 pruebas: persistencia, permisos, roles y limpieza).
+- `src/app/core/services/auth.spec.ts` (4 pruebas: login con encadenamiento `me()`, refresh y logout).
+- `src/app/core/guards/auth-guard.spec.ts` (2 pruebas: protección con redirección `returnUrl`).
+- `src/app/core/guards/guest-guard.spec.ts` (2 pruebas: exclusión para usuarios ya autenticados).
+- `src/app/features/auth/login/login.spec.ts` (4 pruebas: formulario reactivo, validación, login exitoso y manejo de 401).
+- `src/app/features/auth/profile/profile.spec.ts` (1 prueba: renderizado de identidad y matriz de permisos).
+- `src/app/features/auth/forbidden/forbidden.spec.ts` (2 pruebas: pantalla 403 y navegación).
+
+**Total acumulado en ISS-08: 32 archivos de prueba pasados (32 de 32), 158 pruebas unitarias aprobadas (100% de éxito). Compilación de producción (`ng build`) finalizada en 3.72 segundos con 0 advertencias de presupuesto.**
+
+![Resultados de pruebas unitarias y compilación de ISS-08](capturas/iss-08-terminal-tests.png)
+
+#### 2. Evidencia Visual del Formulario de Inicio de Sesión en Escritorio (1280 × 800 px)
+Diseño sobrio y centrado con validación reactiva en tiempo real y soporte para navegación guiada por `returnUrl`:
+
+![Vista de escritorio del Login en ISS-08](capturas/iss-08-login-desktop.png)
+
+#### 3. Evidencia Visual del Formulario de Inicio de Sesión en Móvil (390 × 844 px)
+Adaptación fluida para dispositivos móviles y terminales táctiles de punto de venta:
+
+![Vista móvil del Login en ISS-08](capturas/iss-08-login-mobile.png)
+
+#### 4. Evidencia Visual de la Pantalla de Perfil y Matriz de Permisos Efectivos (1280 × 800 px)
+Panel de identidad con avatar, roles asignados, contadores de acceso y tabla interactiva de permisos efectivos con acciones de recarga y logout:
+
+![Vista de escritorio del Perfil de Usuario y Permisos en ISS-08](capturas/iss-08-perfil-desktop.png)
+
+---
+
+*Estado actual: ISS-00 a ISS-08 completados satisfactoriamente con seguridad RBAC activa en frontend y backend. Próximo paso: ISS-09 (Guards de Ruta y Directiva Estructural RBAC en la UI).*

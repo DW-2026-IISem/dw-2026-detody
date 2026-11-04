@@ -1,7 +1,14 @@
 <div class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
   <!-- Header ocupando toda la parte superior -->
   <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
-    <app-header (menuRequested)="onMenuToggle()" />
+    <app-header
+      [username]="username()"
+      [initials]="initials()"
+      [roleLabel]="roleLabel()"
+      [userItems]="userItems()"
+      [showSession]="session.isAuthenticated()"
+      (menuRequested)="onMenuToggle()"
+    />
   </header>
 
   <div class="flex-1 flex overflow-hidden">
@@ -10,7 +17,14 @@
       class="hidden lg:block w-72 shrink-0 border-r border-slate-200 bg-white p-4 overflow-y-auto"
       aria-label="Navegación principal"
     >
-      <app-aside [items]="items" />
+      <app-aside
+        [items]="items"
+        [username]="username()"
+        [roleLabel]="roleLabel()"
+        [permissionCount]="permissionCount()"
+        [showSession]="session.isAuthenticated()"
+        (logoutRequested)="handleLogout()"
+      />
     </aside>
 
     <!-- Área principal donde se renderizan las rutas con router-outlet -->
@@ -35,7 +49,15 @@
     [modal]="true"
     styleClass="w-80"
   >
-    <app-aside [items]="items" (navigated)="onNavigate()" />
+    <app-aside
+      [items]="items"
+      [username]="username()"
+      [roleLabel]="roleLabel()"
+      [permissionCount]="permissionCount()"
+      [showSession]="session.isAuthenticated()"
+      (navigated)="onNavigate()"
+      (logoutRequested)="handleLogout()"
+    />
   </p-drawer>
 
   <!-- Notificaciones globales Toast y diálogos de confirmación -->
