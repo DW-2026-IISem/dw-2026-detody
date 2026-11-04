@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
 
 /**
- * Rutas de la aplicación.
+ * Rutas de la aplicación (Cierre de Fase I).
  *
- * ISS-06 incorpora las rutas para el listado de ventas (SaleList)
- * y el registro transaccional con borrador (SaleForm).
+ * ISS-07 incorpora las rutas finales de negocio:
+ * - /dashboard: métricas globales y panel de control.
+ * - /detalle-ventas: auditoría de líneas de venta.
  */
 export const routes: Routes = [
   {
@@ -20,7 +21,13 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'clientes',
+        redirectTo: 'dashboard',
+      },
+      {
+        path: 'dashboard',
+        title: 'Panel · HornoRaíz',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
         path: 'clientes',
@@ -59,6 +66,14 @@ export const routes: Routes = [
         title: 'Nueva venta · HornoRaíz',
         loadComponent: () =>
           import('./features/sales/sale-form/sale-form').then((m) => m.SaleForm),
+      },
+      {
+        path: 'detalle-ventas',
+        title: 'Detalle de ventas · HornoRaíz',
+        loadComponent: () =>
+          import('./features/product-sales/product-sale-list/product-sale-list').then(
+            (m) => m.ProductSaleList,
+          ),
       },
       {
         path: 'sales',

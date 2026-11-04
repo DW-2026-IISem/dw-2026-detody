@@ -99,6 +99,17 @@
               type="button"
               text
               rounded
+              severity="info"
+              icon="pi pi-eye"
+              aria-label="Ver detalle"
+              pTooltip="Ver detalle de venta"
+              (click)="openDetail(row)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              text
+              rounded
               severity="warn"
               icon="pi pi-ban"
               aria-label="Cancelar venta"
@@ -134,3 +145,18 @@
     </ng-template>
   </p-table>
 </div>
+
+<p-dialog
+  [visible]="detailVisible()"
+  (visibleChange)="detailVisible.set($event)"
+  [header]="detailTitle()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  styleClass="w-full max-w-2xl mx-4"
+>
+  @if (selectedSale(); as sale) {
+    <app-sale-detail [sale]="sale" [products]="products()" />
+  }
+</p-dialog>

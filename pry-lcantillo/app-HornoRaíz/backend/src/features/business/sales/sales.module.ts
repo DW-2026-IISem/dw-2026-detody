@@ -8,10 +8,11 @@ import { SALE_REPOSITORY } from './domain/interfaces/sale.repository.js';
 import { SaleRepository } from './infrastructure/persistence/repositories/sale.repository.js';
 import { SaleSeeder } from './infrastructure/persistence/seeders/sale.seeder.js';
 import { SalesController } from './presentation/http/controllers/sales.controller.js';
+import { ProductSalesController } from './presentation/http/controllers/product-sales.controller.js';
 
 @Module({
   imports: [ClientsModule, ProductsModule],
-  controllers: [SalesController],
+  controllers: [SalesController, ProductSalesController],
   providers: [
     CreateSaleUseCase,
     ListSalesUseCase,

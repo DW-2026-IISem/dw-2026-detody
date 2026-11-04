@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { TableModule } from 'primeng/table';
@@ -18,6 +19,7 @@ import { filterRows } from '../../../core/utils/filter-rows';
 import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusTag } from '../../../shared/ui/status-tag/status-tag';
+import { SaleDetail } from '../sale-detail/sale-detail';
 import { ClientApi } from '../../clients/client-api';
 import { ProductApi } from '../../products/product-api';
 import { SaleApi } from '../sale-api';
@@ -33,6 +35,8 @@ import { SaleApi } from '../sale-api';
     DatePipe,
     RouterLink,
     ButtonModule,
+    DialogModule,
+    SaleDetail,
     EmptyState,
     InputTextModule,
     MessageModule,
@@ -58,6 +62,9 @@ export class SaleList {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly filter = signal('');
+  readonly detailVisible = signal(false);
+  readonly selectedSale = signal<Sale | null>(null);
+  readonly detailTitle = computed(() => `Detalle de la venta #${this.selectedSale()?.id ?? ''}`);
 
   readonly clientName = computed(() => {
     const map = new Map(this.clients().map((client) => [client.id, client.name]));
@@ -105,6 +112,11 @@ export class SaleList {
         this.loading.set(false);
       },
     });
+  }
+
+  openDetail(sale: Sale): void {
+    this.selectedSale.set(sale);
+    this.detailVisible.set(true);
   }
 
   itemsCount(sale: Sale): number {

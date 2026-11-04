@@ -1,0 +1,176 @@
+<app-page-header
+  title="Dashboard"
+  subtitle="Métricas globales, alertas de inventario y actividad transaccional en tiempo real."
+>
+  <button pButton type="button" severity="primary" routerLink="/ventas/nueva">
+    <i pButtonIcon class="pi pi-plus"></i>
+    <span pButtonLabel>Registrar venta</span>
+  </button>
+</app-page-header>
+
+@if (error()) {
+  <p-message severity="error" styleClass="mb-6 w-full">
+    {{ error() }}
+  </p-message>
+}
+
+@if (loading()) {
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+    @for (i of [1, 2, 3, 4]; track i) {
+      <p-skeleton height="6.5rem" borderRadius="1rem" />
+    }
+  </div>
+} @else {
+  <!-- Tarjetas KPI -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+    <!-- KPI Clientes -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Clientes activos</p>
+        <p class="text-3xl font-black text-slate-800 mt-1">{{ clients().length }}</p>
+        <p class="text-xs text-blue-600 mt-1 font-medium">Base fidelizada</p>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+        <i class="pi pi-users"></i>
+      </div>
+    </div>
+
+    <!-- KPI Categorías -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Categorías de panadería</p>
+        <p class="text-3xl font-black text-slate-800 mt-1">{{ typeCount() }}</p>
+        <p class="text-xs text-purple-600 mt-1 font-medium">Líneas de producción</p>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+        <i class="pi pi-tags"></i>
+      </div>
+    </div>
+
+    <!-- KPI Catálogo -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Productos en catálogo</p>
+        <p class="text-3xl font-black text-slate-800 mt-1">{{ products().length }}</p>
+        <p class="text-xs text-emerald-600 mt-1 font-medium">Panes, tortas y postres</p>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+        <i class="pi pi-box"></i>
+      </div>
+    </div>
+
+    <!-- KPI Ingresos -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Ingresos acumulados</p>
+        <p class="text-2xl font-black text-slate-900 mt-1">{{ revenue() | currency: 'USD' : 'symbol' : '1.0-0' }}</p>
+        <p class="text-xs text-amber-600 mt-1 font-medium">{{ sales().length }} ventas procesadas</p>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+        <i class="pi pi-dollar"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de Dos Columnas: Alertas de Stock y Ventas Recientes -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Tarjeta: Semáforo de Stock Bajo -->
+    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-exclamation-triangle text-amber-500"></i>
+          <h2 class="text-base font-bold text-slate-800">Alertas de Stock Bajo</h2>
+        </div>
+        <button pButton type="button" text severity="primary" routerLink="/productos">
+          <span pButtonLabel class="text-xs">Ver catálogo</span>
+        </button>
+      </div>
+
+      <p-table [value]="lowStock()" responsiveLayout="scroll" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Producto</th>
+            <th class="text-right">Stock</th>
+            <th>Alerta</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-prod>
+          <tr>
+            <td>
+              <p class="font-medium text-slate-800">{{ prod.name }}</p>
+              <p class="text-xs text-slate-400">#{{ prod.id }}</p>
+            </td>
+            <td class="text-right font-bold text-slate-800">
+              {{ prod.quantity ?? prod.stock ?? 0 }}
+            </td>
+            <td>
+              <p-tag
+                [value]="(prod.quantity ?? prod.stock ?? 0) === 0 ? 'Agotado' : 'Reponer stock'"
+                [severity]="(prod.quantity ?? prod.stock ?? 0) === 0 ? 'danger' : 'warn'"
+                [rounded]="true"
+              />
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="3" class="p-6 text-center text-slate-400 text-sm">
+              <i class="pi pi-check-circle text-emerald-500 mr-1"></i>
+              Todos los productos tienen niveles de inventario óptimos.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Tarjeta: Actividad Reciente de Ventas -->
+    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-shopping-cart text-blue-500"></i>
+          <h2 class="text-base font-bold text-slate-800">Últimas Ventas</h2>
+        </div>
+        <button pButton type="button" text severity="primary" routerLink="/ventas">
+          <span pButtonLabel class="text-xs">Ver todas</span>
+        </button>
+      </div>
+
+      <p-table [value]="latestSales()" responsiveLayout="scroll" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Venta</th>
+            <th class="text-right">Total</th>
+            <th>Estado</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-sale>
+          <tr>
+            <td>
+              <p class="font-bold text-slate-800">#{{ sale.id }}</p>
+              <p class="text-xs text-slate-400">
+                {{ sale.createdAt ? (sale.createdAt | date: 'dd/MM/yyyy HH:mm') : 'Hoy' }}
+              </p>
+            </td>
+            <td class="text-right font-bold text-slate-900">
+              {{ sale.total | currency: 'USD' : 'symbol' : '1.2-2' }}
+            </td>
+            <td>
+              <app-status-tag [status]="sale.status" />
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="3" class="p-6 text-center text-slate-400 text-sm">
+              Sin ventas registradas en el sistema.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+}

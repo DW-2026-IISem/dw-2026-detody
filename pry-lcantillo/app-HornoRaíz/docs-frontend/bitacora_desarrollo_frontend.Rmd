@@ -1234,3 +1234,210 @@ Diseño responsivo optimizado para operaciones en mostrador o dispositivos táct
 ---
 
 *Estado actual: ISS-00 a ISS-06 completados satisfactoriamente. Próximo paso: ISS-07 (Detalle de Ventas, Dashboard y Cierre de Fase I).*
+
+
+## ISS-07: Detalle de Ventas, Dashboard y Cierre de Fase I
+
+### Objetivo y Alcance de la Unidad
+La unidad **ISS-07** culmina la **Fase I (Business & Frontend Base)** del sistema panificador *HornoRaíz*. En esta etapa se implementaron tres componentes clave de visualización y control operativo, consolidando la arquitectura reactiva basada en Signals y cerrando todos los módulos de negocio antes de la introducción de seguridad y autenticación en la Fase II:
+
+1. **Gestión y Auditoría de Líneas de Venta (`/detalle-ventas`)**:
+   - Módulo independiente que permite listar, auditar, crear, editar cantidades y anular líneas de venta individuales (`product-sales`).
+   - Ajuste transaccional de inventario en el backend ante modificaciones de cantidad o anulaciones de línea.
+2. **Componente Presentacional de Inspección de Ventas (`SaleDetail`)**:
+   - Componente puro basado en Inputs y Outputs de Signals (`sale = input<Sale | null>(null)`).
+   - Integrado en `SaleList` mediante un modal `<p-dialog>` activado por un botón de inspección con icono `pi-eye`.
+3. **Panel de Control Gerencial (`Dashboard`)**:
+   - Vista inicial y central del sistema (`/dashboard`) que consolida información de las 4 entidades de negocio mediante carga paralela con `forkJoin`.
+   - 4 tarjetas métricas (KPIs): Total de Clientes, Categorías de Panadería, Catálogo de Productos e Ingresos Totales de Ventas Activas.
+   - Tabla de Alertas de Stock Bajo (umbral $\le 5$ unidades o bajo stock mínimo configurado) con tags visuales de advertencia.
+   - Tabla de Últimas Transacciones Comerciales con formato monetario y estado de la orden.
+4. **Cierre y Verificación Integral de Fase I**:
+   - Validación de los 5 contratos REST del backend (`/api/clients`, `/api/tipos-producto`, `/api/productos`, `/api/ventas`, `/api/detalle-ventas`) respondiendo `200 OK` en modo sin sesión (`AUTH_ENABLED=false`).
+
+---
+
+### Arquitectura e Implementación Backend (`ProductSalesController`)
+
+Se implementó el controlador `ProductSalesController` en NestJS (`backend/src/features/business/sales/presentation/http/controllers/product-sales.controller.ts`) con alias de ruta `['detalle-ventas', 'product-sales']`, integrándolo en `SalesModule`:
+
+```typescript
+@Controller(['detalle-ventas', 'product-sales'])
+export class ProductSalesController {
+  constructor(
+    @InjectModel(ProductSale) private readonly productSaleModel: typeof ProductSale,
+    @InjectModel(Product) private readonly productModel: typeof Product,
+    @InjectModel(Sale) private readonly saleModel: typeof Sale,
+    private readonly sequelize: Sequelize,
+  ) {}
+
+  @Get()
+  async findAll() {
+    return this.productSaleModel.findAll({ order: [['id', 'DESC']] });
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateProductSaleDto) {
+    return this.sequelize.transaction(async (t) => {
+      const line = await this.productSaleModel.findByPk(id, { transaction: t });
+      if (!line) throw new NotFoundException('Línea de venta no encontrada');
+
+      if (dto.quantity !== undefined && dto.quantity !== line.quantity) {
+        const diff = dto.quantity - line.quantity;
+        const product = await this.productModel.findByPk(line.product_id, { transaction: t });
+        if (product) {
+          product.stock -= diff;
+          await product.save({ transaction: t });
+        }
+        line.quantity = dto.quantity;
+        line.subtotal = Number(line.unit_price) * dto.quantity;
+      }
+      await line.save({ transaction: t });
+      return line;
+    });
+  }
+}
+```
+
+---
+
+### Implementación Frontend: Detalle de Ventas (`ProductSaleApi`, `ProductSaleList` y `ProductSaleForm`)
+
+El cliente HTTP `ProductSaleApi` interactúa con `/api/detalle-ventas` ofreciendo tipado estricto `ProductSale`. La pantalla `ProductSaleList` orquesta la tabla interactiva de PrimeNG y el diálogo de edición/creación:
+
+```typescript
+@Component({
+  selector: 'app-product-sale-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, TableModule, ButtonModule, DialogModule, TagModule, ProductSaleForm],
+  templateUrl: './product-sale-list.html',
+  styleUrl: './product-sale-list.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ProductSaleList implements OnInit {
+  readonly rows = signal<ProductSale[]>([]);
+  readonly filterText = signal<string>('');
+  readonly isDialogVisible = signal<boolean>(false);
+  readonly selectedLine = signal<ProductSale | null>(null);
+
+  readonly totalUnits = computed(() =>
+    this.filteredRows().reduce((acc, row) => acc + Number(row.quantity ?? 0), 0)
+  );
+
+  readonly totalAmount = computed(() =>
+    this.filteredRows().reduce((acc, row) => acc + Number(row.subtotal ?? (Number(row.quantity) * Number(row.unit_price)) ?? 0), 0)
+  );
+}
+```
+
+---
+
+### Componente Presentacional `SaleDetail`
+
+`SaleDetail` muestra el detalle estructurado de una venta específica (información de cabecera, cliente, total, fecha y desglose de ítems con subtotal) y se desacopla completamente del transporte HTTP:
+
+```typescript
+@Component({
+  selector: 'app-sale-detail',
+  standalone: true,
+  imports: [CommonModule, TableModule, TagModule],
+  templateUrl: './sale-detail.html',
+  styleUrl: './sale-detail.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class SaleDetail {
+  readonly sale = input<Sale | null>(null);
+  readonly clientName = input<string>('');
+
+  readonly items = computed(() => this.sale()?.items ?? []);
+  readonly total = computed(() => Number(this.sale()?.total ?? this.sale()?.total_amount ?? 0));
+}
+```
+
+---
+
+### Panel de Control Central (`Dashboard`)
+
+Implementado en `src/app/features/dashboard/dashboard.ts`, el dashboard consolida todas las entidades comerciales de la panadería mediante Signals reactivos:
+
+```typescript
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterModule, TableModule, ButtonModule, CardModule, TagModule],
+  templateUrl: './dashboard.html',
+  styleUrl: './dashboard.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class Dashboard implements OnInit {
+  readonly clientsCount = signal<number>(0);
+  readonly productTypesCount = signal<number>(0);
+  readonly productsCount = signal<number>(0);
+  readonly totalRevenue = signal<number>(0);
+  readonly lowStockProducts = signal<Product[]>([]);
+  readonly recentSales = signal<Sale[]>([]);
+
+  loadDashboardData(): void {
+    forkJoin([
+      this.clientApi.list(),
+      this.productTypeApi.list(),
+      this.productApi.list(),
+      this.saleApi.list(),
+    ]).subscribe({
+      next: ([clients, types, products, sales]) => {
+        this.clientsCount.set(clients.length);
+        this.productTypesCount.set(types.length);
+        this.productsCount.set(products.length);
+
+        const activeRevenue = sales
+          .filter((s) => s.status !== 'cancelled')
+          .reduce((sum, s) => sum + Number(s.total ?? s.total_amount ?? 0), 0);
+        this.totalRevenue.set(activeRevenue);
+
+        const lowStock = products.filter((p) => {
+          const qty = p.quantity ?? p.stock ?? 0;
+          const min = p.min_stock ?? 5;
+          return qty <= min;
+        });
+        this.lowStockProducts.set(lowStock);
+        this.recentSales.set(sales.slice(0, 5));
+      },
+    });
+  }
+}
+```
+
+---
+
+### Evidencias de Verificación y Pruebas Automatizadas
+
+#### 1. Resultados de la Suite de Pruebas Unitarias (Vitest) y Compilación
+Se incorporaron 15 nuevas pruebas unitarias para cerrar la Fase I:
+- `src/app/features/dashboard/dashboard.spec.ts` (1 prueba de integración y renderizado reactivo).
+- `src/app/features/product-sales/product-sale-api.spec.ts` (6 casos: endpoints CRUD y tipado de líneas).
+- `src/app/features/product-sales/product-sale-form/product-sale-form.spec.ts` (3 casos: inicialización, bloqueo de claves foráneas en modo edición y emisión de datos).
+- `src/app/features/product-sales/product-sale-list/product-sale-list.spec.ts` (4 casos: cómputo reactivo de totales y unidades, filtros y modales).
+- `src/app/features/sales/sale-detail/sale-detail.spec.ts` (1 caso: renderizado puro con Signal inputs).
+
+**Total acumulado al cierre de la Fase I: 25 archivos de prueba pasados (25 de 25), 138 pruebas unitarias aprobadas (100% de éxito). Compilación limpia de producción (`ng build`) con 0 advertencias de presupuesto.**
+
+![Resultados de pruebas unitarias y compilación de ISS-07](capturas/iss-07-terminal-tests.png)
+
+#### 2. Evidencia Visual del Dashboard Gerencial en Escritorio (1280 × 800 px)
+Panel de control con 4 tarjetas de KPIs temáticas, alertas de inventario crítico y resumen de ventas recientes:
+
+![Vista de escritorio del Dashboard en ISS-07](capturas/iss-07-dashboard-desktop.png)
+
+#### 3. Evidencia Visual del Módulo Detalle de Ventas en Escritorio (1280 × 800 px)
+Tabla interactiva para la auditoría y gestión de líneas de venta individuales con totales calculados reactivamente:
+
+![Vista de escritorio del Detalle de Ventas en ISS-07](capturas/iss-07-detalle-ventas-desktop.png)
+
+#### 4. Evidencia Visual Adaptable del Dashboard en Móvil (390 × 844 px)
+Comportamiento fluido y apilamiento responsivo de los paneles de métricas e inventario en pantalla táctil móvil:
+
+![Vista móvil del Dashboard en ISS-07](capturas/iss-07-dashboard-mobile.png)
+
+---
+
+*Estado final de Fase I: Todas las unidades comerciales ISS-00 a ISS-07 se encuentran concluidas, verificadas y documentadas con pruebas automáticas al 100%. El sistema queda preparado para la Fase II (ISS-08: Autenticación JWT, Interceptores HTTP y Sesión).*

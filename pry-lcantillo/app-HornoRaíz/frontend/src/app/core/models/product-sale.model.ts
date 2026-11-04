@@ -1,4 +1,4 @@
-import { Money, Timestamps } from './api.model';
+import { Money, Status, Timestamps } from './api.model';
 import { Product } from './product.model';
 import { Sale } from './sale.model';
 
@@ -12,6 +12,7 @@ export interface ProductSale extends Timestamps {
   unit_price: Money;
   unitPrice?: Money;
   subtotal: Money;
+  status?: Status;
   sale?: Sale;
   product?: Product;
 }
@@ -24,4 +25,5 @@ export interface ProductSalePayload {
   quantity: number;
   unit_price?: Money;
   unitPrice?: Money;
+  status?: Status;
 }

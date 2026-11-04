@@ -57,6 +57,11 @@ export class Shell {
           routerLink: '/ventas',
         },
         {
+          label: 'Detalle de Ventas',
+          icon: 'pi pi-list',
+          routerLink: '/detalle-ventas',
+        },
+        {
           label: 'Dashboard',
           icon: 'pi pi-chart-bar',
           routerLink: '/dashboard',

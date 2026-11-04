@@ -1,0 +1,170 @@
+<app-page-header
+  title="Detalle de ventas"
+  subtitle="Auditoría independiente de líneas de venta y control transaccional de stock."
+>
+  <div class="flex items-center gap-2">
+    <p-tag [value]="rows().length + ' líneas registradas'" severity="info" [rounded]="true" />
+    <button pButton type="button" (click)="openCreate()">
+      <i pButtonIcon class="pi pi-plus"></i>
+      <span pButtonLabel>Nueva línea</span>
+    </button>
+  </div>
+</app-page-header>
+
+@if (error()) {
+  <p-message severity="error" styleClass="mb-4 w-full">
+    {{ error() }}
+  </p-message>
+}
+
+<div class="rounded-xl border border-slate-200 bg-white">
+  <p-table
+    [value]="visibleRows()"
+    [loading]="loading()"
+    [paginator]="visibleRows().length > 10"
+    [rows]="10"
+    dataKey="id"
+    tableStyleClass="min-w-3xl"
+  >
+    <ng-template #caption>
+      <div class="flex items-center gap-2">
+        <i class="pi pi-search text-slate-400"></i>
+        <input
+          pInputText
+          type="search"
+          aria-label="Buscar líneas de detalle"
+          placeholder="Buscar por ID, venta o producto…"
+          [value]="filter()"
+          (input)="filter.set($any($event.target).value)"
+          class="w-full"
+        />
+      </div>
+      @if (filter()) {
+        <p class="mt-2 text-xs text-slate-500">
+          {{ visibleRows().length }} de {{ rows().length }} coinciden con «{{ filter() }}».
+        </p>
+      }
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th style="min-width: 6rem">Línea</th>
+        <th style="min-width: 8rem">Venta</th>
+        <th style="min-width: 14rem">Producto</th>
+        <th style="min-width: 8rem" class="text-right">Precio unitario</th>
+        <th style="min-width: 6rem" class="text-right">Cantidad</th>
+        <th style="min-width: 8rem" class="text-right">Subtotal</th>
+        <th style="min-width: 6rem">Estado</th>
+        <th style="width: 8rem" class="text-right">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-row>
+      <tr>
+        <td>
+          <span class="font-bold text-slate-800">#{{ row.id }}</span>
+        </td>
+
+        <td>
+          <span class="font-semibold text-blue-600">Venta #{{ row.sale_id ?? row.saleId }}</span>
+        </td>
+
+        <td>
+          <p class="font-medium text-slate-800">
+            {{ productName()(row.product_id ?? row.productId) }}
+          </p>
+          <p class="text-xs text-slate-400">ID Producto: #{{ row.product_id ?? row.productId }}</p>
+        </td>
+
+        <td class="text-right text-slate-600">
+          {{ row.unit_price | currency: 'USD' : 'symbol' : '1.2-2' }}
+        </td>
+
+        <td class="text-right font-semibold text-slate-800">
+          {{ row.quantity }}
+        </td>
+
+        <td class="text-right font-bold text-slate-900">
+          {{ row.subtotal | currency: 'USD' : 'symbol' : '1.2-2' }}
+        </td>
+
+        <td>
+          <app-status-tag [status]="row.status" />
+        </td>
+
+        <td>
+          <div class="flex justify-end gap-1">
+            <button
+              pButton
+              type="button"
+              text
+              rounded
+              severity="secondary"
+              icon="pi pi-pencil"
+              aria-label="Editar línea"
+              pTooltip="Editar cantidad"
+              (click)="openEdit(row)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              text
+              rounded
+              severity="warn"
+              icon="pi pi-ban"
+              aria-label="Anular línea"
+              pTooltip="Anular y restaurar stock"
+              (click)="deactivate(row)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              text
+              rounded
+              severity="danger"
+              icon="pi pi-trash"
+              aria-label="Eliminar línea"
+              pTooltip="Eliminar definitivamente"
+              (click)="remove(row)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="8" class="p-8 text-center">
+          <app-empty-state
+            icon="pi pi-list"
+            title="Sin líneas de venta"
+            message="No se encontraron líneas de productos vendidas."
+          />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  [header]="title()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  styleClass="w-full max-w-xl mx-4"
+>
+  @if (dialogVisible()) {
+    <app-product-sale-form
+      [key]="resetKey()"
+      [line]="editing()"
+      [products]="products()"
+      [sales]="sales()"
+      [saving]="saving()"
+      (saved)="save($event)"
+      (cancelled)="dialogVisible.set(false)"
+    />
+  }
+</p-dialog>
