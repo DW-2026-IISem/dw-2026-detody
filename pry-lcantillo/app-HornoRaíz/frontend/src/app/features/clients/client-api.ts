@@ -17,6 +17,7 @@ export class ClientApi {
     return this.http.get<any>(this.baseUrl).pipe(
       map((res) => {
         if (Array.isArray(res)) return res;
+        if (res?.data?.items && Array.isArray(res.data.items)) return res.data.items;
         if (res?.items && Array.isArray(res.items)) return res.items;
         if (res?.clients && Array.isArray(res.clients)) return res.clients;
         return [];
@@ -30,19 +31,19 @@ export class ClientApi {
 
   findById(id: number): Observable<Client> {
     return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
-      map((res) => res?.client ?? res?.item ?? res),
+      map((res) => res?.data ?? res?.client ?? res?.item ?? res),
     );
   }
 
   create(payload: ClientPayload): Observable<Client> {
     return this.http.post<any>(this.baseUrl, payload).pipe(
-      map((res) => res?.client ?? res?.item ?? res),
+      map((res) => res?.data ?? res?.client ?? res?.item ?? res),
     );
   }
 
   update(id: number, payload: Partial<ClientPayload>): Observable<Client> {
     return this.http.patch<any>(`${this.baseUrl}/${id}`, payload).pipe(
-      map((res) => res?.client ?? res?.item ?? res),
+      map((res) => res?.data ?? res?.client ?? res?.item ?? res),
     );
   }
 

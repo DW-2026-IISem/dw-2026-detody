@@ -7,6 +7,7 @@ export class RbacGuard implements CanActivate {
   constructor(private readonly resourceRolesRepository: ResourceRoleService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    if (process.env.AUTH_ENABLED === "false") return true;
     const request = context.switchToHttp().getRequest();
 
     if (!request.auth) {

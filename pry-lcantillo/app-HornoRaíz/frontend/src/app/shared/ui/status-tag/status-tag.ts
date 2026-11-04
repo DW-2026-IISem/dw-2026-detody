@@ -16,14 +16,14 @@ export class StatusTag {
 
   readonly label = computed(() => {
     const val = this.status();
-    if (val === 'active') return 'Activo';
+    if (!val || val === 'active') return 'Activo';
     if (val === 'inactive') return 'Inactivo';
     return String(val);
   });
 
   readonly severity = computed<'success' | 'danger' | 'info' | 'warn' | 'secondary'>(() => {
     const val = this.status();
-    if (val === 'active') return 'success';
+    if (!val || val === 'active') return 'success';
     if (val === 'inactive') return 'danger';
     return 'secondary';
   });
