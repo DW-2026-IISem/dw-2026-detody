@@ -1,0 +1,183 @@
+<div class="space-y-6">
+  <app-page-header
+    title="Asignaciones Usuario ↔ Rol"
+    subtitle="Vinculación de roles de acceso a los colaboradores del sistema"
+  >
+    <button
+      *appHasPermission="'POST /api/asignaciones-rol'"
+      pButton
+      type="button"
+      label="Asignar Rol"
+      icon="pi pi-user-plus"
+      (click)="openAssign()"
+    ></button>
+  </app-page-header>
+
+  <p-card>
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <div class="w-full sm:w-64">
+          <p-select
+            [fluid]="true"
+            [options]="users()"
+            optionLabel="username"
+            [showClear]="true"
+            placeholder="Filtrar por usuario..."
+            [ngModel]="userFilter()"
+            (ngModelChange)="userFilter.set($event)"
+          />
+        </div>
+        <div class="w-full sm:w-56">
+          <p-select
+            [fluid]="true"
+            [options]="roles()"
+            optionLabel="name"
+            [showClear]="true"
+            placeholder="Filtrar por rol..."
+            [ngModel]="roleFilter()"
+            (ngModelChange)="roleFilter.set($event)"
+          />
+        </div>
+      </div>
+      <div class="text-sm text-slate-400">
+        Total: {{ visibleRows().length }} asignaciones
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="space-y-3">
+        <p-skeleton height="3rem" />
+        <p-skeleton height="3rem" />
+      </div>
+    } @else {
+      <p-table
+        [value]="visibleRows()"
+        [paginator]="true"
+        [rows]="10"
+        responsiveLayout="stack"
+        breakpoint="960px"
+      >
+        <ng-template #header>
+          <tr>
+            <th class="w-16">ID</th>
+            <th>Usuario</th>
+            <th>Correo</th>
+            <th>Rol Asignado</th>
+            <th>Estado</th>
+            <th>Fecha Asignación</th>
+            <th class="text-right">Acción</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-row>
+          <tr>
+            <td><span class="text-xs font-mono text-slate-400">#{{ row.id }}</span></td>
+            <td>
+              <div class="flex items-center gap-2">
+                <i class="pi pi-user text-emerald-400 bg-slate-800 p-2 rounded-full"></i>
+                <span class="font-medium text-slate-200">
+                  {{ row.user?.username || ('Usuario #' + (row.user_id ?? row.userId)) }}
+                </span>
+              </div>
+            </td>
+            <td><span class="text-slate-300">{{ row.user?.email || '—' }}</span></td>
+            <td>
+              <p-tag
+                [value]="row.role?.name || ('Rol #' + (row.role_id ?? row.roleId))"
+                severity="info"
+                [rounded]="true"
+              />
+            </td>
+            <td><app-status-tag [status]="row.status || 'active'" /></td>
+            <td>
+              <span class="text-xs text-slate-400">
+                {{ row.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+              </span>
+            </td>
+            <td class="text-right">
+              <button
+                *appHasPermission="'PATCH /api/asignaciones-rol/:id/deactivate'"
+                pButton
+                type="button"
+                icon="pi pi-user-minus"
+                severity="warn"
+                [text]="true"
+                [rounded]="true"
+                pTooltip="Retirar rol del usuario"
+                (click)="confirmRevoke(row)"
+              ></button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="7" class="text-center py-8 text-slate-400">
+              No se encontraron asignaciones usuario-rol registradas
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<!-- Modal Asignar Rol -->
+<p-dialog
+  [visible]="dialogOpen()"
+  (visibleChange)="dialogOpen.set($event)"
+  header="Asignar Rol a Usuario"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-semibold text-slate-300">Seleccionar Usuario *</label>
+      <p-select
+        [fluid]="true"
+        [options]="users()"
+        optionLabel="username"
+        [filter]="true"
+        filterBy="username,email"
+        placeholder="Buscar usuario..."
+        [ngModel]="selectedUser()"
+        (ngModelChange)="selectedUser.set($event)"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-semibold text-slate-300">Seleccionar Rol *</label>
+      <p-select
+        [fluid]="true"
+        [options]="roles()"
+        optionLabel="name"
+        placeholder="Elegir rol a conceder..."
+        [ngModel]="selectedRole()"
+        (ngModelChange)="selectedRole.set($event)"
+      />
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-700">
+      <p-button
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (click)="dialogOpen.set(false)"
+      />
+      <p-button
+        type="button"
+        label="Guardar Asignación"
+        severity="primary"
+        icon="pi pi-check"
+        [loading]="saving()"
+        [disabled]="!canSave() || saving()"
+        (click)="save()"
+      />
+    </div>
+  </div>
+</p-dialog>
+
+<p-confirmdialog />

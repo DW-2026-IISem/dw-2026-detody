@@ -10,26 +10,48 @@ import { RoleUser, RoleUserPayload } from '../../../core/models';
 })
 export class RoleUserApi {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/role-users`;
+  private readonly base = `${environment.apiUrl}/asignaciones-rol`;
 
-  findAll(): Observable<RoleUser[]> {
-    return this.http.get<any>(this.baseUrl).pipe(
+  list(): Observable<RoleUser[]> {
+    return this.http.get<any>(this.base).pipe(
       map((res) => {
         if (Array.isArray(res)) return res;
-        if (res?.items && Array.isArray(res.items)) return res.items;
         if (res?.assignments && Array.isArray(res.assignments)) return res.assignments;
+        if (res?.data?.assignments && Array.isArray(res.data.assignments)) return res.data.assignments;
+        if (res?.items && Array.isArray(res.items)) return res.items;
+        if (res?.data && Array.isArray(res.data)) return res.data;
         return [];
-      })
+      }),
     );
   }
 
-  assign(payload: RoleUserPayload): Observable<RoleUser> {
-    return this.http.post<any>(this.baseUrl, payload).pipe(
-      map((res) => res?.assignment ?? res?.item ?? res)
+  create(payload: RoleUserPayload): Observable<RoleUser> {
+    return this.http.post<any>(this.base, payload).pipe(
+      map((res) => res?.assignment ?? res?.data?.assignment ?? res?.data ?? res),
     );
   }
 
-  revoke(userId: number, roleId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}?user_id=${userId}&role_id=${roleId}`);
+  deactivate(id: number): Observable<unknown> {
+    return this.http.patch(`${this.base}/${id}/deactivate`, {});
+  }
+
+  reactivate(id: number): Observable<unknown> {
+    return this.http.patch(`${this.base}/${id}/reactivate`, {});
+  }
+
+  remove(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/${id}`);
+  }
+
+  findAll(): Observable<RoleUser[]> {
+    return this.list();
+  }
+
+  assignRole(dto: RoleUserPayload): Observable<RoleUser> {
+    return this.create(dto);
+  }
+
+  revokeRole(userId: number, roleId: number): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/role-users?user_id=${userId}&role_id=${roleId}`);
   }
 }

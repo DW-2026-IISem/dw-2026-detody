@@ -36,18 +36,33 @@ export class UserService {
     return this.findById(id);
   }
 
-  async changePassword(userId: number, dto: ChangePasswordDto) {
+  async deactivate(id: number) {
+    await this.findById(id);
+    await this.userRepository.updateStatus(id, 'inactive');
+    return { message: 'Usuario desactivado exitosamente' };
+  }
+
+  async delete(id: number) {
+    await this.findById(id);
+    await this.userRepository.delete(id);
+    return { message: 'Usuario eliminado exitosamente' };
+  }
+
+  async changePassword(userId: number, dto: any) {
     const user = await UserModel.findByPk(userId);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const isMatch = await comparePassword(dto.currentPassword, user.password);
+    const currentPass = dto.current_password || dto.currentPassword;
+    const newPass = dto.new_password || dto.newPassword;
+
+    const isMatch = await comparePassword(currentPass, user.password);
     if (!isMatch) {
       throw new BadRequestException('La contraseña actual es incorrecta');
     }
 
-    const hashedNew = await hashPassword(dto.newPassword);
+    const hashedNew = await hashPassword(newPass);
     await this.userRepository.updatePassword(userId, hashedNew);
     
     return { message: 'Contraseña actualizada exitosamente' };

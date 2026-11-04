@@ -1,0 +1,70 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+  <div class="flex flex-col gap-1">
+    <label for="method" class="text-sm font-semibold text-slate-300">Método HTTP *</label>
+    <p-select
+      id="method"
+      formControlName="method"
+      [options]="methods"
+      optionLabel="label"
+      optionValue="value"
+      [fluid]="true"
+    />
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="path" class="text-sm font-semibold text-slate-300">Ruta (Path) *</label>
+    <input
+      pInputText
+      id="path"
+      formControlName="path"
+      placeholder="Ej: /api/clientes o /api/clientes/:id"
+      [fluid]="true"
+    />
+    @if (form.controls.path.invalid && form.controls.path.touched) {
+      <p-message severity="error" text="La ruta es obligatoria y debe comenzar con / (ej: /api/recursos)" />
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="description" class="text-sm font-semibold text-slate-300">Descripción del Recurso</label>
+    <input
+      pInputText
+      id="description"
+      formControlName="description"
+      placeholder="Operación que autoriza este recurso..."
+      [fluid]="true"
+    />
+  </div>
+
+  @if (!resource()) {
+    <div class="flex flex-col gap-1">
+      <label for="status" class="text-sm font-semibold text-slate-300">Estado Inicial *</label>
+      <p-select
+        id="status"
+        formControlName="status"
+        [options]="statuses"
+        optionLabel="label"
+        optionValue="value"
+        [fluid]="true"
+      />
+    </div>
+  }
+
+  <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-700">
+    <p-button
+      type="button"
+      label="Cancelar"
+      severity="secondary"
+      [outlined]="true"
+      (click)="cancel()"
+    />
+    <p-button
+      type="submit"
+      [label]="resource() ? 'Actualizar Recurso' : 'Crear Recurso'"
+      severity="primary"
+      icon="pi pi-check"
+      [loading]="saving()"
+      [disabled]="form.invalid || saving()"
+    />
+  </div>
+</form>

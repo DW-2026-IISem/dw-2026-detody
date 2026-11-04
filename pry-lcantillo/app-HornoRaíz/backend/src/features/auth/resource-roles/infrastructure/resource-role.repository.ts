@@ -7,8 +7,22 @@ import { RoleModel } from '../../infrastructure/models/role.model.js';
 
 @Injectable()
 export class ResourceRoleRepository {
-  async findAll() {
+  async findAll(filters?: { role_id?: number; resource_id?: number }) {
+    const where: any = {};
+    if (filters?.role_id) where.role_id = filters.role_id;
+    if (filters?.resource_id) where.resource_id = filters.resource_id;
+
     return ResourceRoleModel.findAll({
+      where,
+      include: [
+        { model: ResourceModel, as: 'resource' },
+        { model: RoleModel, as: 'role' },
+      ],
+    });
+  }
+
+  async findById(id: number) {
+    return ResourceRoleModel.findByPk(id, {
       include: [
         { model: ResourceModel, as: 'resource' },
         { model: RoleModel, as: 'role' },
@@ -27,15 +41,13 @@ export class ResourceRoleRepository {
   }
 
   async findByUserId(userId: number) {
-    // 1. Obtener los roles del usuario desde la tabla pivote role_users
     const userRoles = await RoleUserModel.findAll({
-      where: { user_id: userId },
+      where: { user_id: userId, status: 'active' },
     });
 
     const roleIds = userRoles.map((ur: any) => ur.role_id);
     if (roleIds.length === 0) return [];
 
-    // 2. Traer las concesiones de esos roles junto con el recurso y el rol
     return ResourceRoleModel.findAll({
       where: {
         role_id: { [Op.in]: roleIds },
@@ -59,10 +71,15 @@ export class ResourceRoleRepository {
   }
 
   async create(data: any) {
-    return ResourceRoleModel.create(data);
+    const created = await ResourceRoleModel.create(data);
+    return this.findById(created.id);
   }
 
   async updateStatus(id: number, status: string) {
     return ResourceRoleModel.update({ status }, { where: { id } });
+  }
+
+  async delete(id: number) {
+    return ResourceRoleModel.destroy({ where: { id } });
   }
 }

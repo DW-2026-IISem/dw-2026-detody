@@ -1,4 +1,4 @@
-import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, ForeignKey, Model, Table, BelongsTo } from 'sequelize-typescript';
 import { UserModel } from './user.model';
 import { RoleModel } from './role.model';
 
@@ -17,4 +17,10 @@ export class RoleUserModel extends Model {
 
   @Column({ type: DataType.ENUM('active', 'inactive'), defaultValue: 'active' })
   status!: 'active' | 'inactive';
+
+  @BelongsTo(() => UserModel, 'user_id')
+  user!: UserModel;
+
+  @BelongsTo(() => RoleModel, 'role_id')
+  role!: RoleModel;
 }

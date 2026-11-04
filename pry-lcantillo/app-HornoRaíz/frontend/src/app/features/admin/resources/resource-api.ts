@@ -10,38 +10,56 @@ import { Resource, ResourcePayload } from '../../../core/models';
 })
 export class ResourceApi {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/resources`;
+  private readonly base = `${environment.apiUrl}/recursos`;
 
-  findAll(): Observable<Resource[]> {
-    return this.http.get<any>(this.baseUrl).pipe(
+  list(): Observable<Resource[]> {
+    return this.http.get<any>(this.base).pipe(
       map((res) => {
         if (Array.isArray(res)) return res;
-        if (res?.items && Array.isArray(res.items)) return res.items;
         if (res?.resources && Array.isArray(res.resources)) return res.resources;
+        if (res?.data?.resources && Array.isArray(res.data.resources)) return res.data.resources;
+        if (res?.items && Array.isArray(res.items)) return res.items;
+        if (res?.data && Array.isArray(res.data)) return res.data;
         return [];
-      })
+      }),
     );
   }
 
-  findById(id: number): Observable<Resource> {
-    return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
-      map((res) => res?.resource ?? res?.item ?? res)
+  get(id: number): Observable<Resource> {
+    return this.http.get<any>(`${this.base}/${id}`).pipe(
+      map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res),
     );
   }
 
   create(payload: ResourcePayload): Observable<Resource> {
-    return this.http.post<any>(this.baseUrl, payload).pipe(
-      map((res) => res?.resource ?? res?.item ?? res)
+    return this.http.post<any>(this.base, payload).pipe(
+      map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res),
     );
   }
 
   update(id: number, payload: Partial<ResourcePayload>): Observable<Resource> {
-    return this.http.put<any>(`${this.baseUrl}/${id}`, payload).pipe(
-      map((res) => res?.resource ?? res?.item ?? res)
+    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
+      map((res) => res?.resource ?? res?.data?.resource ?? res?.data ?? res),
     );
   }
 
+  deactivate(id: number): Observable<unknown> {
+    return this.http.patch(`${this.base}/${id}/deactivate`, {});
+  }
+
+  remove(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/${id}`);
+  }
+
+  findAll(): Observable<Resource[]> {
+    return this.list();
+  }
+
+  findById(id: number): Observable<Resource> {
+    return this.get(id);
+  }
+
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.remove(id).pipe(map(() => void 0));
   }
 }

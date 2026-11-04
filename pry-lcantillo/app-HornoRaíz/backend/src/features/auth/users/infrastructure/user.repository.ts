@@ -40,6 +40,14 @@ export class UserRepository {
     return UserModel.update(dto, { where: { id } });
   }
 
+  async updateStatus(id: number, status: 'active' | 'inactive'): Promise<[number]> {
+    return UserModel.update({ status }, { where: { id } });
+  }
+
+  async delete(id: number): Promise<number> {
+    return UserModel.destroy({ where: { id } });
+  }
+
   async updatePassword(id: number, hashedNewPassword: string): Promise<[number]> {
     return UserModel.update({ password: hashedNewPassword }, { where: { id } });
   }

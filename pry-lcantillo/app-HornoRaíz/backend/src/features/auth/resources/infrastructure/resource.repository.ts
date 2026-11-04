@@ -34,4 +34,12 @@ export class ResourceRepository {
   async update(id: number, dto: UpdateResourceDto): Promise<[number]> {
     return ResourceModel.update(dto, { where: { id } });
   }
+
+  async updateStatus(id: number, status: 'active' | 'inactive'): Promise<[number]> {
+    return ResourceModel.update({ status }, { where: { id } });
+  }
+
+  async delete(id: number): Promise<number> {
+    return ResourceModel.destroy({ where: { id } });
+  }
 }

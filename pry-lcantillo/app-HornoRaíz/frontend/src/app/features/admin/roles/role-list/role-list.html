@@ -1,0 +1,139 @@
+<div class="space-y-6">
+  <app-page-header
+    title="Catálogo de Roles"
+    subtitle="Definición de perfiles de privilegios y autorización"
+  >
+    <button
+      *appHasPermission="'POST /api/roles'"
+      pButton
+      type="button"
+      label="Nuevo Rol"
+      icon="pi pi-shield"
+      (click)="openCreate()"
+    ></button>
+  </app-page-header>
+
+  <p-card>
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+      <div class="w-full sm:w-72">
+        <input
+          pInputText
+          [ngModel]="filter()"
+          (ngModelChange)="filter.set($event)"
+          placeholder="Buscar rol o descripción..."
+          class="w-full"
+        />
+      </div>
+      <div class="text-sm text-slate-400">
+        Total: {{ rows().length }} roles
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="space-y-3">
+        <p-skeleton height="3rem" />
+        <p-skeleton height="3rem" />
+      </div>
+    } @else {
+      <p-table
+        [value]="visibleRows()"
+        [paginator]="true"
+        [rows]="10"
+        responsiveLayout="stack"
+        breakpoint="960px"
+      >
+        <ng-template #header>
+          <tr>
+            <th class="w-16">ID</th>
+            <th>Nombre del Rol</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Fecha Registro</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-role>
+          <tr>
+            <td><span class="text-xs font-mono text-slate-400">#{{ role.id }}</span></td>
+            <td>
+              <p-tag [value]="role.name" severity="info" [rounded]="true" />
+            </td>
+            <td><span class="text-slate-300">{{ role.description || '—' }}</span></td>
+            <td><app-status-tag [status]="role.status || 'active'" /></td>
+            <td>
+              <span class="text-xs text-slate-400">
+                {{ role.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+              </span>
+            </td>
+            <td class="text-right">
+              <div class="flex justify-end gap-1">
+                <button
+                  *appHasPermission="'PATCH /api/roles/:id'"
+                  pButton
+                  type="button"
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  [text]="true"
+                  [rounded]="true"
+                  pTooltip="Editar rol"
+                  (click)="openEdit(role)"
+                ></button>
+                <button
+                  *appHasPermission="'PATCH /api/roles/:id/deactivate'"
+                  pButton
+                  type="button"
+                  icon="pi pi-ban"
+                  severity="warn"
+                  [text]="true"
+                  [rounded]="true"
+                  pTooltip="Desactivar rol"
+                  (click)="confirmDeactivate(role)"
+                ></button>
+                <button
+                  *appHasPermission="'DELETE /api/roles/:id'"
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  [rounded]="true"
+                  pTooltip="Eliminar rol"
+                  (click)="confirmDelete(role)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="6" class="text-center py-8 text-slate-400">
+              No se encontraron roles registrados
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<!-- Modal Formulario Rol -->
+<p-dialog
+  [visible]="formOpen()"
+  (visibleChange)="formOpen.set($event)"
+  [header]="selectedRole() ? 'Editar Rol' : 'Nuevo Rol'"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <app-role-form
+    [role]="selectedRole()"
+    [saving]="saving()"
+    (saved)="save($event)"
+    (cancelled)="formOpen.set(false)"
+  />
+</p-dialog>
+
+<p-confirmdialog />

@@ -1752,4 +1752,144 @@ Al intentar ingresar directamente por URL a un recurso restringido (por ejemplo 
 
 ---
 
-*Estado actual: ISS-00 a ISS-09 completados con cobertura del 100% en pruebas automatizadas y protección RBAC estructural completa. Próximo paso: ISS-10 (Administración RBAC: Roles, Usuarios y Permisos).*
+*Estado previo: ISS-00 a ISS-09 completados.*
+## ISS-10: Administración RBAC: Usuarios, Roles, Recursos y Pivotes
+
+### Contexto y Objetivos de la Unidad
+En esta tercera y última unidad de la **Fase II: Auth con RBAC (Bloque 3 de 3: Administración)**, se implementó el ecosistema administrativo completo para la gestión del control de acceso basado en roles (RBAC) en `HornoRaíz`.
+
+El objetivo central consistió en dotar a los administradores de interfaces CRUD reactivas y tabulares para el control de las 5 entidades fundamentales de seguridad, garantizando una alineación estricta entre el frontend en Angular 22 y los contratos REST de NestJS:
+
+1. **Gestión Integral de Usuarios (`/admin/usuarios`)**:
+   - Catálogo tabular con búsqueda en tiempo real sobre `username`, `email` y `status`.
+   - Componente modal `UserForm` con validación reactiva: contraseña obligatoria en creación y excluida en edición; selección de estado habilitada solo en creación.
+   - Diálogo de auditoría **"Ver permisos"**: calcula reactivamente los roles asignados y desglosa los permisos efectivos obtenidos de `/api/usuarios/:id/permisos` con etiquetas visuales por método HTTP.
+   - Mecanismo de **autoprotección** (`isSelf`): el administrador en sesión no puede desactivar ni eliminar su propia cuenta.
+
+2. **Gestión de Roles (`/admin/roles`)**:
+   - Administración tabular con normalización automática a mayúsculas (`name.toUpperCase()`) para evitar inconsistencias en el RBAC.
+   - Flujo de desactivación lógica y eliminación física con confirmación modal de PrimeNG (`<p-confirmdialog />`).
+
+3. **Catálogo de Recursos del Sistema (`/admin/recursos`)**:
+   - Tarjetas de resumen métrico con contadores computados por método HTTP (`methodCounters`: GET, POST, PATCH, PUT, DELETE) mediante Signals.
+   - Selector dinámico de filtrado por verbo HTTP y filtro de texto libre por descripción o ruta.
+   - Modal `ResourceForm` con validación estricta de formato de ruta mediante expresión regular (`/^\/.*$/`).
+
+4. **Pivote Asignaciones Rol-Usuario (`/admin/asignaciones`)**:
+   - Mantenimiento de la tabla intermedia `role_users` (`/api/asignaciones-rol`).
+   - Modal de asignación con selectores reactivos (`p-select`) para vincular usuarios y roles activos.
+   - Filtros cruzados por usuario y rol, con soporte de desactivación lógica y reactivación instantánea.
+
+5. **Pivote Concesiones Rol-Recurso (`/admin/permisos`)**:
+   - Mantenimiento de la tabla de autorizaciones `auth_resource_roles` (`/api/concesiones-rol`).
+   - Modal de concesión con selector enriquecido mediante plantillas `#selectedItem` e `#item` que presentan el badge estilizado del verbo HTTP (`methodSeverity()`) junto al código monoespaciado de la ruta.
+   - Filtros dinámicos por rol y ruta de recurso, permitiendo conceder y revocar permisos con reflejo inmediato.
+
+---
+
+### Arquitectura Técnica e Integración
+
+#### 1. Resiliencia de Contratos API y Desempaquetado de Envoltorios
+Los servicios `UserApi`, `RoleApi`, `ResourceApi`, `RoleUserApi` y `ResourceRoleApi` implementan unwrapping defensivo sobre las respuestas JSON de NestJS, garantizando interoperabilidad tanto con respuestas paginadas envueltas (`{ users: [...] }`, `{ data: [...] }`) como con arrays directos:
+
+```typescript
+// Ejemplo de unwrapping resiliente en UserApi
+list(): Observable<User[]> {
+  return this.http.get<any>(this.baseUrl).pipe(
+    map((res) => {
+      const data = res?.data ?? res;
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.users)) return data.users;
+      if (Array.isArray(res?.users)) return res.users;
+      return [];
+    }),
+  );
+}
+```
+
+#### 2. Soporte de Rutas Canónicas y Alias en el Backend NestJS
+Para mantener compatibilidad total con la especificación de la guía didáctica y los endpoints originales en inglés, los controladores del backend registran ambos prefijos mediante decoradores multiruta:
+- `@Controller(['usuarios', 'users'])`
+- `@Controller(['recursos', 'resources'])`
+- `@Controller(['asignaciones-rol', 'role-users'])`
+- `@Controller(['concesiones-rol', 'resource-roles'])`
+
+Asimismo, el módulo de verificación de permisos `resource-match.ts` normaliza los alias de ruta (`ROUTE_ALIASES`) de forma que una concesión sobre `/api/usuarios` autoriza de forma transparente peticiones a `/api/users`.
+
+#### 3. Protección Granular Estructural con `*appHasPermission`
+Cada botón de acción en las 5 tablas administrativas está resguardado por la directiva estructural standalone `HasPermission`:
+
+```html
+<!-- Ejemplo en UserList: acciones protegidas por permisos específicos -->
+<button
+  *appHasPermission="'GET /api/usuarios/:id/permisos'"
+  pButton
+  icon="pi pi-shield"
+  (click)="openPermissions(user)"
+  pTooltip="Ver permisos efectivos"
+/>
+<button
+  *appHasPermission="'PATCH /api/usuarios/:id'"
+  pButton
+  icon="pi pi-pencil"
+  (click)="openEdit(user)"
+  pTooltip="Editar usuario"
+/>
+<button
+  *appHasPermission="'DELETE /api/usuarios/:id'"
+  pButton
+  icon="pi pi-trash"
+  severity="danger"
+  [disabled]="isSelf(user)"
+  (click)="confirmDelete(user)"
+  pTooltip="Eliminar usuario"
+/>
+```
+
+---
+
+### Verificación y Evidencias
+
+#### 1. Resultados de la Suite Completa de Pruebas Automatizadas
+Se diseñaron e integraron 8 suites de pruebas unitarias específicas para la administración RBAC:
+- `src/app/features/admin/users/user-form/user-form.spec.ts` (4 pruebas: emisión en creación con password, edición sin password, validación requerida y reseteo).
+- `src/app/features/admin/users/user-list/user-list.spec.ts` (3 pruebas: carga inicial, filtrado reactivo y apertura de modal de permisos).
+- `src/app/features/admin/roles/role-form/role-form.spec.ts` (3 pruebas: normalización a mayúsculas, validación y emisión).
+- `src/app/features/admin/roles/role-list/role-list.spec.ts` (1 prueba: renderizado de tabla y carga de roles).
+- `src/app/features/admin/resources/resource-form/resource-form.spec.ts` (3 pruebas: validación de regex `/^\/.*$/`, métodos HTTP y emisión).
+- `src/app/features/admin/resources/resource-list/resource-list.spec.ts` (1 prueba: cálculo de contadores por método y filtrado).
+- `src/app/features/admin/role-users/role-user-list/role-user-list.spec.ts` (1 prueba: carga y renderizado de asignaciones).
+- `src/app/features/admin/resource-roles/resource-role-list/resource-role-list.spec.ts` (1 prueba: carga y renderizado de concesiones).
+
+**Total acumulado en ISS-10: 43 archivos de prueba pasados (43 de 43), 180 pruebas unitarias aprobadas (100% de éxito en 6.05 segundos). Compilación de producción (`ng build`) finalizada en 3.74 segundos con 0 errores y 0 advertencias.**
+
+![Resultados de pruebas unitarias y compilación de producción en ISS-10](capturas/iss-10-terminal-tests.png)
+
+#### 2. Evidencia Visual: Administración de Usuarios (`/admin/usuarios`, 1280 × 800 px)
+Tabla interactiva con badges de estado, acciones protegidas por permisos, modal de creación/edición y auditoría de permisos efectivos:
+
+![Vista de escritorio de Administración de Usuarios en ISS-10](capturas/iss-10-usuarios-desktop.png)
+
+#### 3. Evidencia Visual: Catálogo de Roles (`/admin/roles`, 1280 × 800 px)
+Listado de roles con normalización automática a mayúsculas, estados de activación y acciones de eliminación protegidas:
+
+![Vista de escritorio de Catálogo de Roles en ISS-10](capturas/iss-10-roles-desktop.png)
+
+#### 4. Evidencia Visual: Catálogo de Recursos (`/admin/recursos`, 1280 × 800 px)
+Catálogo con contadores métricos en tiempo real por verbo HTTP (GET, POST, PATCH, PUT, DELETE), filtrado y badges con código de color:
+
+![Vista de escritorio de Catálogo de Recursos en ISS-10](capturas/iss-10-recursos-desktop.png)
+
+#### 5. Evidencia Visual: Asignaciones Rol-Usuario (`/admin/asignaciones`, 1280 × 800 px)
+Gestión tabular del pivote usuario-rol con filtros combinados y modal de asignación asistida:
+
+![Vista de escritorio de Asignaciones Rol-Usuario en ISS-10](capturas/iss-10-asignaciones-desktop.png)
+
+#### 6. Evidencia Visual: Concesiones Rol-Recurso (`/admin/permisos`, 1280 × 800 px)
+Control de matriz de autorizaciones RBAC con selector visual enriquecido con badges por método y filtrado por roles:
+
+![Vista de escritorio de Concesiones Rol-Recurso en ISS-10](capturas/iss-10-concesiones-desktop.png)
+
+---
+
+*Estado actual: Fase I (Business) y Fase II (Auth con RBAC) completadas al 100% con 43 archivos de prueba (180 unit tests) totalmente verdes, sincronización bidireccional NestJS-Angular y evidencias fotográficas de alta resolución. Próximo paso: ISS-11 (Build, calidad y resolución de problemas).*

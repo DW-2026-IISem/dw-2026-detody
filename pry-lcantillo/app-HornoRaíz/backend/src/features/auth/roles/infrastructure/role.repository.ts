@@ -28,4 +28,12 @@ export class RoleRepository {
   async update(id: number, dto: UpdateRoleDto): Promise<[number]> {
     return RoleModel.update(dto, { where: { id } });
   }
+
+  async updateStatus(id: number, status: 'active' | 'inactive'): Promise<[number]> {
+    return RoleModel.update({ status }, { where: { id } });
+  }
+
+  async delete(id: number): Promise<number> {
+    return RoleModel.destroy({ where: { id } });
+  }
 }

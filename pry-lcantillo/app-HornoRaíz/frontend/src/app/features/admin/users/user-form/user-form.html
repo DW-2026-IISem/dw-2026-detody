@@ -1,0 +1,88 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+  <div class="flex flex-col gap-1">
+    <label for="username" class="text-sm font-semibold text-slate-300">Nombre de Usuario *</label>
+    <input
+      pInputText
+      id="username"
+      formControlName="username"
+      placeholder="Ej: jperez"
+      [fluid]="true"
+    />
+    @if (form.controls.username.invalid && form.controls.username.touched) {
+      <p-message severity="error" text="El nombre de usuario es obligatorio (mínimo 3 caracteres)" />
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="email" class="text-sm font-semibold text-slate-300">Correo Electrónico *</label>
+    <input
+      pInputText
+      id="email"
+      type="email"
+      formControlName="email"
+      placeholder="correo@ejemplo.com"
+      [fluid]="true"
+    />
+    @if (form.controls.email.invalid && form.controls.email.touched) {
+      <p-message severity="error" text="Ingresa un correo electrónico válido" />
+    }
+  </div>
+
+  @if (!user()) {
+    <div class="flex flex-col gap-1">
+      <label for="password" class="text-sm font-semibold text-slate-300">Contraseña Inicial *</label>
+      <p-password
+        id="password"
+        formControlName="password"
+        [feedback]="true"
+        [toggleMask]="true"
+        [fluid]="true"
+        placeholder="Mínimo 8 caracteres"
+      />
+      @if (form.controls.password.invalid && form.controls.password.touched) {
+        <p-message severity="error" text="La contraseña es obligatoria (mínimo 8 caracteres)" />
+      }
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="status" class="text-sm font-semibold text-slate-300">Estado Inicial *</label>
+      <p-select
+        id="status"
+        formControlName="status"
+        [options]="statuses"
+        optionLabel="label"
+        optionValue="value"
+        [fluid]="true"
+      />
+    </div>
+  }
+
+  <div class="flex flex-col gap-1">
+    <label for="avatar" class="text-sm font-semibold text-slate-300">Avatar (URL opcional)</label>
+    <input
+      pInputText
+      id="avatar"
+      formControlName="avatar"
+      placeholder="https://ejemplo.com/avatar.png"
+      [fluid]="true"
+    />
+  </div>
+
+  <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-700">
+    <p-button
+      type="button"
+      label="Cancelar"
+      severity="secondary"
+      [outlined]="true"
+      (click)="cancel()"
+    />
+    <p-button
+      type="submit"
+      [label]="user() ? 'Actualizar Usuario' : 'Crear Usuario'"
+      severity="primary"
+      icon="pi pi-check"
+      [loading]="saving()"
+      [disabled]="form.invalid || saving()"
+    />
+  </div>
+</form>

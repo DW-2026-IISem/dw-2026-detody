@@ -32,4 +32,16 @@ export class RoleService {
     await this.roleRepository.update(id, dto);
     return this.findById(id);
   }
+
+  async deactivate(id: number) {
+    await this.findById(id);
+    await this.roleRepository.updateStatus(id, 'inactive');
+    return { message: 'Rol desactivado exitosamente' };
+  }
+
+  async delete(id: number) {
+    await this.findById(id);
+    await this.roleRepository.delete(id);
+    return { message: 'Rol eliminado exitosamente' };
+  }
 }

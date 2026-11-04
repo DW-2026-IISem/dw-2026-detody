@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { ResourceRepository } from '../infrastructure/resource.repository';
 import { CreateResourceDto } from '../dto/create-resource.dto';
 import { UpdateResourceDto } from '../dto/update-resource.dto';
-import { normalizePath } from '../../../../shared/auth/resource-match.util';
 
 @Injectable()
 export class ResourceService {
@@ -21,21 +20,28 @@ export class ResourceService {
   }
 
   async create(dto: CreateResourceDto) {
-    const normalizedPath = normalizePath(dto.path);
-    const existing = await this.resourceRepository.findByMethodAndPath(dto.method, normalizedPath);
+    const existing = await this.resourceRepository.findByMethodAndPath(dto.method, dto.path);
     if (existing) {
-      throw new ConflictException(`El recurso ${dto.method} ${normalizedPath} ya está registrado`);
+      throw new ConflictException(`El recurso ${dto.method} ${dto.path} ya existe`);
     }
-    return this.resourceRepository.create({ ...dto, path: normalizedPath });
+    return this.resourceRepository.create(dto);
   }
 
   async update(id: number, dto: UpdateResourceDto) {
     await this.findById(id);
-    const updateData = { ...dto };
-    if (updateData.path) {
-      updateData.path = normalizePath(updateData.path);
-    }
-    await this.resourceRepository.update(id, updateData);
+    await this.resourceRepository.update(id, dto);
     return this.findById(id);
+  }
+
+  async deactivate(id: number) {
+    await this.findById(id);
+    await this.resourceRepository.updateStatus(id, 'inactive');
+    return { message: 'Recurso desactivado exitosamente' };
+  }
+
+  async delete(id: number) {
+    await this.findById(id);
+    await this.resourceRepository.delete(id);
+    return { message: 'Recurso eliminado exitosamente' };
   }
 }

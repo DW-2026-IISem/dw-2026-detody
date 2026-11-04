@@ -108,6 +108,55 @@ export const routes: Routes = [
             './features/product-sales/product-sale-list/product-sale-list'
           ).then((m) => m.ProductSaleList),
       },
+      // ========================================================================
+      // FASE II - ISS-10: Administración RBAC
+      // ========================================================================
+      {
+        path: 'admin/usuarios',
+        title: 'Usuarios · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/usuarios' },
+        loadComponent: () =>
+          import('./features/admin/users/user-list/user-list').then((m) => m.UserList),
+      },
+      {
+        path: 'admin/roles',
+        title: 'Roles · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/roles' },
+        loadComponent: () =>
+          import('./features/admin/roles/role-list/role-list').then((m) => m.RoleList),
+      },
+      {
+        path: 'admin/recursos',
+        title: 'Recursos · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/recursos' },
+        loadComponent: () =>
+          import('./features/admin/resources/resource-list/resource-list').then(
+            (m) => m.ResourceList,
+          ),
+      },
+      {
+        path: 'admin/asignaciones',
+        title: 'Asignaciones · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/asignaciones-rol' },
+        loadComponent: () =>
+          import(
+            './features/admin/role-users/role-user-list/role-user-list'
+          ).then((m) => m.RoleUserList),
+      },
+      {
+        path: 'admin/permisos',
+        title: 'Concesiones · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/concesiones-rol' },
+        loadComponent: () =>
+          import(
+            './features/admin/resource-roles/resource-role-list/resource-role-list'
+          ).then((m) => m.ResourceRoleList),
+      },
     ],
   },
   // Redirección por defecto

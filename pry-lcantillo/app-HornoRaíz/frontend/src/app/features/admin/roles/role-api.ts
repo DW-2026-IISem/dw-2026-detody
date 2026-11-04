@@ -10,38 +10,56 @@ import { Role, RolePayload } from '../../../core/models';
 })
 export class RoleApi {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/roles`;
+  private readonly base = `${environment.apiUrl}/roles`;
 
-  findAll(): Observable<Role[]> {
-    return this.http.get<any>(this.baseUrl).pipe(
+  list(): Observable<Role[]> {
+    return this.http.get<any>(this.base).pipe(
       map((res) => {
         if (Array.isArray(res)) return res;
-        if (res?.items && Array.isArray(res.items)) return res.items;
         if (res?.roles && Array.isArray(res.roles)) return res.roles;
+        if (res?.data?.roles && Array.isArray(res.data.roles)) return res.data.roles;
+        if (res?.items && Array.isArray(res.items)) return res.items;
+        if (res?.data && Array.isArray(res.data)) return res.data;
         return [];
-      })
+      }),
     );
   }
 
-  findById(id: number): Observable<Role> {
-    return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
-      map((res) => res?.role ?? res?.item ?? res)
+  get(id: number): Observable<Role> {
+    return this.http.get<any>(`${this.base}/${id}`).pipe(
+      map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res),
     );
   }
 
   create(payload: RolePayload): Observable<Role> {
-    return this.http.post<any>(this.baseUrl, payload).pipe(
-      map((res) => res?.role ?? res?.item ?? res)
+    return this.http.post<any>(this.base, payload).pipe(
+      map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res),
     );
   }
 
   update(id: number, payload: Partial<RolePayload>): Observable<Role> {
-    return this.http.put<any>(`${this.baseUrl}/${id}`, payload).pipe(
-      map((res) => res?.role ?? res?.item ?? res)
+    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
+      map((res) => res?.role ?? res?.data?.role ?? res?.data ?? res),
     );
   }
 
+  deactivate(id: number): Observable<unknown> {
+    return this.http.patch(`${this.base}/${id}/deactivate`, {});
+  }
+
+  remove(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/${id}`);
+  }
+
+  findAll(): Observable<Role[]> {
+    return this.list();
+  }
+
+  findById(id: number): Observable<Role> {
+    return this.get(id);
+  }
+
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.remove(id).pipe(map(() => void 0));
   }
 }

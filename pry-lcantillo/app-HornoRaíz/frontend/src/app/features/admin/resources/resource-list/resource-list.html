@@ -1,0 +1,180 @@
+<div class="space-y-6">
+  <app-page-header
+    title="Catálogo de Recursos HTTP"
+    subtitle="Inventario de capacidades y endpoints del sistema"
+  >
+    <button
+      *appHasPermission="'POST /api/recursos'"
+      pButton
+      type="button"
+      label="Nuevo Recurso"
+      icon="pi pi-plus"
+      (click)="openCreate()"
+    ></button>
+  </app-page-header>
+
+  <!-- Métodos contadores resumen -->
+  <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+      <span class="text-xs text-sky-400 font-semibold">GET</span>
+      <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('GET') || 0 }}</span>
+    </div>
+    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+      <span class="text-xs text-emerald-400 font-semibold">POST</span>
+      <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('POST') || 0 }}</span>
+    </div>
+    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+      <span class="text-xs text-amber-400 font-semibold">PUT</span>
+      <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('PUT') || 0 }}</span>
+    </div>
+    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+      <span class="text-xs text-orange-400 font-semibold">PATCH</span>
+      <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('PATCH') || 0 }}</span>
+    </div>
+    <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+      <span class="text-xs text-rose-400 font-semibold">DELETE</span>
+      <span class="text-lg font-bold text-slate-200">{{ countsByMethod().get('DELETE') || 0 }}</span>
+    </div>
+  </div>
+
+  <p-card>
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <div class="w-full sm:w-72">
+          <input
+            pInputText
+            [ngModel]="filter()"
+            (ngModelChange)="filter.set($event)"
+            placeholder="Buscar por ruta o descripción..."
+            class="w-full"
+          />
+        </div>
+        <div class="w-full sm:w-48">
+          <p-select
+            [fluid]="true"
+            [options]="methods"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="methodFilter()"
+            (ngModelChange)="methodFilter.set($event)"
+          />
+        </div>
+      </div>
+      <div class="text-sm text-slate-400">
+        Mostrando {{ visibleRows().length }} de {{ rows().length }} recursos
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="space-y-3">
+        <p-skeleton height="3rem" />
+        <p-skeleton height="3rem" />
+        <p-skeleton height="3rem" />
+      </div>
+    } @else {
+      <p-table
+        [value]="visibleRows()"
+        [paginator]="true"
+        [rows]="10"
+        responsiveLayout="stack"
+        breakpoint="960px"
+      >
+        <ng-template #header>
+          <tr>
+            <th class="w-16">ID</th>
+            <th class="w-24">Método</th>
+            <th>Ruta (Path)</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th class="text-right">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-res>
+          <tr>
+            <td><span class="text-xs font-mono text-slate-400">#{{ res.id }}</span></td>
+            <td>
+              <p-tag
+                [value]="res.method || res.http_method || res.httpMethod || 'GET'"
+                [severity]="methodSeverity(res.method || res.http_method || res.httpMethod)"
+                [rounded]="true"
+              />
+            </td>
+            <td>
+              <code class="text-xs text-emerald-400 bg-slate-900 px-2 py-1 rounded">
+                {{ res.path || res.route_path || res.routePath }}
+              </code>
+            </td>
+            <td><span class="text-slate-300">{{ res.description || '—' }}</span></td>
+            <td><app-status-tag [status]="res.status || 'active'" /></td>
+            <td class="text-right">
+              <div class="flex justify-end gap-1">
+                <button
+                  *appHasPermission="'PATCH /api/recursos/:id'"
+                  pButton
+                  type="button"
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  [text]="true"
+                  [rounded]="true"
+                  pTooltip="Editar recurso"
+                  (click)="openEdit(res)"
+                ></button>
+                <button
+                  *appHasPermission="'PATCH /api/recursos/:id/deactivate'"
+                  pButton
+                  type="button"
+                  icon="pi pi-ban"
+                  severity="warn"
+                  [text]="true"
+                  [rounded]="true"
+                  pTooltip="Desactivar recurso"
+                  (click)="confirmDeactivate(res)"
+                ></button>
+                <button
+                  *appHasPermission="'DELETE /api/recursos/:id'"
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  [rounded]="true"
+                  pTooltip="Eliminar recurso"
+                  (click)="confirmDelete(res)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="6" class="text-center py-8 text-slate-400">
+              No se encontraron recursos que coincidan con los filtros
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>
+
+<!-- Modal Formulario Recurso -->
+<p-dialog
+  [visible]="formOpen()"
+  (visibleChange)="formOpen.set($event)"
+  [header]="selectedResource() ? 'Editar Recurso' : 'Nuevo Recurso'"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <app-resource-form
+    [resource]="selectedResource()"
+    [saving]="saving()"
+    (saved)="save($event)"
+    (cancelled)="formOpen.set(false)"
+  />
+</p-dialog>
+
+<p-confirmdialog />
