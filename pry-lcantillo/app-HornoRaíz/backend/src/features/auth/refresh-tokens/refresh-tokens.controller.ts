@@ -11,7 +11,7 @@ import {
 import { JwtAuthGuard } from '../access/jwt-auth.guard';
 import { RefreshTokensService } from './refresh-tokens.service';
 
-@Controller('api/sesiones')
+@Controller('sesiones')
 @UseGuards(JwtAuthGuard)
 export class RefreshTokensController {
   constructor(private readonly service: RefreshTokensService) {}

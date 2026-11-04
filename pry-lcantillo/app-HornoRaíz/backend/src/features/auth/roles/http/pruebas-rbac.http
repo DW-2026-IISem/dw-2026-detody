@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:3004/api
+
+### 1. Iniciar sesión como administrador
+# @name loginAdmin
+POST {{baseUrl}}/session/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+### 2. Iniciar sesión con el usuario de prueba
+# @name loginOperador
+POST {{baseUrl}}/session/login
+Content-Type: application/json
+
+{
+  "identifier": "operador",
+  "password": "Operador123!"
+}
+
+### 3. Consultar el perfil del usuario de prueba
+GET {{baseUrl}}/session/profile
+Authorization: Bearer {{loginOperador.response.body.data.access_token}}

@@ -1,0 +1,154 @@
+### ============================================================
+### HornoRaíz API — Flujo Completo RBAC (Roles & Permisos)
+### ============================================================
+@baseUrl = http://localhost:3004/api
+
+# Variables del nuevo usuario para garantizar que Paso 2 y Paso 3 coincidan siempre
+@newUsername = operador_demo1
+@newEmail = operador_demo1@hornoraiz.local
+@newPassword = Operador123!
+
+### ============================================================
+### PASO 1 — Login como Administrador (Superusuario)
+### ============================================================
+# @name loginAdmin
+POST {{baseUrl}}/session/login
+Content-Type: application/json
+
+{
+  "identifier": "admin",
+  "password": "Admin123!"
+}
+
+### ============================================================
+### PASO 2 — Admin crea un nuevo usuario sin roles ni permisos
+### ============================================================
+# @name createUser
+POST {{baseUrl}}/users
+Authorization: Bearer {{loginAdmin.response.body.data.access_token}}
+Content-Type: application/json
+
+{
+  "username": "{{newUsername}}",
+  "email": "{{newEmail}}",
+  "password": "{{newPassword}}"
+}
+
+### ============================================================
+### PASO 3 — Login con el nuevo usuario sin roles ni permisos
+### ============================================================
+# @name loginUser
+POST {{baseUrl}}/session/login
+Content-Type: application/json
+
+{
+  "identifier": "{{newUsername}}",
+  "password": "{{newPassword}}"
+}
+
+### ============================================================
+### PASO 4 — Prueba de Autenticación básica (Solo JWT, sin RBAC)
+### Debe retornar: 200 OK
+### ============================================================
+GET {{baseUrl}}/session/profile
+Authorization: Bearer {{loginUser.response.body.data.access_token}}
+
+### ============================================================
+### PASO 5 — Prueba RBAC Negativa: Usuario intenta acceder a clientes
+### Debe retornar: 403 Forbidden (No tiene rol ni permisos)
+### ============================================================
+GET {{baseUrl}}/clients
+Authorization: Bearer {{loginUser.response.body.data.access_token}}
+
+### ============================================================
+### PASO 6 — Admin crea un nuevo rol en el sistema
+### ============================================================
+# @name createRole
+POST {{baseUrl}}/roles
+Authorization: Bearer {{loginAdmin.response.body.data.access_token}}
+Content-Type: application/json
+
+{
+  "name": "AUDITOR_CLIENTES",
+  "description": "Rol de solo lectura para el módulo de clientes"
+}
+
+### ============================================================
+### PASO 7 — Admin asigna el nuevo rol al usuario creado
+### ============================================================
+# @name assignRole
+POST {{baseUrl}}/role-users
+Authorization: Bearer {{loginAdmin.response.body.data.access_token}}
+Content-Type: application/json
+
+{
+  "user_id": {{createUser.response.body.data.id}},
+  "role_id": {{createRole.response.body.data.id}}
+}
+
+### ============================================================
+### PASO 8 — Admin concede permisos al nuevo rol
+### Concedemos:
+###  - Recurso 24: GET  /api/clients     (Listar clientes)
+###  - Recurso 26: GET  /api/clients/:id (Ver detalle cliente)
+### (Nota: NO le concedemos POST /api/clients ni DELETE)
+### ============================================================
+
+### 8.1 Conceder GET /api/clients (recurso ID: 24)
+# @name grantReadClients
+POST {{baseUrl}}/resource-roles
+Authorization: Bearer {{loginAdmin.response.body.data.access_token}}
+Content-Type: application/json
+
+{
+  "role_id": {{createRole.response.body.data.id}},
+  "resource_id": 24
+}
+
+### 8.2 Conceder GET /api/clients/:id (recurso ID: 26)
+# @name grantReadOneClient
+POST {{baseUrl}}/resource-roles
+Authorization: Bearer {{loginAdmin.response.body.data.access_token}}
+Content-Type: application/json
+
+{
+  "role_id": {{createRole.response.body.data.id}},
+  "resource_id": 26
+}
+
+### ============================================================
+### PASO 9 — El usuario ejecuta la acción permitida
+### Debe retornar: 200 OK (Ahora sí tiene permiso para listar clientes)
+### ============================================================
+GET {{baseUrl}}/clients
+Authorization: Bearer {{loginUser.response.body.data.access_token}}
+
+### ============================================================
+### PASO 10 — El usuario intenta una acción para la que NO tiene permiso
+### Intenta crear un cliente (POST /api/clients)
+### Debe retornar: 403 Forbidden
+### ============================================================
+POST {{baseUrl}}/clients
+Authorization: Bearer {{loginUser.response.body.data.access_token}}
+Content-Type: application/json
+
+{
+  "name": "Cliente Intento Denegado",
+  "email": "denegado@hornoraiz.com",
+  "phone": "3001112233"
+}
+
+### ============================================================
+### PASO 11 — El Administrador ejecuta la acción que el usuario no pudo
+### Debe retornar: 201 Created (El admin sí tiene permisos de creación)
+### ============================================================
+POST {{baseUrl}}/clients
+Authorization: Bearer {{loginAdmin.response.body.data.access_token}}
+Content-Type: application/json
+
+{
+  "name": "Cliente Panadería El Trigo",
+  "email": "eltrigo@hornoraiz.com",
+  "phone": "3009998877",
+  "address": "Calle 45 # 12-34"
+}

@@ -1,27 +1,53 @@
 import { Injectable } from '@nestjs/common';
-import { ResourceRoleModel } from '../../infrastructure/models/resource-role.model';
-import { RoleModel } from '../../infrastructure/models/role.model';
-import { ResourceModel } from '../../infrastructure/models/resource.model';
-import { GrantPermissionDto } from '../dto/grant-permission.dto';
+import { Op } from 'sequelize';
+import { ResourceRoleModel } from '../../infrastructure/models/resource-role.model.js';
+import { RoleUserModel } from '../../infrastructure/models/role-user.model.js';
+import { ResourceModel } from '../../infrastructure/models/resource.model.js';
 
 @Injectable()
 export class ResourceRoleRepository {
-  async findAll(): Promise<ResourceRoleModel[]> {
+  async findAll() {
     return ResourceRoleModel.findAll({
-      where: { status: 'active' },
-      include: [
-        { model: RoleModel, as: 'role', attributes: ['id', 'name'] },
-        { model: ResourceModel, as: 'resource', attributes: ['id', 'method', 'path', 'description'] },
-      ],
+      include: [{ model: ResourceModel, as: 'resource' }],
     });
   }
-  async findByRoleAndResource(role_id: number, resource_id: number): Promise<ResourceRoleModel | null> {
-    return ResourceRoleModel.findOne({ where: { role_id, resource_id } });
+
+  async findByRoleId(roleId: number) {
+    return ResourceRoleModel.findAll({
+      where: { role_id: roleId },
+      include: [{ model: ResourceModel, as: 'resource' }],
+    });
   }
-  async create(dto: GrantPermissionDto): Promise<ResourceRoleModel> {
-    return ResourceRoleModel.create({ role_id: dto.role_id, resource_id: dto.resource_id, status: dto.status || 'active' });
+
+  async findByUserId(userId: number) {
+    // 1. Obtener los roles del usuario desde la tabla pivote role_users
+    const userRoles = await RoleUserModel.findAll({
+      where: { user_id: userId },
+    });
+
+    const roleIds = userRoles.map((ur: any) => ur.role_id);
+    if (roleIds.length === 0) return [];
+
+    // 2. Traer las concesiones de esos roles junto con el recurso
+    return ResourceRoleModel.findAll({
+      where: {
+        role_id: { [Op.in]: roleIds },
+      },
+      include: [{ model: ResourceModel, as: 'resource' }],
+    });
   }
-  async updateStatus(id: number, status: 'active' | 'inactive'): Promise<[number]> {
+
+  async findByRoleAndResource(role_id: number, resource_id: number) {
+    return ResourceRoleModel.findOne({
+      where: { role_id, resource_id },
+    });
+  }
+
+  async create(data: any) {
+    return ResourceRoleModel.create(data);
+  }
+
+  async updateStatus(id: number, status: string) {
     return ResourceRoleModel.update({ status }, { where: { id } });
   }
 }

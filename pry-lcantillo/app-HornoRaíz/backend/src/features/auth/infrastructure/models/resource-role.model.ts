@@ -1,10 +1,12 @@
-// src/features/auth/infrastructure/models/resource-role.model.ts
-import { Table, Column, Model, DataType, ForeignKey } from 'sequelize-typescript';
-import { RoleModel } from './role.model';
-import { ResourceModel } from './resource.model';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { RoleModel } from './role.model.js';
+import { ResourceModel } from './resource.model.js';
 
-@Table({ tableName: 'resource_roles', timestamps: true })
+@Table({ tableName: 'auth_resource_roles', timestamps: false })
 export class ResourceRoleModel extends Model {
+  @Column({ primaryKey: true, autoIncrement: true, type: DataType.INTEGER })
+  id!: number;
+
   @ForeignKey(() => RoleModel)
   @Column({ type: DataType.INTEGER, allowNull: false })
   role_id!: number;
@@ -13,6 +15,13 @@ export class ResourceRoleModel extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   resource_id!: number;
 
-  @Column({ type: DataType.ENUM('active', 'inactive'), defaultValue: 'inactive', allowNull: false })
+  // DECLARACIÓN DE LA COLUMNA STATUS:
+  @Column({ type: DataType.ENUM('active', 'inactive'), defaultValue: 'active' })
   status!: 'active' | 'inactive';
+
+  @BelongsTo(() => RoleModel)
+  role!: RoleModel;
+
+  @BelongsTo(() => ResourceModel)
+  resource!: ResourceModel;
 }

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Delete, Body, Query, ParseIntPipe } from '@nestj
 import { ResourceRoleService } from '../application/resource-role.service';
 import { GrantPermissionDto } from '../dto/grant-permission.dto';
 
-@Controller('api/concesiones-rol')
+@Controller('resource-roles')
 export class ResourceRoleController {
   constructor(private readonly resourceRoleService: ResourceRoleService) {}
   @Get() async findAll() { return this.resourceRoleService.findAll(); }

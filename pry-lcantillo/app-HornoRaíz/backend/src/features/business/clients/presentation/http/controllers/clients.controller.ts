@@ -1,13 +1,16 @@
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateClientDto } from '../../../application/dto/create-client.dto.js';
 import { ClientMapper } from '../../../application/mappers/client.mapper.js';
 import { CreateClientUseCase } from '../../../application/use-cases/create-client.use-case.js';
 import { GetClientByIdUseCase } from '../../../application/use-cases/get-client-by-id.use-case.js';
 import { ListClientsUseCase } from '../../../application/use-cases/list-clients.use-case.js';
+import { JwtAuthGuard } from '../../../../../auth/access/jwt-auth.guard.js';
+import { RbacGuard } from '../../../../../auth/access/rbac.guard.js';
 
 @ApiTags('clients')
 @Controller('clients')
+@UseGuards(JwtAuthGuard, RbacGuard)
 export class ClientsController {
   constructor(
     private readonly createClient: CreateClientUseCase,

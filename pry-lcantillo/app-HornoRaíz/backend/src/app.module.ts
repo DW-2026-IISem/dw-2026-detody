@@ -16,6 +16,7 @@ import { RolesModule } from './features/auth/roles/roles.module';
 import { ResourcesModule } from './features/auth/resources/resources.module';
 import { RoleUsersModule } from './features/auth/role-users/role-users.module';
 import { ResourceRolesModule } from './features/auth/resource-roles/resource-roles.module';
+import { SessionModule } from './features/auth/session/session.module';
 
 @Module({
   providers: [ProductSeeder, ProductTypeSeeder, ClientSeeder, SaleSeeder, MainSeeder],
@@ -32,6 +33,7 @@ import { ResourceRolesModule } from './features/auth/resource-roles/resource-rol
     ResourcesModule,
     RoleUsersModule,
     ResourceRolesModule,
+    SessionModule,
   ],
 })
 export class AppModule {}

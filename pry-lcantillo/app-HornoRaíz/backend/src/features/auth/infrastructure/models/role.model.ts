@@ -1,5 +1,5 @@
 // src/features/auth/infrastructure/models/role.model.ts
-import { Table, Column, Model, DataType, Unique, BeforeValidate, BelongsToMany } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, Unique, BeforeValidate, BelongsToMany, HasMany } from 'sequelize-typescript';
 import { UserModel } from './user.model';
 import { RoleUserModel } from '../../roles/dto/role-user.model';
 import { ResourceModel } from './resource.model';
@@ -27,4 +27,6 @@ export class RoleModel extends Model {
   static uppercaseName(instance: RoleModel) {
     if (instance.name) instance.name = instance.name.trim().toUpperCase();
   }
+  @HasMany(() => ResourceRoleModel)
+  resourceRoles!: ResourceRoleModel[];
 }

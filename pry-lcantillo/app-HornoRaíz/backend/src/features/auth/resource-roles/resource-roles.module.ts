@@ -1,14 +1,11 @@
 import { Module } from '@nestjs/common';
-import { SequelizeModule } from '@nestjs/sequelize';
-import { ResourceRoleModel } from '../infrastructure/models/resource-role.model';
-import { ResourceRoleController } from './infrastructure/resource-role.controller';
-import { ResourceRoleService } from './application/resource-role.service';
-import { ResourceRoleRepository } from './infrastructure/resource-role.repository';
+import { ResourceRoleController } from './infrastructure/resource-role.controller.js';
+import { ResourceRoleService } from './application/resource-role.service.js';
+import { ResourceRoleRepository } from './infrastructure/resource-role.repository.js';
 
 @Module({
-  imports: [SequelizeModule.forFeature([ResourceRoleModel])],
   controllers: [ResourceRoleController],
   providers: [ResourceRoleService, ResourceRoleRepository],
-  exports: [ResourceRoleService],
+  exports: [ResourceRoleService], // <-- INDISPENSABLE para que el Guard lo pueda inyectar
 })
 export class ResourceRolesModule {}

@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Put, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../../access/jwt-auth.guard.js';
+import { RbacGuard } from '../../access/rbac.guard.js';
 import { UserService } from '../application/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 
-@Controller('api/users')
+@Controller('users')
+@UseGuards(JwtAuthGuard, RbacGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

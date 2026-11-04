@@ -2,7 +2,7 @@ import { Controller, Get, Post, Delete, Body, Query, ParseIntPipe } from '@nestj
 import { RoleUserService } from '../application/role-user.service';
 import { CreateRoleUserDto } from '../dto/create-role-user.dto';
 
-@Controller('api/asignaciones-rol')
+@Controller('role-users')
 export class RoleUserController {
   constructor(private readonly roleUserService: RoleUserService) {}
   @Get() async findAll() { return this.roleUserService.findAll(); }
