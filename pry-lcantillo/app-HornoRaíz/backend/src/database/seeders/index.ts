@@ -131,14 +131,18 @@ export async function runAllSeeders(): Promise<void> {
       { method: 'POST', path: '/api/resources', description: 'Crear recurso API', isSeller: false },
       { method: 'GET', path: '/api/resources/:id', description: 'Detalle recurso API', isSeller: false },
       { method: 'PUT', path: '/api/resources/:id', description: 'Actualizar recurso API', isSeller: false },
+      { method: 'PATCH', path: '/api/resources/:id', description: 'Actualizar recurso API (PATCH)', isSeller: false },
+      { method: 'PATCH', path: '/api/resources/:id/deactivate', description: 'Desactivar recurso API', isSeller: false },
       { method: 'DELETE', path: '/api/resources/:id', description: 'Eliminar recurso API', isSeller: false },
 
       { method: 'GET', path: '/api/role-users', description: 'Listar relaciones usuario-rol', isSeller: false },
       { method: 'POST', path: '/api/role-users', description: 'Asignar rol a usuario', isSeller: false },
+      { method: 'PATCH', path: '/api/role-users/:id/deactivate', description: 'Retirar rol de usuario', isSeller: false },
       { method: 'DELETE', path: '/api/role-users/:id', description: 'Remover rol de usuario', isSeller: false },
 
       { method: 'GET', path: '/api/resource-roles', description: 'Listar concesiones RBAC', isSeller: false },
       { method: 'POST', path: '/api/resource-roles', description: 'Crear concesion RBAC', isSeller: false },
+      { method: 'PATCH', path: '/api/resource-roles/:id/deactivate', description: 'Revocar concesion RBAC', isSeller: false },
       { method: 'DELETE', path: '/api/resource-roles/:id', description: 'Eliminar concesion RBAC', isSeller: false },
 
       // Negocio (Clients)
@@ -146,6 +150,8 @@ export async function runAllSeeders(): Promise<void> {
       { method: 'POST', path: '/api/clients', description: 'Crear cliente', isSeller: true },
       { method: 'GET', path: '/api/clients/:id', description: 'Detalle cliente', isSeller: true },
       { method: 'PUT', path: '/api/clients/:id', description: 'Actualizar cliente', isSeller: false },
+      { method: 'PATCH', path: '/api/clients/:id', description: 'Actualizar cliente (PATCH)', isSeller: false },
+      { method: 'PATCH', path: '/api/clients/:id/deactivate', description: 'Baja logica cliente', isSeller: false },
       { method: 'DELETE', path: '/api/clients/:id', description: 'Eliminar cliente', isSeller: false },
 
       // Negocio (Product Types)
@@ -153,6 +159,8 @@ export async function runAllSeeders(): Promise<void> {
       { method: 'POST', path: '/api/product-types', description: 'Crear tipo de producto', isSeller: false },
       { method: 'GET', path: '/api/product-types/:id', description: 'Detalle tipo de producto', isSeller: true },
       { method: 'PUT', path: '/api/product-types/:id', description: 'Actualizar tipo de producto', isSeller: false },
+      { method: 'PATCH', path: '/api/product-types/:id', description: 'Actualizar tipo de producto (PATCH)', isSeller: false },
+      { method: 'PATCH', path: '/api/product-types/:id/deactivate', description: 'Baja logica tipo de producto', isSeller: false },
       { method: 'DELETE', path: '/api/product-types/:id', description: 'Eliminar tipo de producto', isSeller: false },
 
       // Negocio (Products)
@@ -160,6 +168,8 @@ export async function runAllSeeders(): Promise<void> {
       { method: 'POST', path: '/api/products', description: 'Crear producto', isSeller: false },
       { method: 'GET', path: '/api/products/:id', description: 'Detalle producto', isSeller: true },
       { method: 'PUT', path: '/api/products/:id', description: 'Actualizar producto', isSeller: false },
+      { method: 'PATCH', path: '/api/products/:id', description: 'Actualizar producto (PATCH)', isSeller: false },
+      { method: 'PATCH', path: '/api/products/:id/deactivate', description: 'Baja logica producto', isSeller: false },
       { method: 'DELETE', path: '/api/products/:id', description: 'Eliminar producto', isSeller: false },
 
       // Negocio (Sales)
@@ -167,6 +177,8 @@ export async function runAllSeeders(): Promise<void> {
       { method: 'POST', path: '/api/sales', description: 'Registrar venta', isSeller: true },
       { method: 'GET', path: '/api/sales/:id', description: 'Detalle venta', isSeller: true },
       { method: 'PUT', path: '/api/sales/:id', description: 'Actualizar venta', isSeller: false },
+      { method: 'PATCH', path: '/api/sales/:id', description: 'Actualizar venta (PATCH)', isSeller: false },
+      { method: 'PATCH', path: '/api/sales/:id/deactivate', description: 'Anular venta', isSeller: false },
       { method: 'DELETE', path: '/api/sales/:id', description: 'Anular/Eliminar venta', isSeller: false },
 
       // Negocio (Product Sales)

@@ -7,10 +7,12 @@
       *appHasPermission="'POST /api/recursos'"
       pButton
       type="button"
-      label="Nuevo Recurso"
-      icon="pi pi-plus"
+      class="bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-sm hover:shadow transition-all duration-200 rounded-lg px-4 py-2 border-none flex items-center gap-2 cursor-pointer"
       (click)="openCreate()"
-    ></button>
+    >
+      <i pButtonIcon class="pi pi-plus"></i>
+      <span pButtonLabel>Nuevo recurso</span>
+    </button>
   </app-page-header>
 
   <!-- Métodos contadores resumen -->
@@ -129,35 +131,41 @@
                   *appHasPermission="'PATCH /api/recursos/:id'"
                   pButton
                   type="button"
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-blue-600 hover:bg-blue-50 transition-colors p-2"
+                  text
+                  rounded
+                  aria-label="Editar recurso"
                   pTooltip="Editar recurso"
                   (click)="openEdit(res)"
-                ></button>
+                >
+                  <i class="pi pi-pencil text-base"></i>
+                </button>
                 <button
                   *appHasPermission="'PATCH /api/recursos/:id/deactivate'"
                   pButton
                   type="button"
-                  icon="pi pi-ban"
-                  severity="warn"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-amber-600 hover:bg-amber-50 transition-colors p-2"
+                  text
+                  rounded
+                  aria-label="Desactivar recurso"
                   pTooltip="Desactivar recurso"
                   (click)="confirmDeactivate(res)"
-                ></button>
+                >
+                  <i class="pi pi-ban text-base"></i>
+                </button>
                 <button
                   *appHasPermission="'DELETE /api/recursos/:id'"
                   pButton
                   type="button"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-red-600 hover:bg-red-50 transition-colors p-2"
+                  text
+                  rounded
+                  aria-label="Eliminar recurso"
                   pTooltip="Eliminar recurso"
                   (click)="confirmDelete(res)"
-                ></button>
+                >
+                  <i class="pi pi-trash text-base"></i>
+                </button>
               </div>
             </td>
           </tr>

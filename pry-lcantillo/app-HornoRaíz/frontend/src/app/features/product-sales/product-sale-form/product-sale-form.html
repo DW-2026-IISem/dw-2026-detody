@@ -73,12 +73,18 @@
       type="button"
       severity="secondary"
       outlined
+      class="border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg px-4 py-2 font-medium transition-colors"
       [disabled]="saving()"
       (click)="cancelled.emit()"
     >
       <span pButtonLabel>Cancelar</span>
     </button>
-    <button pButton type="submit" [loading]="saving()" severity="primary">
+    <button
+      pButton
+      type="submit"
+      [loading]="saving()"
+      class="bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-5 py-2 shadow-sm hover:shadow border-none transition-all duration-200 cursor-pointer"
+    >
       <i pButtonIcon class="pi pi-check"></i>
       <span pButtonLabel>{{ saving() ? 'Guardando...' : 'Guardar línea' }}</span>
     </button>

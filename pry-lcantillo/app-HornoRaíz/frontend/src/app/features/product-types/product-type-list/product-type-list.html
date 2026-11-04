@@ -7,6 +7,7 @@
     *appHasPermission="'POST /api/tipos-producto'"
     pButton
     type="button"
+    class="bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-sm hover:shadow transition-all duration-200 rounded-lg px-4 py-2 border-none flex items-center gap-2 cursor-pointer"
     (click)="openCreate()"
   >
     <i pButtonIcon class="pi pi-plus"></i>
@@ -75,37 +76,40 @@
               type="button"
               text
               rounded
-              severity="secondary"
-              icon="pi pi-pencil"
+              class="text-blue-600 hover:bg-blue-50 transition-colors p-2"
               *appHasPermission="'PATCH /api/tipos-producto/:id'"
               aria-label="Editar tipo"
               pTooltip="Editar"
               (click)="openEdit(row)"
-            ></button>
+            >
+              <i class="pi pi-pencil text-base"></i>
+            </button>
             <button
               pButton
               type="button"
               text
               rounded
-              severity="warn"
-              icon="pi pi-ban"
+              class="text-amber-600 hover:bg-amber-50 transition-colors p-2"
               *appHasPermission="'PATCH /api/tipos-producto/:id/deactivate'"
               aria-label="Dar de baja al tipo"
               pTooltip="Baja lógica"
               (click)="deactivate(row)"
-            ></button>
+            >
+              <i class="pi pi-ban text-base"></i>
+            </button>
             <button
               pButton
               type="button"
               text
               rounded
-              severity="danger"
-              icon="pi pi-trash"
+              class="text-red-600 hover:bg-red-50 transition-colors p-2"
               *appHasPermission="'DELETE /api/tipos-producto/:id'"
               aria-label="Eliminar tipo"
               pTooltip="Eliminar"
               (click)="remove(row)"
-            ></button>
+            >
+              <i class="pi pi-trash text-base"></i>
+            </button>
           </div>
         </td>
       </tr>

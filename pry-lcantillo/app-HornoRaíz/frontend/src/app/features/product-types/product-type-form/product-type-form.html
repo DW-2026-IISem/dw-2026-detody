@@ -45,10 +45,22 @@
   </div>
 
   <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
-    <button pButton type="button" severity="secondary" outlined (click)="cancelled.emit()">
+    <button
+      pButton
+      type="button"
+      severity="secondary"
+      outlined
+      class="border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg px-4 py-2 font-medium transition-colors"
+      (click)="cancelled.emit()"
+    >
       <span pButtonLabel>Cancelar</span>
     </button>
-    <button pButton type="submit" [loading]="saving()">
+    <button
+      pButton
+      type="submit"
+      [loading]="saving()"
+      class="bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-5 py-2 shadow-sm hover:shadow border-none transition-all duration-200 cursor-pointer"
+    >
       <i pButtonIcon class="pi pi-check"></i>
       <span pButtonLabel>Guardar</span>
     </button>

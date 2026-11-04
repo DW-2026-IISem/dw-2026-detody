@@ -7,10 +7,12 @@
       *appHasPermission="'POST /api/concesiones-rol'"
       pButton
       type="button"
-      label="Conceder Permiso"
-      icon="pi pi-key"
+      class="bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-sm hover:shadow transition-all duration-200 rounded-lg px-4 py-2 border-none flex items-center gap-2 cursor-pointer"
       (click)="openGrant()"
-    ></button>
+    >
+      <i pButtonIcon class="pi pi-key"></i>
+      <span pButtonLabel>Conceder permiso</span>
+    </button>
   </app-page-header>
 
   <p-card>
@@ -111,13 +113,15 @@
                 *appHasPermission="'PATCH /api/concesiones-rol/:id/deactivate'"
                 pButton
                 type="button"
-                icon="pi pi-times"
-                severity="warn"
-                [text]="true"
-                [rounded]="true"
+                class="text-red-600 hover:bg-red-50 transition-colors p-2"
+                text
+                rounded
+                aria-label="Revocar permiso"
                 pTooltip="Revocar permiso"
                 (click)="confirmRevoke(grant)"
-              ></button>
+              >
+                <i class="pi pi-times text-base"></i>
+              </button>
             </td>
           </tr>
         </ng-template>
@@ -204,6 +208,7 @@
         label="Cancelar"
         severity="secondary"
         [outlined]="true"
+        styleClass="border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg px-4 py-2 font-medium"
         (click)="dialogOpen.set(false)"
       />
       <p-button
@@ -211,6 +216,7 @@
         label="Conceder Permiso"
         severity="primary"
         icon="pi pi-check"
+        styleClass="bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-5 py-2 border-none shadow-sm"
         [loading]="saving()"
         [disabled]="!canSave() || saving()"
         (click)="save()"

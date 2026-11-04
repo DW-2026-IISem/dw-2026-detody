@@ -79,6 +79,7 @@
       label="Cancelar"
       severity="secondary"
       [outlined]="true"
+      styleClass="border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg px-4 py-2 font-medium"
       (click)="cancel()"
     />
     <p-button
@@ -86,6 +87,7 @@
       [label]="user() ? 'Actualizar Usuario' : 'Crear Usuario'"
       severity="primary"
       icon="pi pi-check"
+      styleClass="bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-5 py-2 border-none shadow-sm"
       [loading]="saving()"
       [disabled]="form.invalid || saving()"
     />

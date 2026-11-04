@@ -7,10 +7,12 @@
       *appHasPermission="'POST /api/usuarios'"
       pButton
       type="button"
-      label="Nuevo Usuario"
-      icon="pi pi-user-plus"
+      class="bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-sm hover:shadow transition-all duration-200 rounded-lg px-4 py-2 border-none flex items-center gap-2 cursor-pointer"
       (click)="openCreate()"
-    ></button>
+    >
+      <i pButtonIcon class="pi pi-user-plus"></i>
+      <span pButtonLabel>Nuevo usuario</span>
+    </button>
   </app-page-header>
 
   <p-card>
@@ -81,48 +83,56 @@
                   *appHasPermission="'GET /api/usuarios'"
                   pButton
                   type="button"
-                  icon="pi pi-key"
-                  severity="info"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-indigo-600 hover:bg-indigo-50 transition-colors p-2"
+                  text
+                  rounded
+                  aria-label="Ver permisos efectivos"
                   pTooltip="Ver permisos efectivos"
                   (click)="viewPermissions(user)"
-                ></button>
+                >
+                  <i class="pi pi-key text-base"></i>
+                </button>
                 <button
                   *appHasPermission="'PATCH /api/usuarios/:id'"
                   pButton
                   type="button"
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-blue-600 hover:bg-blue-50 transition-colors p-2"
+                  text
+                  rounded
+                  aria-label="Editar usuario"
                   pTooltip="Editar usuario"
                   (click)="openEdit(user)"
-                ></button>
+                >
+                  <i class="pi pi-pencil text-base"></i>
+                </button>
                 <button
                   *appHasPermission="'PATCH /api/usuarios/:id/deactivate'"
                   pButton
                   type="button"
-                  icon="pi pi-ban"
-                  severity="warn"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-amber-600 hover:bg-amber-50 transition-colors p-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  text
+                  rounded
                   [disabled]="isSelf(user)"
+                  aria-label="Desactivar usuario"
                   pTooltip="Desactivar usuario"
                   (click)="confirmDeactivate(user)"
-                ></button>
+                >
+                  <i class="pi pi-ban text-base"></i>
+                </button>
                 <button
                   *appHasPermission="'DELETE /api/usuarios/:id'"
                   pButton
                   type="button"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-red-600 hover:bg-red-50 transition-colors p-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  text
+                  rounded
                   [disabled]="isSelf(user)"
+                  aria-label="Eliminar usuario"
                   pTooltip="Eliminar usuario"
                   (click)="confirmDelete(user)"
-                ></button>
+                >
+                  <i class="pi pi-trash text-base"></i>
+                </button>
               </div>
             </td>
           </tr>

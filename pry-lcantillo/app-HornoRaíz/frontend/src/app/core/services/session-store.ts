@@ -132,8 +132,11 @@ export class SessionStore {
     }
     const verb = method.toUpperCase();
     const requestPath = path.split('?')[0];
+    const isUpdateVerb = (v: string) => v === 'PUT' || v === 'PATCH';
     return this._permissions().some(
-      (permission) => permission.method === verb && pathMatches(permission.path, requestPath),
+      (permission) =>
+        (permission.method === verb || (isUpdateVerb(permission.method) && isUpdateVerb(verb))) &&
+        pathMatches(permission.path, requestPath),
     );
   }
 
@@ -267,6 +270,22 @@ export class SessionStore {
             method: 'POST',
             path: '/api/ventas',
             description: 'Procesar venta con rollback transaccional',
+            role_id: 1,
+            role_name: 'ADMIN',
+          },
+          {
+            resource_id: 99,
+            method: 'PATCH',
+            path: '/api/ventas/:id',
+            description: 'Actualizar o anular venta',
+            role_id: 1,
+            role_name: 'ADMIN',
+          },
+          {
+            resource_id: 100,
+            method: 'DELETE',
+            path: '/api/ventas/:id',
+            description: 'Eliminar venta',
             role_id: 1,
             role_name: 'ADMIN',
           },
@@ -600,5 +619,11 @@ function pathMatches(pattern: string, path: string): boolean {
   const normPath = normalizeRouteAliases(path);
 
   const escaped = normPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/:[^/]+/g, '/[^/]+');
-  return new RegExp(`^${escaped}$`).test(normPath);
+  if (new RegExp(`^${escaped}$`).test(normPath)) {
+    return true;
+  }
+  if (new RegExp(`^${escaped}/deactivate$`).test(normPath)) {
+    return true;
+  }
+  return false;
 }

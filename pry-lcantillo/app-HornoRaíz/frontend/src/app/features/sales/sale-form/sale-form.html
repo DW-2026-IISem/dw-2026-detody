@@ -3,7 +3,14 @@
   subtitle="Borrador transaccional en memoria: selecciona cliente, agrega ítems y confirma."
 >
   <div class="flex items-center gap-2">
-    <button pButton type="button" severity="secondary" outlined routerLink="/ventas">
+    <button
+      pButton
+      type="button"
+      severity="secondary"
+      outlined
+      class="border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg px-4 py-2 font-medium transition-colors"
+      routerLink="/ventas"
+    >
       <i pButtonIcon class="pi pi-arrow-left"></i>
       <span pButtonLabel>Volver a Ventas</span>
     </button>
@@ -82,7 +89,7 @@
             pButton
             type="button"
             severity="primary"
-            class="w-full"
+            class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg px-4 py-2 border-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             [disabled]="!selectedProductId()"
             (click)="addLine()"
           >
@@ -156,12 +163,13 @@
                 type="button"
                 text
                 rounded
-                severity="danger"
-                icon="pi pi-trash"
+                class="text-red-600 hover:bg-red-50 transition-colors p-2"
                 aria-label="Quitar línea"
                 pTooltip="Quitar del borrador"
                 (click)="removeLine(index)"
-              ></button>
+              >
+                <i class="pi pi-trash text-base"></i>
+              </button>
             </td>
           </tr>
         </ng-template>
@@ -256,7 +264,7 @@
         pButton
         type="button"
         severity="primary"
-        class="w-full mt-2"
+        class="w-full mt-4 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border-none flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         [loading]="saving()"
         [disabled]="loading() || lines().length === 0 || !clientId()"
         (click)="save()"

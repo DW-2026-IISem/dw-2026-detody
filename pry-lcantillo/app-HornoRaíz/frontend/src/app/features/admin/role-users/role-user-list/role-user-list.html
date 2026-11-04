@@ -7,10 +7,12 @@
       *appHasPermission="'POST /api/asignaciones-rol'"
       pButton
       type="button"
-      label="Asignar Rol"
-      icon="pi pi-user-plus"
+      class="bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-sm hover:shadow transition-all duration-200 rounded-lg px-4 py-2 border-none flex items-center gap-2 cursor-pointer"
       (click)="openAssign()"
-    ></button>
+    >
+      <i pButtonIcon class="pi pi-user-plus"></i>
+      <span pButtonLabel>Asignar rol</span>
+    </button>
   </app-page-header>
 
   <p-card>
@@ -101,13 +103,15 @@
                 *appHasPermission="'PATCH /api/asignaciones-rol/:id/deactivate'"
                 pButton
                 type="button"
-                icon="pi pi-user-minus"
-                severity="warn"
-                [text]="true"
-                [rounded]="true"
+                class="text-amber-600 hover:bg-amber-50 transition-colors p-2"
+                text
+                rounded
+                aria-label="Retirar rol del usuario"
                 pTooltip="Retirar rol del usuario"
                 (click)="confirmRevoke(row)"
-              ></button>
+              >
+                <i class="pi pi-user-minus text-base"></i>
+              </button>
             </td>
           </tr>
         </ng-template>
@@ -167,6 +171,7 @@
         label="Cancelar"
         severity="secondary"
         [outlined]="true"
+        styleClass="border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg px-4 py-2 font-medium"
         (click)="dialogOpen.set(false)"
       />
       <p-button
@@ -174,6 +179,7 @@
         label="Guardar Asignación"
         severity="primary"
         icon="pi pi-check"
+        styleClass="bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-5 py-2 border-none shadow-sm"
         [loading]="saving()"
         [disabled]="!canSave() || saving()"
         (click)="save()"

@@ -7,10 +7,12 @@
       *appHasPermission="'POST /api/roles'"
       pButton
       type="button"
-      label="Nuevo Rol"
-      icon="pi pi-shield"
+      class="bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-sm hover:shadow transition-all duration-200 rounded-lg px-4 py-2 border-none flex items-center gap-2 cursor-pointer"
       (click)="openCreate()"
-    ></button>
+    >
+      <i pButtonIcon class="pi pi-shield"></i>
+      <span pButtonLabel>Nuevo rol</span>
+    </button>
   </app-page-header>
 
   <p-card>
@@ -74,35 +76,41 @@
                   *appHasPermission="'PATCH /api/roles/:id'"
                   pButton
                   type="button"
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-blue-600 hover:bg-blue-50 transition-colors p-2"
+                  text
+                  rounded
+                  aria-label="Editar rol"
                   pTooltip="Editar rol"
                   (click)="openEdit(role)"
-                ></button>
+                >
+                  <i class="pi pi-pencil text-base"></i>
+                </button>
                 <button
                   *appHasPermission="'PATCH /api/roles/:id/deactivate'"
                   pButton
                   type="button"
-                  icon="pi pi-ban"
-                  severity="warn"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-amber-600 hover:bg-amber-50 transition-colors p-2"
+                  text
+                  rounded
+                  aria-label="Desactivar rol"
                   pTooltip="Desactivar rol"
                   (click)="confirmDeactivate(role)"
-                ></button>
+                >
+                  <i class="pi pi-ban text-base"></i>
+                </button>
                 <button
                   *appHasPermission="'DELETE /api/roles/:id'"
                   pButton
                   type="button"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  [text]="true"
-                  [rounded]="true"
+                  class="text-red-600 hover:bg-red-50 transition-colors p-2"
+                  text
+                  rounded
+                  aria-label="Eliminar rol"
                   pTooltip="Eliminar rol"
                   (click)="confirmDelete(role)"
-                ></button>
+                >
+                  <i class="pi pi-trash text-base"></i>
+                </button>
               </div>
             </td>
           </tr>

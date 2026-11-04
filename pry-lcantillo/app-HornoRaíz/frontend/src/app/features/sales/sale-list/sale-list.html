@@ -9,7 +9,13 @@
       severity="success"
       [rounded]="true"
     />
-    <button *appHasPermission="'POST /api/ventas'" pButton type="button" routerLink="/ventas/nueva">
+    <button
+      *appHasPermission="'POST /api/ventas'"
+      pButton
+      type="button"
+      class="bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-sm hover:shadow transition-all duration-200 rounded-lg px-4 py-2 border-none flex items-center gap-2 cursor-pointer"
+      routerLink="/ventas/nueva"
+    >
       <i pButtonIcon class="pi pi-plus"></i>
       <span pButtonLabel>Nueva venta</span>
     </button>
@@ -99,35 +105,38 @@
               type="button"
               text
               rounded
-              severity="info"
-              icon="pi pi-eye"
+              class="text-indigo-600 hover:bg-indigo-50 transition-colors p-2"
               aria-label="Ver detalle"
               pTooltip="Ver detalle de venta"
               (click)="openDetail(row)"
-            ></button>
+            >
+              <i class="pi pi-eye text-base"></i>
+            </button>
             <button
               pButton
               type="button"
               text
               rounded
-              severity="warn"
-              icon="pi pi-ban"
+              class="text-amber-600 hover:bg-amber-50 transition-colors p-2"
               *appHasPermission="'PATCH /api/ventas/:id/deactivate'"
               aria-label="Cancelar venta"
               pTooltip="Anular venta y restaurar stock"
               (click)="deactivate(row)"
-            ></button>
+            >
+              <i class="pi pi-ban text-base"></i>
+            </button>
             <button
               pButton
               type="button"
               text
               rounded
-              severity="danger"
-              icon="pi pi-trash"
+              class="text-red-600 hover:bg-red-50 transition-colors p-2"
               aria-label="Eliminar venta"
               pTooltip="Eliminar definitivamente"
               (click)="remove(row)"
-            ></button>
+            >
+              <i class="pi pi-trash text-base"></i>
+            </button>
           </div>
         </td>
       </tr>

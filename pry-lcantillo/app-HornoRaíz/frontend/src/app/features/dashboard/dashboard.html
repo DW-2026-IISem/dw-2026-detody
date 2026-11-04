@@ -6,7 +6,7 @@
     *appHasPermission="'POST /api/ventas'"
     pButton
     type="button"
-    severity="primary"
+    class="bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-sm hover:shadow transition-all duration-200 rounded-lg px-4 py-2 border-none flex items-center gap-2 cursor-pointer"
     routerLink="/ventas/nueva"
   >
     <i pButtonIcon class="pi pi-plus"></i>
@@ -118,7 +118,13 @@
           <i class="pi pi-exclamation-triangle text-amber-500"></i>
           <h2 class="text-base font-bold text-slate-800">Alertas de Stock Bajo</h2>
         </div>
-        <button pButton type="button" text severity="primary" routerLink="/productos">
+        <button
+          pButton
+          type="button"
+          text
+          class="text-xs font-semibold text-amber-700 hover:text-amber-800 hover:bg-amber-50 px-2 py-1 rounded transition-colors"
+          routerLink="/productos"
+        >
           <span pButtonLabel class="text-xs">Ver catálogo</span>
         </button>
       </div>
@@ -169,7 +175,13 @@
           <i class="pi pi-shopping-cart text-blue-500"></i>
           <h2 class="text-base font-bold text-slate-800">Últimas Ventas</h2>
         </div>
-        <button pButton type="button" text severity="primary" routerLink="/ventas">
+        <button
+          pButton
+          type="button"
+          text
+          class="text-xs font-semibold text-amber-700 hover:text-amber-800 hover:bg-amber-50 px-2 py-1 rounded transition-colors"
+          routerLink="/ventas"
+        >
           <span pButtonLabel class="text-xs">Ver todas</span>
         </button>
       </div>
