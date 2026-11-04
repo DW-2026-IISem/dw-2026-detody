@@ -3,8 +3,7 @@ import { Routes } from '@angular/router';
 /**
  * Rutas de la aplicación.
  *
- * ISS-02 introduce el layout Shell para las rutas del negocio y conserva
- * el prototipo en /construir.
+ * ISS-04 incorpora la ruta para el catálogo de tipos de producto (ProductTypeList).
  */
 export const routes: Routes = [
   {
@@ -27,6 +26,14 @@ export const routes: Routes = [
         title: 'Clientes · HornoRaíz',
         loadComponent: () =>
           import('./features/clients/client-list/client-list').then((m) => m.ClientList),
+      },
+      {
+        path: 'tipos-producto',
+        title: 'Tipos de producto · HornoRaíz',
+        loadComponent: () =>
+          import('./features/product-types/product-type-list/product-type-list').then(
+            (m) => m.ProductTypeList,
+          ),
       },
     ],
   },

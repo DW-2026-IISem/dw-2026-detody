@@ -7,7 +7,7 @@ import { GetProductTypeByIdUseCase } from '../../../application/use-cases/get-pr
 import { ListProductTypesUseCase } from '../../../application/use-cases/list-product-types.use-case.js';
 
 @ApiTags('product-types')
-@Controller('product-types')
+@Controller(['product-types', 'tipos-producto'])
 export class ProductTypesController {
   constructor(
     private readonly createProductType: CreateProductTypeUseCase,

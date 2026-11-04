@@ -1,48 +1,66 @@
-import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ProductType, ProductTypePayload } from '../../core/models';
+import { ProductType, ProductTypePayload } from '../../core/models/product-type.model';
 
+/**
+ * Servicio API para Tipos de Producto (/api/tipos-producto).
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class ProductTypeApi {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/product-types`;
+  private readonly base = `${environment.apiUrl}/tipos-producto`;
+
+  list(): Observable<ProductType[]> {
+    return this.http.get<any>(this.base).pipe(
+      map((response) => {
+        if (Array.isArray(response)) return response;
+        if (response?.data?.items && Array.isArray(response.data.items)) return response.data.items;
+        if (response?.product_types && Array.isArray(response.product_types)) return response.product_types;
+        if (response?.items && Array.isArray(response.items)) return response.items;
+        return [];
+      }),
+    );
+  }
 
   findAll(): Observable<ProductType[]> {
-    return this.http.get<any>(this.baseUrl).pipe(
-      map((res) => {
-        if (Array.isArray(res)) return res;
-        if (res?.items && Array.isArray(res.items)) return res.items;
-        if (res?.product_types && Array.isArray(res.product_types)) return res.product_types;
-        if (res?.productTypes && Array.isArray(res.productTypes)) return res.productTypes;
-        return [];
-      })
+    return this.list();
+  }
+
+  get(id: number): Observable<ProductType> {
+    return this.http.get<any>(`${this.base}/${id}`).pipe(
+      map((response) => response?.data ?? response?.product_type ?? response?.productType ?? response?.item ?? response),
     );
   }
 
   findById(id: number): Observable<ProductType> {
-    return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
-      map((res) => res?.product_type ?? res?.productType ?? res?.item ?? res)
-    );
+    return this.get(id);
   }
 
   create(payload: ProductTypePayload): Observable<ProductType> {
-    return this.http.post<any>(this.baseUrl, payload).pipe(
-      map((res) => res?.product_type ?? res?.productType ?? res?.item ?? res)
+    return this.http.post<any>(this.base, payload).pipe(
+      map((response) => response?.data ?? response?.product_type ?? response?.productType ?? response?.item ?? response),
     );
   }
 
   update(id: number, payload: Partial<ProductTypePayload>): Observable<ProductType> {
-    return this.http.put<any>(`${this.baseUrl}/${id}`, payload).pipe(
-      map((res) => res?.product_type ?? res?.productType ?? res?.item ?? res)
+    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
+      map((response) => response?.data ?? response?.product_type ?? response?.productType ?? response?.item ?? response),
     );
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  deactivate(id: number): Observable<unknown> {
+    return this.http.patch(`${this.base}/${id}/deactivate`, {});
+  }
+
+  remove(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/${id}`);
+  }
+
+  delete(id: number): Observable<unknown> {
+    return this.remove(id);
   }
 }

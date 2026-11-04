@@ -635,4 +635,166 @@ Comportamiento responsivo con reorganización de la cabecera, tabla con scroll h
 
 ---
 
-*Estado actual: ISS-00, ISS-01, ISS-01A, ISS-01B, ISS-02 e ISS-03 completados satisfactoriamente. Próximo paso: ISS-04 (CRUD de Tipos de Producto).*
+## ISS-04: CRUD de Tipos de Producto con Signals
+
+### Objetivo del ISS
+Replicar y consolidar el patrón de arquitectura reactiva con Signals para la entidad `ProductType` (categorías base de panadería y pastelería en HornoRaíz):
+1. Servicio cliente `ProductTypeApi` (`src/app/features/product-types/product-type-api.ts`), consumiendo `/api/tipos-producto` y `/api/product-types` con mapeo defensivo para respuestas de NestJS (`res.data.items`) y Sequelize (`res.product_types`).
+2. Formulario reactivo `ProductTypeForm` con validación de nombre requerido (máximo 120 caracteres), descripción opcional y control del estado bloqueado en edición.
+3. Lista coordinadora `ProductTypeList` gestionada mediante signals (`rows`, `loading`, `saving`, `error`, `filter`, `dialogVisible`, `editing`, `resetKey`) y filtrado puro en memoria (`computed(() => visibleRows())`).
+4. Tabla PrimeNG 22 estilizada con Aura y variables de plantilla nativas (`#caption`, `#header`, `#body`, `#emptymessage`).
+5. Integración en `src/app/app.routes.ts` permitiendo la navegación tanto por URL directa (`/tipos-producto`) como desde el menú lateral de `Shell`.
+
+---
+
+### Criterios de Aceptación (ISS-04) — Estado Consolidado
+
+| Criterio | Descripción | Estado | Resultado Obtenido |
+| :--- | :--- | :---: | :--- |
+| **4.1 Listado Activos** | `GET /api/tipos-producto` lista tipos del seeder en la tabla | **Cumplido** | 3 categorías reales cargadas: Panadería Tradicional, Pastelería y Repostería, Bebidas e Infusiones |
+| **4.2 Validación y Alta** | «Nuevo tipo» valida nombre obligatorio (máx 120) y envía `POST` | **Cumplido** | Formulario valida nombre y emite payload completo con `status: active`; POST exitoso |
+| **4.3 Edición** | «Editar» carga valores, bloquea `status` y envía `PATCH /:id` | **Cumplido** | Diálogo reutiliza el formulario; control `status` deshabilitado; envía atributos mutables |
+| **4.4 Filtro en Memoria** | Buscador filtra por nombre y descripción sin llamadas a red | **Cumplido** | `filterRows` memorizado en `computed()`; 0 peticiones HTTP al buscar |
+| **4.5 Baja Lógica y Física** | Confirmación modal para baja lógica (`PATCH /deactivate`) y física (`DELETE`) | **Cumplido** | Diálogos de confirmación con `ConfirmationService`; recarga reactiva de la tabla |
+| **4.6 Navegación Directa** | La ruta `/tipos-producto` funciona por URL directa y desde el menú | **Cumplido** | Registrada en `app.routes.ts` bajo `Shell` con carga diferida (`loadComponent`) |
+
+---
+
+### Implementación Técnica Paso a Paso
+
+#### 1. Servicio API Cliente (`src/app/features/product-types/product-type-api.ts`)
+
+Consume la API de backend con tipado estricto y desempaquetado polimórfico:
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class ProductTypeApi {
+  private readonly http = inject(HttpClient);
+  private readonly base = `${environment.apiUrl}/tipos-producto`;
+
+  list(): Observable<ProductType[]> {
+    return this.http.get<any>(this.base).pipe(
+      map((response) => {
+        if (Array.isArray(response)) return response;
+        if (response?.data?.items && Array.isArray(response.data.items)) return response.data.items;
+        if (response?.product_types && Array.isArray(response.product_types)) return response.product_types;
+        return [];
+      }),
+    );
+  }
+
+  create(payload: ProductTypePayload): Observable<ProductType> {
+    return this.http.post<any>(this.base, payload).pipe(
+      map((res) => res?.data ?? res?.product_type ?? res),
+    );
+  }
+
+  update(id: number, payload: Partial<ProductTypePayload>): Observable<ProductType> {
+    return this.http.patch<any>(`${this.base}/${id}`, payload).pipe(
+      map((res) => res?.data ?? res?.product_type ?? res),
+    );
+  }
+
+  deactivate(id: number): Observable<unknown> {
+    return this.http.patch(`${this.base}/${id}/deactivate`, {});
+  }
+
+  remove(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/${id}`);
+  }
+}
+```
+
+#### 2. Formulario Reactivo (`src/app/features/product-types/product-type-form/`)
+
+* Control de `resetKey` y bloqueo de `status` durante edición:
+
+```typescript
+// Fragmento clave de product-type-form.ts
+constructor() {
+  effect(() => {
+    const current = this.productType();
+    this.resetKey(); // Forzar reinicio al abrir el diálogo
+
+    this.form.reset({
+      name: current?.name ?? '',
+      description: current?.description ?? '',
+      status: current?.status ?? 'active',
+    });
+
+    if (current) {
+      this.form.controls.status.disable();
+    } else {
+      this.form.controls.status.enable();
+    }
+  });
+}
+```
+
+#### 3. Lista y Filtrado Declarativo (`src/app/features/product-types/product-type-list/`)
+
+* Búsqueda multi-campo en memoria:
+
+```typescript
+readonly visibleRows = computed(() =>
+  filterRows(this.rows(), this.filter(), (row) => [row.name, row.description]),
+);
+```
+
+* Plantilla compatible con PrimeNG 22:
+
+```html
+<p-table [value]="visibleRows()" [loading]="loading()" dataKey="id">
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="name">Nombre <p-sort-icon field="name" /></th>
+      <th>Descripción</th>
+      <th>Estado</th>
+      <th class="text-right">Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-row>
+    <tr>
+      <td class="font-medium text-slate-800">{{ row.name }}</td>
+      <td class="text-slate-600">{{ row.description || '—' }}</td>
+      <td><app-status-tag [status]="row.status" /></td>
+      <td class="text-right">
+        <button pButton text rounded icon="pi pi-pencil" (click)="openEdit(row)"></button>
+        <button pButton text rounded severity="warn" icon="pi pi-ban" (click)="deactivate(row)"></button>
+        <button pButton text rounded severity="danger" icon="pi pi-trash" (click)="remove(row)"></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+```
+
+---
+
+### Evidencias de Verificación y Pruebas Automatizadas
+
+#### 1. Resultados de la Suite de Pruebas Unitarias (Vitest)
+Se ejecutaron las pruebas unitarias completas validando el nuevo servicio, formulario y lista:
+
+1. `src/app/features/product-types/product-type-api.spec.ts` (6 casos aprobados: `list`, `get`, `create`, `update`, `deactivate`, `remove`).
+2. `src/app/features/product-types/product-type-form/product-type-form.spec.ts` (8 casos aprobados: validaciones, longitud máxima, emisiones desacopladas, `resetKey`, cancelación).
+3. `src/app/features/product-types/product-type-list/product-type-list.spec.ts` (10 casos aprobados: carga, manejo de error 500, filtro en computed, modal crear/editar, POST, PATCH, control con toast, baja lógica y física).
+4. Pruebas anteriores consolidadas: `filter-rows.spec.ts` (5 casos), `client-form.spec.ts` (7 casos), `client-list.spec.ts` (10 casos), `client-api.spec.ts` (8 casos), `shell.spec.ts` (3 casos), `construir.spec.ts` (7 casos), `status-tag.spec.ts` (4 casos), `ejemplo.spec.ts` (4 casos), `media-query.spec.ts` (3 casos), `api-error.spec.ts` (3 casos), `app.spec.ts` (2 casos).
+
+**Total: 14 archivos pasados, 80 casos de prueba aprobados (100% de éxito).**
+
+![Resultados de pruebas unitarias y compilación de ISS-04](capturas/iss-04-terminal-tests.png)
+
+#### 2. Evidencia Visual del Módulo de Tipos de Producto en Escritorio (1280 × 800 px)
+Carga directa de datos reales del backend NestJS (`Panadería Tradicional`, `Pastelería y Repostería`, `Bebidas e Infusiones`), etiqueta informativa «3 activos», buscador funcional y botones de acción:
+
+![Vista de escritorio de Tipos de Producto en ISS-04](capturas/iss-04-tipos-producto-desktop.png)
+
+#### 3. Evidencia Visual Adaptable en Móvil (390 × 844 px)
+Diseño responsive con cabecera apilada, tabla desplazable y menú integrado en Drawer:
+
+![Vista móvil de Tipos de Producto en ISS-04](capturas/iss-04-tipos-producto-mobile.png)
+
+---
+
+*Estado actual: ISS-00, ISS-01, ISS-01A, ISS-01B, ISS-02, ISS-03 e ISS-04 completados satisfactoriamente. Próximo paso: ISS-05 (CRUD de Productos con selector de categoría).*
