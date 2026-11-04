@@ -1,14 +1,29 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withInMemoryScrolling,
+} from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import Aura from '@primeuix/themes/aura';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
+    ),
+    // PrimeNG 22: tema Aura. El modo oscuro se activa con la clase .app-dark.
     providePrimeNG({
+      ripple: true,
+      inputVariant: 'outlined',
       theme: {
         preset: Aura,
         options: {
@@ -20,5 +35,7 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
+    MessageService,
+    ConfirmationService,
   ],
 };

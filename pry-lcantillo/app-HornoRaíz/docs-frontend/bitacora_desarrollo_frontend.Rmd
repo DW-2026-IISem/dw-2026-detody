@@ -22,11 +22,11 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 # Introducción y Arquitectura del Sistema
 
-El proyecto **HornoRaíz** es una plataforma web modular para la gestión integral de producción y ventas en panaderías y reposterías artesanales. El ecosistema tecnológico se divide en dos capas desacopladas:
+El proyecto **HornoRaíz** es una plataforma web modular para la gestión integral de panaderías y reposterías artesanales. El ecosistema tecnológico se divide en dos capas desacopladas:
 
 1. **Backend (API REST):** Desarrollado con **NestJS** y **Sequelize ORM**, ejecutándose en el puerto `3004` bajo el prefijo global `/api` con control de acceso basado en roles y recursos (RBAC).
 2. **Frontend (SPA):** Desarrollado con **Angular 22** (arquitectura standalone, signals y reactividad moderna), estilizado mediante el patrón *"sin CSS propio"* combinando **PrimeNG (Aura theme)** y **Tailwind CSS 4**.
-3. **Entorno de Desarrollo:** Ubuntu 26.04 bajo WSL 2 integrado con Windows 11 y RStudio.
+3. **Repositorio GitHub:** [github.com/DW-2026-IISem/dw-2026-detody](https://github.com/DW-2026-IISem/dw-2026-detody) (rama `main`).
 
 ---
 
@@ -35,9 +35,9 @@ El proyecto **HornoRaíz** es una plataforma web modular para la gestión integr
 ## ISS-00: Requisitos Previos y Preparación del Entorno
 
 ### Objetivo del ISS
-Garantizar la disponibilidad de las herramientas de construcción frontend (Node, npm, Angular CLI), confirmar el funcionamiento y protección del backend NestJS en el puerto `3004`, y validar el flujo de credenciales y roles (ADMIN y SELLER) antes de comenzar la codificación de componentes.
+Garantizar la disponibilidad de las herramientas de construcción frontend (Node, npm, Angular CLI), confirmar el funcionamiento y protección del backend NestJS en el puerto `3004`, y validar el flujo de credenciales y roles (ADMIN y SELLER).
 
-### Tabla de Criterios de Aceptación (ISS-00) — Estado Consolidado
+### Criterios de Aceptación (ISS-00) — Estado Consolidado
 
 | Criterio | Descripción | Estado | Resultado Obtenido |
 | :--- | :--- | :---: | :--- |
@@ -52,93 +52,24 @@ Garantizar la disponibilidad de las herramientas de construcción frontend (Node
 | **0.5 Herramientas UI** | Navegador Edge y DevTools listos para inspección | **Cumplido** | DevTools y servidor dev listos |
 | **0.6 Estructura** | Directorio del frontend creado dentro de `app-HornoRaíz/` | **Cumplido** | `~/.../app-HornoRaíz/frontend` |
 
----
-
-### Código y Comandos Ejecutados
-
-Se desarrolló y ejecutó un script de verificación automatizado en Bash (`verify-iss00.sh`):
-
-```bash
-#!/bin/bash
-# 1. Comprobación de versiones
-echo "Node:"; node -v
-echo "npm:"; npm -v
-echo "ng path:"; which ng
-ng version | head -n 14
-
-# 2. Comprobación de Backend protegido en puerto 3004
-echo "Petición sin token a /api/clients (espera 401):"
-curl -s -i http://localhost:3004/api/clients | head -n 12
-
-# 3. Login de Administrador y consulta de perfil
-LOGIN_ADMIN=$(curl -s -X POST http://localhost:3004/api/session/login \
-  -H "Content-Type: application/json" \
-  -d '{"identifier":"admin","password":"Admin123!"}')
-ADMIN_TOKEN=$(echo "$LOGIN_ADMIN" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
-
-# Consulta con Bearer token a recurso protegido
-curl -s http://localhost:3004/api/session/profile -H "Authorization: Bearer $ADMIN_TOKEN"
-curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost:3004/api/clients -H "Authorization: Bearer $ADMIN_TOKEN"
-
-# 4. Login de Vendedor (SELLER) y prueba de RBAC restrictivo
-LOGIN_SELLER=$(curl -s -X POST http://localhost:3004/api/session/login \
-  -H "Content-Type: application/json" \
-  -d '{"identifier":"seller","password":"Seller123!"}')
-SELLER_TOKEN=$(echo "$LOGIN_SELLER" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
-
-# Seller accede a clientes (Permitido por matriz de permisos)
-curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost:3004/api/clients -H "Authorization: Bearer $SELLER_TOKEN"
-
-# Seller intenta crear usuarios (Denegado por RBAC -> 403 Forbidden)
-curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" -X POST http://localhost:3004/api/users \
-  -H "Authorization: Bearer $SELLER_TOKEN" -H "Content-Type: application/json" \
-  -d '{"username":"hack","email":"hack@test.com","password":"123"}'
-```
-
----
-
 ### Evidencia de Terminal del ISS-00
 
-A continuación se presenta la captura generada del resultado de la prueba de verificación técnica del entorno:
-
-![Verificación de Requisitos Previos ISS-00](capturas/iss-00-terminal-verificacion.png)
+![Verificación técnica automatizada de ISS-00](capturas/iss-00-terminal-verificacion.png)
 
 ---
 
-## ISS-01: Bootstrap del Proyecto Frontend
+## ISS-01: Bootstrap del Proyecto Frontend y Demostración de Signals
 
-Siguiendo las directrices técnicas del laboratorio y la estructura recomendada (**Opción A**), el proyecto frontend se inicializó en el directorio:
-`~/ia-lab/projects/DW/pry-lcantillo/app-HornoRaíz/frontend`
-
-### 1. Inicialización con Angular CLI
+### 1. Inicialización e Instalación
+El proyecto se generó con Angular CLI 22 y se instalaron las dependencias UI oficiales:
 
 ```bash
 ng new front-hornoraiz --directory . --style=tailwind --routing --ssr=false --skip-git --package-manager=npm --defaults
+npm install primeng @primeuix/themes primeicons @angular/cdk
 ```
 
-#### Parámetros Explicados:
-* `--directory .`: Crea los archivos en la raíz de `frontend/` sin subcarpetas innecesarias.
-* `--style=tailwind`: Preconfigura el compilador para usar Tailwind CSS.
-* `--routing`: Genera el archivo central de rutas `app.routes.ts`.
-* `--ssr=false`: Single Page Application (SPA) pura sin sobrecoste de Server-Side Rendering.
-* `--skip-git`: Evita repositorios Git anidados dentro del proyecto principal.
-* `--defaults`: Aplica la convención moderna de nombres (Angular 2025: `app.ts`, `app.html`).
-
----
-
-### 2. Instalación de Dependencias de UI
-
-Se instalaron PrimeNG y sus componentes visuales requeridos:
-
-```bash
-npm install primeng @primeng/themes primeicons
-```
-
----
-
-### 3. Configuración de Capas de Estilos (`src/styles.css`)
-
-Siguiendo estrictamente la regla de **"Sin CSS propio"**, el archivo `src/styles.css` solo declara el orden de capas CSS y las importaciones de Tailwind y PrimeIcons:
+### 2. Capas CSS y Tema Aura (`src/styles.css` y `src/app/app.config.ts`)
+Se estableció el orden de capas para que Tailwind 4 prevalezca sobre los componentes sin necesidad de `!important`:
 
 ```css
 @layer theme, base, primeng, utilities;
@@ -146,96 +77,132 @@ Siguiendo estrictamente la regla de **"Sin CSS propio"**, el archivo `src/styles
 @import 'primeicons/primeicons.css';
 ```
 
----
+En `angular.json` se configuró el presupuesto de producción a `750kB` (warning) y `1MB` (error).
 
-### 4. Configuración del Proveedor PrimeNG (`src/app/app.config.ts`)
-
-Se configuró el tema `Aura` y el mapeo de capas en `app.config.ts`:
+### 3. Anatomía del Componente Demo (`src/app/demo/ejemplo/`)
+Se implementó un componente con un objeto en un `signal()`, dos valores derivados con `computed()`, un `effect()` secundario y estilos encapsulados:
 
 ```typescript
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
-import { routes } from './app.routes';
+// Fragmento clave de ejemplo.ts
+protected readonly producto = signal<Producto>({ nombre: 'Café molido 500 g', precio: 18000, activo: true });
+protected readonly precioFinal = computed(() => Math.round(this.producto().precio * 1.19));
+protected readonly estadoTexto = computed(() => this.producto().activo ? 'Activo' : 'Inactivo');
 
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-        options: {
-          darkModeSelector: '.app-dark',
-          cssLayer: {
-            name: 'primeng',
-            order: 'theme, base, primeng, utilities',
-          },
-        },
-      },
-    }),
-  ],
-};
+private readonly registro = effect(() => {
+  const { nombre, precio, activo } = this.producto();
+  console.log(`[ejemplo] ${nombre} · precio ${precio} · ${activo ? 'activo' : 'inactivo'}`);
+});
 ```
+
+### Evidencia Visual de ISS-01 (Signals y Tema Aura)
+
+![Componente didáctico de signals y encapsulamiento](capturas/iss-01-demo-signals.png)
 
 ---
 
-### 5. Configuración Base del HTML (`src/index.html`)
+## ISS-01A: Esqueleto Visual (Header, Aside, Footer y Contenido)
 
-Se configuró el fondo y la tipografía estándar en la etiqueta `<body>` con utilidades de Tailwind:
+### 1. Componentes de Presentación Pura
+Se generaron las tres piezas de layout en `src/app/layout/` sin servicios ni llamadas a API:
+
+* **Header (`src/app/layout/header/`):** Altura fija `h-16`, barra superior con interpolación `{{ title }}`.
+* **Aside (`src/app/layout/aside/`):** Columna lateral oscura con ancho fijado por el contenedor padre (`w-64 shrink-0`).
+* **Footer (`src/app/layout/footer/`):** Franja inferior a todo el ancho.
+* **Archivos CSS:** Quedan completamente vacíos (`/* Vacío a propósito */`) demostrando la regla de *"Sin CSS propio"*.
+
+### 2. Composición en `app.html`
+Se estructuraron las cuatro regiones mediante flexbox vertical y horizontal con `min-w-0` para prevenir desbordamientos:
 
 ```html
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>HornoRaíz</title>
-    <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  </head>
-  <body class="m-0 bg-slate-100 font-sans text-slate-900">
-    <app-root></app-root>
-  </body>
-</html>
+<div class="flex min-h-screen flex-col bg-slate-100">
+  <app-header />
+  <div class="flex flex-1">
+    <aside class="w-64 shrink-0"><app-aside /></aside>
+    <main id="contenido" class="min-w-0 flex-1 p-6">
+      <h1 class="text-2xl font-semibold text-slate-900">{{ title }}</h1>
+      <p class="mt-2 text-slate-600">Bienvenido a HornoRaíz.</p>
+    </main>
+  </div>
+  <app-footer />
+</div>
 ```
+
+### Evidencia Visual de ISS-01A (Layout Estático)
+
+![Esqueleto de cuatro regiones en ISS-01A](capturas/iss-01a-layout.png)
 
 ---
 
-### 6. Verificación de Compilación y Servidor de Desarrollo
+## ISS-01B: Menú PrimeNG e Interacción Responsiva
 
-Se ejecutó la compilación de producción para validar la ausencia de conflictos de tipos o CSS:
+### 1. Canales de Comunicación (`input()`, `output()` y `signal()`)
 
-```bash
-ng build
+* **Aside (`src/app/layout/aside/aside.ts`):** Recibe las opciones por `items = input<MenuItem[]>([])` y renderiza el menú con `<p-panelmenu [model]="items()" [multiple]="true" />`. Emite `navigated = output<void>()` al hacer clic en un control.
+* **Header (`src/app/layout/header/header.ts`):** Mantiene visible el botón hamburguesa en todas las resoluciones (sin `lg:hidden`) y emite `menuRequested = output<void>()`.
+* **Utilidad Media Query (`src/app/core/utils/media-query.ts`):** Función reactiva `watchMediaQuery('(min-width: 1024px)')` basada en `Signal<boolean>` con limpieza automática de escuchas (`DestroyRef`).
+
+### 2. Prototipo Interactivo (`src/app/features/construir/`)
+Centraliza el estado en tres signals (`sidebarCollapsed`, `mobileOpen`, `title`). 
+
+* En pantallas de escritorio ($\ge 1024\text{ px}$), el botón del Header colapsa o despliega el Aside fijo devolviendo el espacio al contenido.
+* En pantallas móviles ($< 1024\text{ px}$), el botón abre un componente `p-drawer` lateral reutilizando el mismo componente `<app-aside />`.
+
+```typescript
+// Lógica de respuesta según la resolución
+protected onMenuToggle(): void {
+  if (this.isDesktop()) {
+    this.sidebarCollapsed.update((collapsed) => !collapsed);
+    return;
+  }
+  this.mobileOpen.set(true);
+}
+
+protected seleccionar(titulo: string): void {
+  this.title.set(titulo);
+  this.mobileOpen.set(false);
+}
 ```
 
-**Resultado de compilación:**
-```
-✔ Building...
-Initial chunk files | Names         |  Raw size | Estimated transfer size
-main-PW6YXOU4.js    | main          | 401.62 kB |                94.30 kB
-styles-T4S5J5XQ.css | styles        |  19.88 kB |                 4.01 kB
-                    | Initial total | 421.49 kB |                98.31 kB
+### 3. Enrutamiento Diferido (`loadComponent`)
+`app.html` se convierte en un simple `<router-outlet />`, delegando en `src/app/app.routes.ts`:
 
-Application bundle generation complete. [2.206 seconds]
+```typescript
+export const routes: Routes = [
+  {
+    path: 'construir',
+    loadComponent: () => import('./features/construir/construir').then((m) => m.Construir),
+  },
+  { path: '', pathMatch: 'full', redirectTo: 'construir' },
+  { path: '**', redirectTo: 'construir' },
+];
 ```
 
-Posteriormente se inició el servidor en modo desarrollo:
-
-```bash
-npx ng serve --host 0.0.0.0 --port 4200
-```
+* **Optimización de Bundle:** El componente `Construir` se empaqueta en un chunk diferido (`chunk-H6VZP772.js`, 227.98 kB), dejando el bundle principal (`main.js`) en solo 117 kB.
 
 ---
 
-### 7. Evidencia Visual del Despliegue en Navegador
+### 4. Pruebas Unitarias Automatizadas
+Se ejecutaron las pruebas unitarias completas con Vitest/Angular CLI (`npm test -- --watch=false`):
 
-A continuación se muestra la captura de pantalla de la aplicación corriendo en `http://localhost:4200`:
-
-![Resultado del despliegue inicial de Angular 22 en localhost:4200](capturas/iss-01-bootstrap.png)
+* `src/app/app.spec.ts`: 2 pruebas aprobadas (`RouterOutlet` verificado).
+* `src/app/demo/ejemplo/ejemplo.spec.ts`: 4 pruebas aprobadas (cálculos de IVA, estado, reset).
+* `src/app/features/construir/construir.spec.ts`: 7 pruebas aprobadas (composición, opciones del menú, drawer móvil, colapso en escritorio).
+* **Total: 13 pruebas aprobadas (100% de éxito).**
 
 ---
 
-*Estado actual: ISS-00 e ISS-01 completados satisfactoriamente. Próximo paso: ISS-01A (Esqueleto visual: Header, Aside, Footer y Shell).*
+### 5. Evidencias Visuales de ISS-01B
+
+#### A. Vista en Escritorio (1280 × 800 px)
+PanelMenu desplegado a la izquierda, título activo reactivo, tarjeta de contenido centrada y Footer abajo:
+
+![Vista de escritorio de ISS-01B](capturas/iss-01b-desktop.png)
+
+#### B. Vista Móvil (390 × 844 px)
+Aside fijo oculto automáticamente, botón de menú visible y adaptable para abrir el Drawer:
+
+![Vista móvil de ISS-01B](capturas/iss-01b-mobile.png)
+
+---
+
+*Estado actual: ISS-00, ISS-01, ISS-01A e ISS-01B completados satisfactoriamente. Próximo paso: ISS-02 (Núcleo, modelos y layout de negocio).*

@@ -1,12 +1,17 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
+/**
+ * Componente principal (`<app-root>`).
+ *
+ * Desde ISS-01B es solo el punto de entrada: el router elige qué componente se
+ * dibuja dentro de `<router-outlet />` según la URL.
+ */
 @Component({
-  imports: [RouterOutlet],
+  host: { class: 'block' },
   selector: 'app-root',
-  styleUrl: './app.css',
+  imports: [RouterOutlet],
   templateUrl: './app.html',
+  styleUrl: './app.css',
 })
-export class App {
-  protected readonly title = signal('front-hornoraiz');
-}
+export class App {}

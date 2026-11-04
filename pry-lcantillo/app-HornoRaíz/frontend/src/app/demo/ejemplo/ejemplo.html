@@ -1,0 +1,74 @@
+<div class="flex flex-col gap-6">
+  <!-- Tarjeta principal: el objeto en un signal -->
+  <p-card header="Demostración: Objeto en un Signal">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">{{ producto().nombre }}</h2>
+          <p class="text-sm text-slate-500">Vista previa: {{ producto().nombre }}</p>
+        </div>
+        <p-tag
+          [value]="estadoTexto()"
+          [severity]="producto().activo ? 'success' : 'danger'"
+          [rounded]="true"
+        />
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs uppercase tracking-wider text-slate-400">Precio base</span>
+          <p class="text-2xl font-bold text-slate-900">{{ producto().precio }}</p>
+          <p class="text-xs text-slate-500">
+            Precio final con IVA (19 %): <strong>{{ precioFinal() }}</strong>
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="nombreProducto" class="text-xs font-medium text-slate-600">Editar Nombre</label>
+          <input
+            id="nombreProducto"
+            pInputText
+            [value]="producto().nombre"
+            (input)="cambiarNombre($event)"
+            class="w-full"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 pt-2">
+        <button pButton type="button" (click)="variarPrecio(1000)" class="p-button-outlined">
+          <span pButtonLabel>+1000</span>
+        </button>
+        <button pButton type="button" (click)="variarPrecio(-1000)" class="p-button-outlined">
+          <span pButtonLabel>-1000</span>
+        </button>
+        <button pButton type="button" severity="secondary" (click)="alternarEstado()">
+          <span pButtonLabel>Cambiar estado</span>
+        </button>
+        <button pButton type="button" severity="warn" text (click)="reiniciar()">
+          <span pButtonLabel>Reiniciar</span>
+        </button>
+      </div>
+
+      @if (producto().activo) {
+        <p-message severity="success" variant="simple">
+          Producto activo: la API lo devolvería en <code>GET /api/products</code>.
+        </p-message>
+      } @else {
+        <p-message severity="warn" variant="simple">
+          Producto inactivo: el borrado lógico lo oculta de las listas.
+        </p-message>
+      }
+    </div>
+  </p-card>
+
+  <!-- Tarjeta didáctica: aislamiento de estilos -->
+  <p-card header="Aislamiento de Estilos (ViewEncapsulation)">
+    <p class="text-sm text-slate-600">
+      Esta caja tiene la clase <code>.ejemplo-alcance</code> definida en <code>ejemplo.css</code>. Angular le añade un atributo <code>_ngcontent-...</code> para que el estilo no afecte a otros componentes.
+    </p>
+    <div class="ejemplo-alcance mt-4 text-sm text-slate-700">
+      ✔ Estilo encapsulado del componente: borde punteado verde esmeralda y fondo suave.
+    </div>
+  </p-card>
+</div>
