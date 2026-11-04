@@ -80,6 +80,60 @@ export class SaleRepository implements ISaleRepository {
     return model ? this.toDomain(model) : null;
   }
 
+
+  async deactivate(id: number): Promise<Sale | null> {
+    const transaction = await this.sequelize.transaction();
+    try {
+      const model = await this.saleRepo.findByPk(id, { include: [SaleItemModel], transaction });
+      if (!model) {
+        await transaction.rollback();
+        return null;
+      }
+      if (model.status !== 'cancelled') {
+        await model.update({ status: 'cancelled' }, { transaction });
+        for (const item of (model.items || [])) {
+          await this.productRepo.increment('stock', {
+            by: item.quantity,
+            where: { id: item.productId },
+            transaction,
+          });
+        }
+      }
+      await transaction.commit();
+      return (await this.findById(id))!;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  }
+
+  async delete(id: number): Promise<boolean> {
+    const transaction = await this.sequelize.transaction();
+    try {
+      const model = await this.saleRepo.findByPk(id, { include: [SaleItemModel], transaction });
+      if (!model) {
+        await transaction.rollback();
+        return false;
+      }
+      if (model.status !== 'cancelled') {
+        for (const item of (model.items || [])) {
+          await this.productRepo.increment('stock', {
+            by: item.quantity,
+            where: { id: item.productId },
+            transaction,
+          });
+        }
+      }
+      await this.itemRepo.destroy({ where: { saleId: id }, transaction });
+      await this.saleRepo.destroy({ where: { id }, transaction });
+      await transaction.commit();
+      return true;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  }
+
   private toDomain(m: SaleModel): Sale {
     const items = (m.items ?? []).map(
       (i) =>

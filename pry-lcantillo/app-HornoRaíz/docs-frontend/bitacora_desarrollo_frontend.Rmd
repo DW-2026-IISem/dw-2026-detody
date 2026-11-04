@@ -805,7 +805,8 @@ Diseño responsive con cabecera apilada, tabla desplazable y menú integrado en 
 ## ISS-05: CRUD de Productos y Relación Many-to-One con Tipos (Catálogo y Semáforo de Stock)
 
 ### Descripción y Alcance
-En esta unidad se implementó el catálogo completo de productos para **HornoRaíz** (`/productos`), introduciendo la primera relación Many-to-One de la plataforma: cada producto pertenece a una categoría o tipo (`product_type_id` $ightarrow$ `ProductType`). 
+En esta unidad se implementó el catálogo completo de productos para **HornoRaíz** (`/productos`), introduciendo la primera relación Many-to-One de la plataforma: cada producto pertenece a una categoría o tipo (`product_type_id` $
+ightarrow$ `ProductType`). 
 
 El módulo resuelve tres desafíos técnicos centrales:
 1. **Carga en paralelo con `forkJoin`**: Se obtienen simultáneamente los productos y el catálogo de tipos activos, evitando cascadas secuenciales HTTP y repintados redundantes de la tabla.
@@ -1005,4 +1006,231 @@ Diseño responsivo optimizado para pantallas estrechas con indicadores de stock 
 
 ---
 
-*Estado actual: ISS-00 a ISS-05 completados satisfactoriamente. Próximo paso: ISS-06 (Ventas y Detalle de Líneas Transaccionales).*
+
+
+
+---
+
+## ISS-06: Ventas Transaccionales y Detalle de Líneas (Borrador Reactivo con Signals)
+
+### Descripción y Alcance
+En esta unidad se implementó el módulo transaccional de ventas para **HornoRaíz** (`/ventas` y `/ventas/nueva`), el cual articula clientes, productos, inventario y facturación en un flujo de consistencia atómica (**ACID**):
+
+1. **Borrador en memoria con Signals**: El frontend gestiona un carrito o borrador local sin disparar mutaciones sobre la base de datos hasta que el usuario confirma la operación. Añadir o quitar productos del borrador recalcula subtotales y totales inmediatamente mediante señales calculadas (`computed()`).
+2. **Validación de stock dual (Cliente + Servidor)**: El componente previene agregar cantidades superiores al stock disponible en memoria. Al confirmar la venta, el backend NestJS re-valida el stock dentro de una transacción Sequelize para evitar condiciones de carrera (*race conditions*).
+3. **Persistencia atómica**: Al confirmar, el frontend envía un payload con `client_id`, `tax`, `discounts` y el array de `items: [{ product_id, quantity }]`. El servidor asigna los precios unitarios oficiales, genera la cabecera en `sales`, registra el detalle en `sale_items` y descuenta el stock de cada producto. Si alguna línea falla, se ejecuta un `rollback` integral.
+4. **Anulación y restauración de inventario**: La baja lógica (`PATCH /api/ventas/:id/deactivate`) cambia el estado a `cancelled` y restituye el stock correspondiente a cada producto.
+
+---
+
+### Implementación del Modelo (`sale.model.ts`)
+```typescript
+export interface SaleItemInput {
+  product_id?: number;
+  productId?: number;
+  quantity: number;
+}
+
+export interface SaleItem extends Timestamps {
+  id?: number;
+  sale_id?: number;
+  saleId?: number;
+  product_id?: number;
+  productId?: number;
+  quantity: number;
+  unit_price?: Money;
+  unitPrice?: Money;
+  subtotal?: Money;
+  product?: Product;
+}
+
+export interface Sale extends Timestamps {
+  id: number;
+  client_id?: number;
+  clientId?: number;
+  tax?: Money;
+  discounts?: Money;
+  subtotal?: Money;
+  total?: Money;
+  total_amount?: Money;
+  totalAmount?: Money;
+  status: Status | 'pending' | 'completed' | 'cancelled';
+  client?: Client;
+  items?: SaleItem[];
+}
+
+export interface SaleCreatePayload {
+  client_id?: number;
+  clientId?: number;
+  tax?: Money;
+  discounts?: Money;
+  items: SaleItemInput[];
+}
+```
+
+---
+
+### Servicio API Transaccional (`SaleApi`)
+Ubicado en `src/app/features/sales/sale-api.ts`. Centraliza las peticiones a `/api/ventas`, deserializando `{ data: { items: [...] } }` y normalizando identificadores y totales:
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class SaleApi {
+  private readonly http = inject(HttpClient);
+  private readonly base = `${environment.apiUrl}/ventas`;
+
+  list(): Observable<Sale[]> {
+    return this.http.get<any>(this.base).pipe(
+      map((response) => {
+        const raw = response?.data?.items ?? response?.sales ?? response?.items ?? response ?? [];
+        return raw.map((item: any) => this.normalize(item));
+      }),
+    );
+  }
+
+  create(payload: SaleCreatePayload): Observable<Sale> {
+    const body = {
+      ...payload,
+      clientId: payload.clientId ?? payload.client_id,
+      items: (payload.items ?? []).map((i) => ({
+        productId: i.productId ?? i.product_id,
+        quantity: Number(i.quantity),
+      })),
+    };
+    return this.http.post<any>(this.base, body).pipe(
+      map((res) => this.normalize(res?.data ?? res?.sale ?? res)),
+    );
+  }
+
+  deactivate(id: number): Observable<unknown> {
+    return this.http.patch(`${this.base}/${id}/deactivate`, {});
+  }
+
+  remove(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/${id}`);
+  }
+}
+```
+
+---
+
+### Formulario y Borrador Transaccional (`SaleForm`)
+
+#### 1. Estado Reactivo y Señales Computadas
+```typescript
+readonly clientId = signal<number | null>(null);
+readonly tax = signal(0);
+readonly discounts = signal(0);
+readonly lines = signal<DraftLine[]>([]);
+readonly selectedProductId = signal<number | null>(null);
+readonly quantity = signal(1);
+
+/** Diccionario en memoria para traducción O(1) */
+readonly productById = computed(() => new Map(this.products().map((p) => [p.id, p])));
+
+/** Subtotal calculado dinámicamente */
+readonly subtotal = computed(() =>
+  this.lines().reduce((sum, line) => {
+    const product = this.productById().get(line.product_id);
+    return sum + Number(product?.price ?? 0) * line.quantity;
+  }, 0),
+);
+
+/** Total final considerando impuestos y descuentos */
+readonly total = computed(
+  () => this.subtotal() + Number(this.tax() ?? 0) - Number(this.discounts() ?? 0),
+);
+```
+
+#### 2. Agrupación y Validación de Stock en Cliente
+```typescript
+addLine(): void {
+  const productId = this.selectedProductId();
+  const requested = Number(this.quantity());
+  this.error.set(null);
+
+  if (productId === null || requested < 1) {
+    this.error.set('Selecciona un producto y una cantidad válida (mínimo 1).');
+    return;
+  }
+
+  const product = this.productById().get(productId);
+  if (!product) return;
+
+  const availableStock = product.quantity ?? product.stock ?? 0;
+  const already = this.lines()
+    .filter((l) => l.product_id === productId)
+    .reduce((sum, l) => sum + l.quantity, 0);
+
+  if (already + requested > availableStock) {
+    this.error.set(
+      `Stock insuficiente de «${product.name}»: disponible ${availableStock}, solicitado ${already + requested}.`,
+    );
+    return;
+  }
+
+  this.lines.update((currentLines) => {
+    const found = currentLines.find((l) => l.product_id === productId);
+    if (!found) {
+      return [...currentLines, { product_id: productId, quantity: requested }];
+    }
+    return currentLines.map((l) =>
+      l.product_id === productId ? { ...l, quantity: l.quantity + requested } : l,
+    );
+  });
+
+  this.selectedProductId.set(null);
+  this.quantity.set(1);
+}
+```
+
+---
+
+### Listado y Resumen Financiero (`SaleList`)
+Implementado en `src/app/features/sales/sale-list/`. Carga ventas, clientes y productos en paralelo mediante `forkJoin`, expone `totalRevenue` (sumando únicamente ventas no anuladas) y gestiona la cancelación con reversión de inventario:
+
+```typescript
+readonly clientName = computed(() => {
+  const map = new Map(this.clients().map((client) => [client.id, client.name]));
+  return (id: number) => map.get(id) ?? `Cliente #${id}`;
+});
+
+readonly totalRevenue = computed(() =>
+  this.rows()
+    .filter((s) => s.status !== 'cancelled')
+    .reduce((acc, s) => acc + Number(s.total ?? s.total_amount ?? s.totalAmount ?? 0), 0),
+);
+```
+
+---
+
+### Evidencias de Verificación y Pruebas Automatizadas
+
+#### 1. Resultados de la Suite de Pruebas Unitarias (Vitest)
+Se incorporaron 20 pruebas unitarias nuevas para el flujo de ventas:
+1. `src/app/features/sales/sale-api.spec.ts` (6 casos: `list`, normalización de totales, `get`, `create`, `update`, `deactivate`, `remove`).
+2. `src/app/features/sales/sale-form/sale-form.spec.ts` (7 casos: carga en paralelo, validación de stock, agrupación de ítems, derivación de `subtotal`/`total`, eliminación de líneas y navegación POST).
+3. `src/app/features/sales/sale-list/sale-list.spec.ts` (7 casos: `forkJoin`, resolución de nombres $O(1)$, cálculo de ingresos netos, conteo de unidades, filtro local, anulación y eliminación).
+
+**Total acumulado de la suite completa: 20 suites pasadas, 123 pruebas aprobadas (100% de éxito).**
+
+![Resultados de pruebas unitarias y compilación de ISS-06](capturas/iss-06-terminal-tests.png)
+
+#### 2. Evidencia Visual del Registro de Ventas en Escritorio (1280 × 800 px)
+Ventas reales registradas con total en moneda, estado de la transacción y métricas de ingresos consolidados:
+
+![Vista de escritorio del Listado de Ventas en ISS-06](capturas/iss-06-ventas-desktop.png)
+
+#### 3. Evidencia Visual del Formulario Borrador de Venta en Escritorio (1280 × 800 px)
+Diseño modular en tres bloques: selección de cliente, selector de producto con validación de inventario disponible y resumen sticky de liquidación:
+
+![Vista de escritorio del Formulario de Nueva Venta en ISS-06](capturas/iss-06-nueva-venta-desktop.png)
+
+#### 4. Evidencia Visual Adaptable en Móvil (390 × 844 px)
+Diseño responsivo optimizado para operaciones en mostrador o dispositivos táctiles:
+
+![Vista móvil del Listado de Ventas en ISS-06](capturas/iss-06-ventas-mobile.png)
+
+---
+
+*Estado actual: ISS-00 a ISS-06 completados satisfactoriamente. Próximo paso: ISS-07 (Detalle de Ventas, Dashboard y Cierre de Fase I).*

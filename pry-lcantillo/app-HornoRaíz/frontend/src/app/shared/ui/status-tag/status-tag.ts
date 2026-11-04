@@ -12,19 +12,23 @@ import { Status } from '../../../core/models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatusTag {
-  readonly status = input.required<Status | string>();
+  readonly status = input<Status | string | undefined | null>();
 
   readonly label = computed(() => {
     const val = this.status();
     if (!val || val === 'active') return 'Activo';
     if (val === 'inactive') return 'Inactivo';
+    if (val === 'completed') return 'Completada';
+    if (val === 'cancelled') return 'Anulada';
+    if (val === 'pending') return 'Pendiente';
     return String(val);
   });
 
   readonly severity = computed<'success' | 'danger' | 'info' | 'warn' | 'secondary'>(() => {
     const val = this.status();
-    if (!val || val === 'active') return 'success';
-    if (val === 'inactive') return 'danger';
+    if (!val || val === 'active' || val === 'completed') return 'success';
+    if (val === 'inactive' || val === 'cancelled') return 'danger';
+    if (val === 'pending') return 'warn';
     return 'secondary';
   });
 }

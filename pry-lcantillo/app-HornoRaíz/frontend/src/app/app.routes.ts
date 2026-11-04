@@ -3,7 +3,8 @@ import { Routes } from '@angular/router';
 /**
  * Rutas de la aplicación.
  *
- * ISS-05 incorpora la ruta para el catálogo de productos (ProductList).
+ * ISS-06 incorpora las rutas para el listado de ventas (SaleList)
+ * y el registro transaccional con borrador (SaleForm).
  */
 export const routes: Routes = [
   {
@@ -46,6 +47,22 @@ export const routes: Routes = [
       {
         path: 'products',
         redirectTo: 'productos',
+      },
+      {
+        path: 'ventas',
+        title: 'Ventas · HornoRaíz',
+        loadComponent: () =>
+          import('./features/sales/sale-list/sale-list').then((m) => m.SaleList),
+      },
+      {
+        path: 'ventas/nueva',
+        title: 'Nueva venta · HornoRaíz',
+        loadComponent: () =>
+          import('./features/sales/sale-form/sale-form').then((m) => m.SaleForm),
+      },
+      {
+        path: 'sales',
+        redirectTo: 'ventas',
       },
     ],
   },

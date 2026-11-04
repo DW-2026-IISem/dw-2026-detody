@@ -17,9 +17,9 @@ export interface SaleItem extends Timestamps {
   product_id?: number;
   productId?: number;
   quantity: number;
-  unit_price: Money;
+  unit_price?: Money;
   unitPrice?: Money;
-  subtotal: Money;
+  subtotal?: Money;
   product?: Product;
 }
 
@@ -27,6 +27,10 @@ export interface Sale extends Timestamps {
   id: number;
   client_id?: number;
   clientId?: number;
+  tax?: Money;
+  discounts?: Money;
+  subtotal?: Money;
+  total?: Money;
   total_amount?: Money;
   totalAmount?: Money;
   status: Status | 'pending' | 'completed' | 'cancelled';
@@ -37,6 +41,8 @@ export interface Sale extends Timestamps {
 export interface SaleCreatePayload {
   client_id?: number;
   clientId?: number;
+  tax?: Money;
+  discounts?: Money;
   items: SaleItemInput[];
 }
 
@@ -44,4 +50,6 @@ export interface SaleUpdatePayload {
   status?: Status | 'pending' | 'completed' | 'cancelled';
   client_id?: number;
   clientId?: number;
+  tax?: Money;
+  discounts?: Money;
 }
