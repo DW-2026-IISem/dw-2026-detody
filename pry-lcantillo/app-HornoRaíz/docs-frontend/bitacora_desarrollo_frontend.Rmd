@@ -205,4 +205,239 @@ Aside fijo oculto automáticamente, botón de menú visible y adaptable para abr
 
 ---
 
-*Estado actual: ISS-00, ISS-01, ISS-01A e ISS-01B completados satisfactoriamente. Próximo paso: ISS-02 (Núcleo, modelos y layout de negocio).*
+## ISS-02: Núcleo: environment, modelos, servicios y layout Shell
+
+### Objetivo del ISS
+Construir los cimientos arquitectónicos del frontend para la interacción con la API REST de HornoRaíz:
+1. Centralizar la configuración de entornos con `environment.ts` (build) y `environment.development.ts` (serve).
+2. Definir los 13 modelos de datos e interfaces TypeScript (`src/app/core/models/`) con tipado estricto, timestamps y utilidades monetarias (`Money`, `toNumber`).
+3. Implementar los 10 servicios cliente `*Api` (`src/app/features/.../*-api.ts`) inyectando `HttpClient` y aplicando unwrapping defensivo sobre las respuestas del backend NestJS.
+4. Desarrollar utilidades transversales para manejo de errores de red (`toApiMessage()`) y notificaciones (`NotificationService` envolviendo `MessageService` de PrimeNG).
+5. Crear componentes visuales compartidos (`PageHeader`, `EmptyState`, `StatusTag`) bajo el principio de *"Sin CSS propio"*.
+6. Implementar el layout de producción `Shell` (`src/app/layout/shell/`), integrando `Header`, `Aside`, `router-outlet`, `Footer`, `Drawer`, `Toast` y `ConfirmDialog`.
+7. Conectar el enrutamiento principal mediante `loadComponent` preservando el prototipo `/construir` e integrando la vista inicial de clientes.
+8. Registrar `provideHttpClient()` en `app.config.ts` sin interceptores en Fase I.
+
+---
+
+### Criterios de Aceptación (ISS-02) — Estado Consolidado
+
+| Criterio | Descripción | Estado | Resultado Obtenido |
+| :--- | :--- | :---: | :--- |
+| **2.1 Entornos** | `apiUrl` termina en `/api` (sin slash final), `production`, `requireAuth` y `primeUiLicense` definidos | **Cumplido** | `environment.ts` y `environment.development.ts` creados; `angular.json` con `fileReplacements` |
+| **2.2 Modelos Core** | 13 interfaces de modelos en `src/app/core/models/` y exportación consolidada en `index.ts` | **Cumplido** | `api`, `client`, `product-type`, `product`, `sale`, `product-sale`, `user`, `role`, `resource`, `role-user`, `resource-role`, `auth`, `dashboard` |
+| **2.3 Servicios API** | 10 servicios `@Injectable({ providedIn: 'root' })` con `HttpClient` y mapeo reactivo | **Cumplido** | `ClientApi`, `ProductTypeApi`, `ProductApi`, `SaleApi`, `ProductSaleApi`, `UserApi`, `RoleApi`, `ResourceApi`, `RoleUserApi`, `ResourceRoleApi` |
+| **2.4 Utilidades** | Manejo de errores HTTP normalizado y servicio de alertas toast | **Cumplido** | `toApiMessage()` en `api-error.ts` y `NotificationService` con `MessageService` |
+| **2.5 Componentes UI** | Componentes compartidos de cabecera, estado vacío y etiqueta de estado | **Cumplido** | `PageHeader`, `EmptyState` y `StatusTag` (con `computed()` para reactividad) |
+| **2.6 Layout Shell** | Composición de `Header`, `Aside`, `router-outlet`, `Footer`, `Drawer`, `Toast` y `ConfirmDialog` | **Cumplido** | `Shell` implementado con `watchMediaQuery`, Drawer móvil y colapso responsive |
+| **2.7 Enrutamiento** | `app.routes.ts` monta `Shell` con `loadComponent` y conserva el prototipo `/construir` | **Cumplido** | Enrutamiento modular con carga perezosa de `Shell`, `ClientList` y `Construir` |
+| **2.8 HTTP Provider** | `provideHttpClient()` registrado en `app.config.ts` sin interceptores de sesión | **Cumplido** | Configurado en `app.config.ts` |
+| **2.9 Compilación** | `ng build` termina con código de salida 0 y chunk diferido de `shell` | **Cumplido** | Código 0, bundle inicial en 523 kB, `shell` diferido en 97.33 kB |
+| **2.10 Pruebas** | Suite de pruebas automatizadas completa con 8 archivos y 33 casos de prueba | **Cumplido** | **8 archivos pasados, 33 pruebas aprobadas (100% éxito)** |
+
+---
+
+### Implementación Técnica Paso a Paso
+
+#### 1. Configuración de Entornos (`src/environments/`)
+
+En `src/environments/environment.ts` (producción) y `environment.development.ts` (desarrollo):
+
+```typescript
+export const environment = {
+  production: false,
+  appName: 'HornoRaíz',
+  apiUrl: 'http://localhost:3004/api', // SIN slash final para evitar rutas con doble barra
+  requireAuth: true,                  // Mitad frontal del interruptor de fases (Fase II)
+  primeUiLicense: '',                 // Clave Community de PrimeUI
+};
+```
+
+#### 2. Definición de Modelos del Dominio (`src/app/core/models/`)
+
+Se implementó el catálogo completo de 13 archivos de modelos, incluyendo tipos para montos (`Money`), utilidades de conversión (`toNumber`), marcas temporales (`Timestamps`) y tipos de error HTTP (`ApiError`):
+
+```typescript
+// Fragmento clave de api.model.ts
+export type Status = 'active' | 'inactive';
+export type Money = number | string;
+
+export interface Timestamps {
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export function toNumber(value: Money | null | undefined): number {
+  if (value === null || value === undefined) return 0;
+  const parsed = typeof value === 'number' ? value : parseFloat(value.toString());
+  return isNaN(parsed) ? 0 : parsed;
+}
+```
+
+```typescript
+// Fragmento clave de client.model.ts
+import { Status, Timestamps } from './api.model';
+
+export interface Client extends Timestamps {
+  id: number;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  status: Status;
+}
+
+export interface ClientPayload {
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  status?: Status;
+}
+```
+
+#### 3. Servicios API y Desempaquetado Reactivo (`src/app/features/.../*-api.ts`)
+
+Los servicios consumen la API inyectando `HttpClient` y aplican operadores `.pipe(map(...))` para desempaquetar las respuestas tanto si el backend las retorna envueltas (`{ items }`, `{ clients }`) como si entrega arreglos planos:
+
+```typescript
+// Fragmento clave de client-api.ts
+@Injectable({ providedIn: 'root' })
+export class ClientApi {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/clients`;
+
+  findAll(): Observable<Client[]> {
+    return this.http.get<any>(this.baseUrl).pipe(
+      map((res) => {
+        if (Array.isArray(res)) return res;
+        if (res?.items && Array.isArray(res.items)) return res.items;
+        if (res?.clients && Array.isArray(res.clients)) return res.clients;
+        return [];
+      })
+    );
+  }
+
+  findById(id: number): Observable<Client> {
+    return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
+      map((res) => res?.client ?? res?.item ?? res)
+    );
+  }
+
+  create(payload: ClientPayload): Observable<Client> {
+    return this.http.post<any>(this.baseUrl, payload).pipe(
+      map((res) => res?.client ?? res?.item ?? res)
+    );
+  }
+
+  update(id: number, payload: Partial<ClientPayload>): Observable<Client> {
+    return this.http.put<any>(`${this.baseUrl}/${id}`, payload).pipe(
+      map((res) => res?.client ?? res?.item ?? res)
+    );
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+}
+```
+
+#### 4. Componentes Compartidos de Interfaz (`src/app/shared/ui/`)
+
+* **`PageHeader`:** Título `h1`, subtítulo descriptivo opcional y ranura de proyección `<ng-content />` para botones de acción.
+* **`EmptyState`:** Contenedor estilizado con ícono PrimeIcons, título, descripción y ranura para llamados a la acción.
+* **`StatusTag`:** Utiliza `computed()` para mapear reactivamente el estado (`active` $\rightarrow$ etiqueta "Activo" con severidad `success`; `inactive` $\rightarrow$ etiqueta "Inactivo" con severidad `danger`):
+
+```typescript
+// Fragmento clave de status-tag.ts
+@Component({
+  selector: 'app-status-tag',
+  standalone: true,
+  imports: [Tag],
+  template: `<p-tag [value]="label()" [severity]="severity()" [rounded]="true" />`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class StatusTag {
+  readonly status = input.required<Status | string>();
+
+  readonly label = computed(() => {
+    const val = this.status();
+    return val === 'active' ? 'Activo' : val === 'inactive' ? 'Inactivo' : String(val);
+  });
+
+  readonly severity = computed<'success' | 'danger' | 'secondary'>(() => {
+    const val = this.status();
+    return val === 'active' ? 'success' : val === 'inactive' ? 'danger' : 'secondary';
+  });
+}
+```
+
+#### 5. Layout Shell de Producción (`src/app/layout/shell/`)
+
+El layout `Shell` unifica la experiencia de usuario:
+* Provee `MessageService` y `ConfirmationService` a nivel de vista.
+* Renderiza `<app-header>` en la parte superior.
+* Renderiza el `<app-aside>` en una columna izquierda en escritorio ($\ge 1024\text{ px}$) o dentro de un `<p-drawer>` en pantallas móviles.
+* Renderiza el `<main>` con `<router-outlet />` donde se inyectan las pantallas hijas.
+* Renderiza el `<app-footer>` al final de la página.
+* Incluye los contenedores globales `<p-toast>` y `<p-confirmdialog>`.
+
+```typescript
+// Estructura de app.routes.ts
+export const routes: Routes = [
+  {
+    path: 'construir',
+    loadComponent: () => import('./features/construir/construir').then((m) => m.Construir),
+  },
+  {
+    path: '',
+    loadComponent: () => import('./layout/shell/shell').then((m) => m.Shell),
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'clientes' },
+      {
+        path: 'clientes',
+        title: 'Clientes · HornoRaíz',
+        loadComponent: () => import('./features/clients/client-list/client-list').then((m) => m.ClientList),
+      },
+    ],
+  },
+  { path: '**', redirectTo: 'construir' },
+];
+```
+
+---
+
+### Evidencias de Verificación y Pruebas Automatizadas
+
+#### 1. Resultados de la Suite de Pruebas Unitarias (Vitest)
+Se ejecutaron las pruebas unitarias completas validando utilidades, componentes compartidos, layout y servicios cliente:
+
+1. `src/app/core/utils/api-error.spec.ts` (3 casos)
+2. `src/app/core/utils/media-query.spec.ts` (3 casos)
+3. `src/app/features/clients/client-api.spec.ts` (7 casos con `HttpTestingController`)
+4. `src/app/app.spec.ts` (2 casos)
+5. `src/app/shared/ui/status-tag/status-tag.spec.ts` (4 casos)
+6. `src/app/demo/ejemplo/ejemplo.spec.ts` (4 casos)
+7. `src/app/layout/shell/shell.spec.ts` (3 casos)
+8. `src/app/features/construir/construir.spec.ts` (7 casos)
+
+**Resultado: 8 archivos pasados, 33 casos de prueba aprobados (100% de éxito).**
+
+![Resultados de pruebas unitarias y compilación de ISS-02](capturas/iss-02-terminal-tests.png)
+
+#### 2. Evidencia Visual del Layout Shell en Escritorio (1280 × 800 px)
+Header superior, Aside de navegación con secciones *Operación* y *Herramientas*, vista integrada con `PageHeader`, `StatusTag` y `EmptyState`, y Footer inferior:
+
+![Vista de escritorio del Layout Shell en ISS-02](capturas/iss-02-shell-desktop.png)
+
+#### 3. Evidencia Visual del Layout Shell en Móvil (390 × 844 px)
+Comportamiento responsive con ocultamiento automático del Aside lateral, disposición vertical adaptable de la cabecera y el estado vacío:
+
+![Vista móvil del Layout Shell en ISS-02](capturas/iss-02-shell-mobile.png)
+
+---
+
+*Estado actual: ISS-00, ISS-01, ISS-01A, ISS-01B e ISS-02 completados satisfactoriamente. Próximo paso: ISS-03 (CRUD de Clientes con backend y tablas reactivas).*
