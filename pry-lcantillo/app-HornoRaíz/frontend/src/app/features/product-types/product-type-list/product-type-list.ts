@@ -16,6 +16,7 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusTag } from '../../../shared/ui/status-tag/status-tag';
 import { ProductTypeApi } from '../product-type-api';
 import { ProductTypeForm } from '../product-type-form/product-type-form';
+import { HasPermission } from '../../../shared/directives/has-permission';
 
 /**
  * Lista de tipos de producto con operaciones de CRUD reactivo con signals.
@@ -24,6 +25,7 @@ import { ProductTypeForm } from '../product-type-form/product-type-form';
   host: { class: 'block' },
   selector: 'app-product-type-list',
   imports: [
+    HasPermission,
     ButtonModule,
     DialogModule,
     EmptyState,

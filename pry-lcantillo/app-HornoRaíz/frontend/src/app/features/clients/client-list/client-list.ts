@@ -16,6 +16,7 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusTag } from '../../../shared/ui/status-tag/status-tag';
 import { ClientApi } from '../client-api';
 import { ClientForm } from '../client-form/client-form';
+import { HasPermission } from '../../../shared/directives/has-permission';
 
 /**
  * Lista de clientes con todas las operaciones del CRUD.
@@ -27,6 +28,7 @@ import { ClientForm } from '../client-form/client-form';
   host: { class: 'block' },
   selector: 'app-client-list',
   imports: [
+    HasPermission,
     ButtonModule,
     DialogModule,
     EmptyState,

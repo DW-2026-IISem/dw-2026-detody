@@ -20,6 +20,7 @@ import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
 import { StatusTag } from '../../../shared/ui/status-tag/status-tag';
 import { SaleDetail } from '../sale-detail/sale-detail';
+import { HasPermission } from '../../../shared/directives/has-permission';
 import { ClientApi } from '../../clients/client-api';
 import { ProductApi } from '../../products/product-api';
 import { SaleApi } from '../sale-api';
@@ -31,6 +32,7 @@ import { SaleApi } from '../sale-api';
   host: { class: 'block' },
   selector: 'app-sale-list',
   imports: [
+    HasPermission,
     CurrencyPipe,
     DatePipe,
     RouterLink,

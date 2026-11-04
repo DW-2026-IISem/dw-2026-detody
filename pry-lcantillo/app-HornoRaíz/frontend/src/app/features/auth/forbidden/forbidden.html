@@ -5,14 +5,22 @@
     </div>
     <h1 class="text-3xl font-black text-slate-800">403</h1>
     <h2 class="text-xl font-bold text-slate-700 mt-1">Acceso Denegado</h2>
-    <p class="text-sm text-slate-500 mt-2 mb-6">
+    <p class="text-sm text-slate-500 mt-2">
       No cuentas con los permisos efectivos requeridos por tu rol para acceder a este recurso.
     </p>
+
+    @if (permission) {
+      <div class="rounded-xl bg-slate-900 px-4 py-3 my-5 text-left border border-slate-700">
+        <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Permiso requerido</p>
+        <code class="text-sm text-emerald-400 font-mono font-bold">{{ permission }}</code>
+      </div>
+    }
+
     <p-button
-      label="Volver al Dashboard"
+      label="Volver al Panel Principal"
       icon="pi pi-home"
       (onClick)="goHome()"
-      styleClass="p-button-warning bg-amber-600 hover:bg-amber-700 border-none text-white rounded-xl px-6 py-2.5 font-bold shadow-md"
+      styleClass="p-button-warning bg-amber-600 hover:bg-amber-700 border-none text-white rounded-xl px-6 py-2.5 font-bold shadow-md mt-2"
     />
   </div>
 </div>

@@ -14,6 +14,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Client } from '../../../core/models/client.model';
 import { Product } from '../../../core/models/product.model';
 import { NotificationService } from '../../../core/services/notification';
+import { HasPermission } from '../../../shared/directives/has-permission';
 import { toApiMessage } from '../../../core/utils/api-error';
 import { EmptyState } from '../../../shared/ui/empty-state/empty-state';
 import { PageHeader } from '../../../shared/ui/page-header/page-header';
@@ -34,6 +35,7 @@ export type DraftLine = { product_id: number; quantity: number };
   host: { class: 'block' },
   selector: 'app-sale-form',
   imports: [
+    HasPermission,
     CurrencyPipe,
     FormsModule,
     RouterLink,

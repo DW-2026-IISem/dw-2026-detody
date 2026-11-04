@@ -3,7 +3,7 @@
   subtitle="Catálogo base para la categorización de los productos de panadería y pastelería."
 >
   <p-tag [value]="rows().length + ' activos'" severity="info" [rounded]="true" />
-  <button pButton type="button" (click)="openCreate()">
+  <button *appHasPermission="'POST /api/tipos-producto'" pButton type="button" (click)="openCreate()">
     <i pButtonIcon class="pi pi-plus"></i>
     <span pButtonLabel>Nuevo tipo</span>
   </button>
@@ -72,6 +72,7 @@
               rounded
               severity="secondary"
               icon="pi pi-pencil"
+              *appHasPermission="'PATCH /api/tipos-producto/:id'"
               aria-label="Editar tipo"
               pTooltip="Editar"
               (click)="openEdit(row)"
@@ -83,6 +84,7 @@
               rounded
               severity="warn"
               icon="pi pi-ban"
+              *appHasPermission="'PATCH /api/tipos-producto/:id/deactivate'"
               aria-label="Dar de baja al tipo"
               pTooltip="Baja lógica"
               (click)="deactivate(row)"
@@ -94,6 +96,7 @@
               rounded
               severity="danger"
               icon="pi pi-trash"
+              *appHasPermission="'DELETE /api/tipos-producto/:id'"
               aria-label="Eliminar tipo"
               pTooltip="Eliminar"
               (click)="remove(row)"

@@ -22,6 +22,7 @@ import { ProductApi } from '../../products/product-api';
 import { SaleApi } from '../../sales/sale-api';
 import { ProductSaleApi } from '../product-sale-api';
 import { ProductSaleForm } from '../product-sale-form/product-sale-form';
+import { HasPermission } from '../../../shared/directives/has-permission';
 
 /**
  * Listado independiente de líneas de venta (/api/detalle-ventas).
@@ -31,6 +32,7 @@ import { ProductSaleForm } from '../product-sale-form/product-sale-form';
   host: { class: 'block' },
   selector: 'app-product-sale-list',
   imports: [
+    HasPermission,
     CurrencyPipe,
     ButtonModule,
     DialogModule,

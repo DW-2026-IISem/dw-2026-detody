@@ -8,6 +8,7 @@ import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { HasPermission } from '../../shared/directives/has-permission';
 import { Client } from '../../core/models/client.model';
 import { Product } from '../../core/models/product.model';
 import { Sale } from '../../core/models/sale.model';
@@ -27,6 +28,7 @@ import { SaleApi } from '../sales/sale-api';
   host: { class: 'block' },
   selector: 'app-dashboard',
   imports: [
+    HasPermission,
     CurrencyPipe,
     DatePipe,
     RouterLink,

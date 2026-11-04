@@ -20,6 +20,7 @@ import { StatusTag } from '../../../shared/ui/status-tag/status-tag';
 import { ProductTypeApi } from '../../product-types/product-type-api';
 import { ProductApi } from '../product-api';
 import { ProductForm } from '../product-form/product-form';
+import { HasPermission } from '../../../shared/directives/has-permission';
 
 /**
  * Catálogo de productos con relación a tipos, semáforo de stock y CRUD con signals.
@@ -28,6 +29,7 @@ import { ProductForm } from '../product-form/product-form';
   host: { class: 'block' },
   selector: 'app-product-list',
   imports: [
+    HasPermission,
     CurrencyPipe,
     ButtonModule,
     DialogModule,

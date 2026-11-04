@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 import { guestGuard } from './core/guards/guest-guard';
+import { permissionGuard } from './core/guards/permission-guard';
+import { authOnlyGuard } from './core/guards/auth-only-guard';
 
 export const routes: Routes = [
   // Ruta pública de demostración didáctica de ISS-01 / ISS-02
@@ -9,7 +11,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/construir/construir').then((m) => m.Construir),
   },
-  // Pantalla de Login (protegida con guestGuard: si ya está autenticado redirige a /dashboard)
+  // Pantalla de Login (guestGuard: si ya está autenticado redirige a /dashboard)
   {
     path: 'login',
     title: 'Iniciar Sesión · HornoRaíz',
@@ -38,18 +40,23 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         title: 'Panel de Control · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/ventas' },
         loadComponent: () =>
           import('./features/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
         path: 'perfil',
         title: 'Mi Perfil y Permisos · HornoRaíz',
+        canActivate: [authOnlyGuard],
         loadComponent: () =>
           import('./features/auth/profile/profile').then((m) => m.Profile),
       },
       {
         path: 'clientes',
         title: 'Gestión de Clientes · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/clientes' },
         loadComponent: () =>
           import('./features/clients/client-list/client-list').then(
             (m) => m.ClientList,
@@ -58,6 +65,8 @@ export const routes: Routes = [
       {
         path: 'tipos-producto',
         title: 'Categorías de Panadería · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/tipos-producto' },
         loadComponent: () =>
           import('./features/product-types/product-type-list/product-type-list').then(
             (m) => m.ProductTypeList,
@@ -66,6 +75,8 @@ export const routes: Routes = [
       {
         path: 'productos',
         title: 'Catálogo de Panadería · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/productos' },
         loadComponent: () =>
           import('./features/products/product-list/product-list').then(
             (m) => m.ProductList,
@@ -74,18 +85,24 @@ export const routes: Routes = [
       {
         path: 'ventas',
         title: 'Historial de Ventas · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/ventas' },
         loadComponent: () =>
           import('./features/sales/sale-list/sale-list').then((m) => m.SaleList),
       },
       {
         path: 'ventas/nueva',
         title: 'Registrar Nueva Venta · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'POST /api/ventas' },
         loadComponent: () =>
           import('./features/sales/sale-form/sale-form').then((m) => m.SaleForm),
       },
       {
         path: 'detalle-ventas',
         title: 'Detalle de Ventas · HornoRaíz',
+        canActivate: [permissionGuard],
+        data: { permission: 'GET /api/detalle-ventas' },
         loadComponent: () =>
           import(
             './features/product-sales/product-sale-list/product-sale-list'

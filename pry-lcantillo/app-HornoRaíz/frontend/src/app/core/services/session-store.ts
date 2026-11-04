@@ -14,6 +14,28 @@ interface PersistedSession {
   permissions: EffectivePermission[];
 }
 
+const ROUTE_ALIASES: Record<string, string> = {
+  clientes: 'clients',
+  'tipos-producto': 'product-types',
+  productos: 'products',
+  ventas: 'sales',
+  'detalle-ventas': 'product-sales',
+  usuarios: 'users',
+  recursos: 'resources',
+  'asignaciones-rol': 'role-users',
+  'concesiones-rol': 'resource-roles',
+  sesion: 'session',
+  permisos: 'permissions',
+};
+
+function normalizeRouteAliases(path: string): string {
+  let normalized = path;
+  for (const [es, en] of Object.entries(ROUTE_ALIASES)) {
+    normalized = normalized.replace(new RegExp(`/api/${es}(/|$|:)`, 'g'), `/api/${en}$1`);
+  }
+  return normalized;
+}
+
 /**
  * Única fuente de verdad de la sesión en el cliente.
  * Todo se expone como signals de solo lectura y se deriva con computed().
@@ -127,8 +149,8 @@ export class SessionStore {
 
   private restore(): void {
     try {
-      if (typeof window !== 'undefined' && window.location?.search?.includes('demo_auth=admin')) {
-        this._accessToken.set('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.demo-admin-token');
+      if (typeof window !== 'undefined' && window.location?.href?.includes('demo_auth=admin')) {
+        this._accessToken.set('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGhvcm5vcmFpei5jb20iLCJpYXQiOjE3OTM3NzU1NjYsImV4cCI6MjE0NzQ4MzY0N30.LYBGdahK2LF6UjDCuxPHet-awgqCach-EhZH8GCxR0Q');
         this._refreshToken.set('9f2c6a28d5e12ca3ce11f263fac918e7');
         this._user.set({
           id: 1,
@@ -141,10 +163,40 @@ export class SessionStore {
           { resource_id: 2, method: 'GET', path: '/api/permisos', description: 'Obtener lista de permisos efectivos', role_id: 1, role_name: 'ADMIN' },
           { resource_id: 3, method: 'GET', path: '/api/clientes', description: 'Listar clientes', role_id: 1, role_name: 'ADMIN' },
           { resource_id: 4, method: 'POST', path: '/api/clientes', description: 'Crear cliente', role_id: 1, role_name: 'ADMIN' },
-          { resource_id: 5, method: 'GET', path: '/api/productos', description: 'Catálogo de productos', role_id: 1, role_name: 'ADMIN' },
-          { resource_id: 6, method: 'POST', path: '/api/ventas', description: 'Procesar venta con rollback transaccional', role_id: 1, role_name: 'ADMIN' },
-          { resource_id: 7, method: 'GET', path: '/api/tipos-producto', description: 'Categorías de panadería', role_id: 1, role_name: 'ADMIN' },
-          { resource_id: 8, method: 'GET', path: '/api/detalle-ventas', description: 'Auditoría independiente de líneas de venta', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 5, method: 'PATCH', path: '/api/clientes/:id', description: 'Actualizar cliente', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 6, method: 'DELETE', path: '/api/clientes/:id', description: 'Eliminar cliente', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 7, method: 'GET', path: '/api/productos', description: 'Catálogo de productos', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 8, method: 'POST', path: '/api/productos', description: 'Crear producto', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 9, method: 'PATCH', path: '/api/productos/:id', description: 'Actualizar producto', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 10, method: 'DELETE', path: '/api/productos/:id', description: 'Eliminar producto', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 11, method: 'GET', path: '/api/ventas', description: 'Historial de ventas', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 12, method: 'POST', path: '/api/ventas', description: 'Procesar venta con rollback transaccional', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 13, method: 'GET', path: '/api/tipos-producto', description: 'Categorías de panadería', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 14, method: 'POST', path: '/api/tipos-producto', description: 'Crear categoría', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 15, method: 'PATCH', path: '/api/tipos-producto/:id', description: 'Actualizar categoría', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 16, method: 'DELETE', path: '/api/tipos-producto/:id', description: 'Eliminar categoría', role_id: 1, role_name: 'ADMIN' },
+          { resource_id: 17, method: 'GET', path: '/api/detalle-ventas', description: 'Auditoría independiente de líneas de venta', role_id: 1, role_name: 'ADMIN' },
+        ]);
+        return;
+      }
+
+      if (typeof window !== 'undefined' && window.location?.href?.includes('demo_auth=seller')) {
+        this._accessToken.set('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoic2VsbGVyIiwiZW1haWwiOiJzZWxsZXJAaG9ybm9yYWl6LmNvbSIsImlhdCI6MTc5Mzc3NTU2NiwiZXhwIjoyMTQ3NDgzNjQ3fQ.XV-9O3F98jOqUi4kk9tED2mmy_TTZuWBSqRSzZ3PFXU');
+        this._refreshToken.set('seller-ref-token-xyz');
+        this._user.set({
+          id: 2,
+          username: 'seller',
+          email: 'seller@hornoraiz.com',
+          status: 'active',
+        });
+        this._permissions.set([
+          { resource_id: 1, method: 'GET', path: '/api/sesion/perfil', description: 'Obtener perfil', role_id: 2, role_name: 'SELLER' },
+          { resource_id: 2, method: 'GET', path: '/api/permisos', description: 'Obtener permisos', role_id: 2, role_name: 'SELLER' },
+          { resource_id: 3, method: 'GET', path: '/api/clientes', description: 'Listar clientes', role_id: 2, role_name: 'SELLER' },
+          { resource_id: 4, method: 'GET', path: '/api/clientes/:id', description: 'Detalle cliente', role_id: 2, role_name: 'SELLER' },
+          { resource_id: 5, method: 'GET', path: '/api/productos', description: 'Catálogo de productos', role_id: 2, role_name: 'SELLER' },
+          { resource_id: 6, method: 'GET', path: '/api/ventas', description: 'Historial de ventas', role_id: 2, role_name: 'SELLER' },
+          { resource_id: 7, method: 'POST', path: '/api/ventas', description: 'Registrar nueva venta', role_id: 2, role_name: 'SELLER' },
         ]);
         return;
       }
@@ -183,8 +235,11 @@ export class SessionStore {
 }
 
 function pathMatches(pattern: string, path: string): boolean {
-  const escaped = pattern
+  const normPattern = normalizeRouteAliases(pattern);
+  const normPath = normalizeRouteAliases(path);
+
+  const escaped = normPattern
     .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     .replace(/\/:[^/]+/g, '/[^/]+');
-  return new RegExp(`^${escaped}$`).test(path);
+  return new RegExp(`^${escaped}$`).test(normPath);
 }

@@ -1608,3 +1608,148 @@ Panel de identidad con avatar, roles asignados, contadores de acceso y tabla int
 ---
 
 *Estado actual: ISS-00 a ISS-08 completados satisfactoriamente con seguridad RBAC activa en frontend y backend. Próximo paso: ISS-09 (Guards de Ruta y Directiva Estructural RBAC en la UI).*
+
+
+## ISS-09: Guards de Ruta y RBAC Estructural en la UI
+
+### Contexto y Objetivos de la Unidad
+En esta segunda unidad de la **Fase II: Auth con RBAC (Bloque 2 de 3: Protección del Business)**, se consolidó la protección granular de la interfaz de usuario para que coincida milimétricamente con el modelo de autorización estricta del backend NestJS.
+
+El objetivo fue asegurar que ningún usuario pueda acceder a rutas de negocio no autorizadas ni visualizar elementos interactivos (botones de creación, edición, desactivación lógica y borrado físico) para los que no tenga permisos explícitos en su token JWT:
+
+1. **Guards de Ruta Especializados**:
+   - `permissionGuard`: Evalúa los metadatos declarados en la ruta (`data: { permission: 'METHOD /api/recurso' }`) contra el catálogo en memoria de `SessionStore.canPermission()`. Si el usuario carece del permiso, la navegación se interrumpe y se redirige a `/forbidden?permission=...` preservando el detalle del permiso requerido.
+   - `authOnlyGuard`: Impide el acceso a pantallas exclusivas del subsistema de identidad (como `/perfil`) cuando `environment.requireAuth` se encuentra desactivado, garantizando retrocompatibilidad con el modo didáctico de la Fase I.
+   - `authGuard`: Enriquecido con captura y preservación de `returnUrl` para reanudar el flujo de navegación original tras un login exitoso.
+   - `guestGuard`: Redirige al `/dashboard` a cualquier usuario que intente entrar a `/login` contando ya con una sesión activa y válida.
+
+2. **Directiva Estructural Reactiva `*appHasPermission`**:
+   - Diseñada como directiva estructural standalone (`src/app/shared/directives/has-permission.ts`) con inyección de `TemplateRef` y `ViewContainerRef`.
+   - Utiliza un `effect()` reactivo de Angular 22 que escucha continuamente la signal de permisos de `SessionStore`.
+   - Si el permiso está concedido, crea la vista embebida; si es revocado o ausente, limpia el contenedor del DOM sin dejar nodos residuales ni elementos deshabilitados visibles.
+
+3. **Filtrado Granular en Pantallas de Negocio (Business Screens)**:
+   - Integrada en todas las vistas del dominio: `ClientList`, `ProductTypeList`, `ProductList`, `SaleList`, `ProductSaleList`, `SaleForm` y `Dashboard`.
+   - Protege cada botón de acción: `POST /api/clientes` (Nuevo), `PATCH /api/clientes/:id` (Editar), `DELETE /api/clientes/:id` (Baja/Eliminar), `POST /api/tipos-producto`, `POST /api/productos`, `POST /api/ventas` (Confirmar venta), etc.
+
+4. **Menú de Navegación Dinámico y Reactivo**:
+   - Centralizado en `src/app/layout/shell/nav.config.ts` mediante la constante `NAV`.
+   - El componente `Shell` calcula reactivamente `navGroups` mediante un `computed()` que filtra los elementos según `session.canPermission(item.permission)`.
+   - Los roles con acceso restringido (como `seller`) solo ven en el panel lateral las opciones correspondientes a su perfil de privilegios (por ejemplo: Clientes, Productos y Ventas), ocultando automáticamente categorías y auditoría de líneas de venta.
+
+---
+
+### Implementaciones Clave
+
+#### 1. Directiva Estructural `*appHasPermission` (`src/app/shared/directives/has-permission.ts`)
+```typescript
+import { Directive, effect, inject, input, TemplateRef, ViewContainerRef } from '@angular/core';
+import { SessionStore } from '../../core/services/session-store';
+
+@Directive({
+  selector: '[appHasPermission]',
+  standalone: true,
+})
+export class HasPermission {
+  private readonly templateRef = inject(TemplateRef<unknown>);
+  private readonly viewContainer = inject(ViewContainerRef);
+  private readonly session = inject(SessionStore);
+
+  readonly appHasPermission = input.required<string>();
+
+  private hasView = false;
+
+  constructor() {
+    effect(() => {
+      const permission = this.appHasPermission();
+      const granted = this.session.canPermission(permission);
+
+      if (granted && !this.hasView) {
+        this.viewContainer.createEmbeddedView(this.templateRef);
+        this.hasView = true;
+      } else if (!granted && this.hasView) {
+        this.viewContainer.clear();
+        this.hasView = false;
+      }
+    });
+  }
+}
+```
+
+#### 2. Guard de Permisos (`src/app/core/guards/permission-guard.ts`)
+```typescript
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { SessionStore } from '../services/session-store';
+
+export const permissionGuard: CanActivateFn = (route) => {
+  const session = inject(SessionStore);
+  const router = inject(Router);
+
+  if (!environment.requireAuth) {
+    return true;
+  }
+
+  const permission = route.data?.['permission'] as string | undefined;
+  if (!permission || session.canPermission(permission)) {
+    return true;
+  }
+
+  return router.createUrlTree(['/forbidden'], {
+    queryParams: { permission },
+  });
+};
+```
+
+#### 3. Configuración y Filtrado Reactivo del Menú Lateral (`src/app/layout/shell/shell.ts`)
+```typescript
+readonly navGroups = computed<NavGroup[]>(() => {
+  return NAV.map((group) => ({
+    title: group.title,
+    items: group.items.filter((item) => {
+      if (item.authOnly && !this.session.authEnabled) {
+        return false;
+      }
+      if (!item.permission) {
+        return true;
+      }
+      return this.session.canPermission(item.permission);
+    }),
+  })).filter((group) => group.items.length > 0);
+});
+```
+
+---
+
+### Evidencias de Verificación y Pruebas Automatizadas
+
+#### 1. Resultados de la Suite de Pruebas Unitarias (Vitest) y Compilación
+Se incorporaron pruebas unitarias especializadas para la directiva estructural, los nuevos guards y el comportamiento reactivo del shell:
+- `src/app/shared/directives/has-permission.spec.ts` (2 pruebas: renderizado condicional según permisos reactivos).
+- `src/app/core/guards/permission-guard.spec.ts` (2 pruebas: paso concedido con permiso y redirección a `/forbidden` con queryParam).
+- `src/app/core/guards/auth-only-guard.spec.ts` (1 prueba: redirección a dashboard cuando authEnabled es false).
+- `src/app/layout/shell/shell.spec.ts` (3 pruebas: instanciación y filtrado reactivo del catálogo de navegación).
+
+**Total acumulado en ISS-09: 35 archivos de prueba pasados (35 de 35), 163 pruebas unitarias aprobadas (100% de éxito en 5.11 segundos). Compilación de producción (`ng build`) finalizada en 3.30 segundos con 0 errores y 0 advertencias.**
+
+![Resultados de pruebas unitarias y compilación de ISS-09](capturas/iss-09-terminal-tests.png)
+
+#### 2. Evidencia Visual del Menú Completo para Administrador (1280 × 800 px)
+El usuario con rol `ADMIN` dispone de acceso íntegro a todas las categorías operativas (Clientes, Tipos de Producto, Productos, Ventas y Detalle de Ventas) y a las funciones de administración y perfil:
+
+![Vista de escritorio del Menú Completo para Administrador en ISS-09](capturas/iss-09-admin-menu-desktop.png)
+
+#### 3. Evidencia Visual del Menú Filtrado Reactivamente para Vendedor (1280 × 800 px)
+El usuario con rol `SELLER` visualiza un menú lateral acotado estrictamente a sus permisos efectivos (`GET /api/clientes`, `GET /api/productos`, `GET /api/ventas`). Las secciones no autorizadas (`Tipos de Producto` y `Detalle de Ventas`) son filtradas de forma totalmente transparente sin alterar la experiencia de usuario:
+
+![Vista de escritorio del Menú Filtrado para Vendedor en ISS-09](capturas/iss-09-seller-menu-desktop.png)
+
+#### 4. Evidencia Visual de Pantalla de Acceso Prohibido con Detalle de Permiso Requerido (1280 × 800 px)
+Al intentar ingresar directamente por URL a un recurso restringido (por ejemplo `/tipos-producto`), `permissionGuard` intercepta la navegación y redirige a `/forbidden` mostrando de forma amigable el permiso específico requerido:
+
+![Vista de escritorio de Acceso Prohibido en ISS-09](capturas/iss-09-forbidden-desktop.png)
+
+---
+
+*Estado actual: ISS-00 a ISS-09 completados con cobertura del 100% en pruebas automatizadas y protección RBAC estructural completa. Próximo paso: ISS-10 (Administración RBAC: Roles, Usuarios y Permisos).*

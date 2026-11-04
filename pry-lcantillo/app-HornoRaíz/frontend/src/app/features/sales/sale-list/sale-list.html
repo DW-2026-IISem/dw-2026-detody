@@ -5,7 +5,7 @@
   <div class="flex items-center gap-2">
     <p-tag [value]="rows().length + ' ventas registradas'" severity="info" [rounded]="true" />
     <p-tag [value]="'Ingresos: ' + (totalRevenue() | currency: 'USD' : 'symbol' : '1.2-2')" severity="success" [rounded]="true" />
-    <button pButton type="button" routerLink="/ventas/nueva">
+    <button *appHasPermission="'POST /api/ventas'" pButton type="button" routerLink="/ventas/nueva">
       <i pButtonIcon class="pi pi-plus"></i>
       <span pButtonLabel>Nueva venta</span>
     </button>
@@ -112,6 +112,7 @@
               rounded
               severity="warn"
               icon="pi pi-ban"
+              *appHasPermission="'PATCH /api/ventas/:id/deactivate'"
               aria-label="Cancelar venta"
               pTooltip="Anular venta y restaurar stock"
               (click)="deactivate(row)"

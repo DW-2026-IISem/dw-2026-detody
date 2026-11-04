@@ -11,6 +11,7 @@ import { watchMediaQuery } from '../../core/utils/media-query';
 import { SessionStore } from '../../core/services/session-store';
 import { AuthService } from '../../core/services/auth';
 import { NotificationService } from '../../core/services/notification';
+import { NAV } from './nav.config';
 
 @Component({
   selector: 'app-shell',
@@ -46,11 +47,35 @@ export class Shell {
   readonly roleLabel = computed(() => this.session.roleNames().join(', ') || 'ADMIN');
   readonly permissionCount = computed(() => this.session.permissionCount());
 
+  /** Menú lateral filtrado reactivamente por permisos y estado de auth */
+  readonly items = computed<MenuItem[]>(() => this.navGroups());
+  readonly navGroups = computed<MenuItem[]>(() =>
+    NAV.filter((group) => !group.authOnly || this.session.authEnabled)
+      .map((group) => ({
+        label: group.label,
+        expanded: true,
+        items: group.items
+          .filter((item) => !item.permission || this.session.canPermission(item.permission))
+          .map<MenuItem>((item) => ({
+            label: item.label,
+            icon: item.icon,
+            routerLink: item.routerLink,
+            routerLinkActiveOptions: { exact: item.routerLink === '/ventas' },
+          })),
+      }))
+      .filter((group) => (group.items?.length ?? 0) > 0),
+  );
+
   readonly userItems = computed<MenuItem[]>(() => [
     {
       label: 'Mi Perfil',
       icon: 'pi pi-user',
       routerLink: '/perfil',
+    },
+    {
+      label: 'Actualizar permisos',
+      icon: 'pi pi-refresh',
+      command: () => this.handleRefreshPermissions(),
     },
     {
       separator: true,
@@ -61,57 +86,6 @@ export class Shell {
       command: () => this.handleLogout(),
     },
   ]);
-
-  readonly items: MenuItem[] = [
-    {
-      label: 'Principal',
-      icon: 'pi pi-home',
-      routerLink: '/dashboard',
-    },
-    {
-      label: 'Operación',
-      icon: 'pi pi-compass',
-      expanded: true,
-      items: [
-        {
-          label: 'Clientes',
-          icon: 'pi pi-users',
-          routerLink: '/clientes',
-        },
-        {
-          label: 'Tipos de Producto',
-          icon: 'pi pi-tags',
-          routerLink: '/tipos-producto',
-        },
-        {
-          label: 'Productos',
-          icon: 'pi pi-box',
-          routerLink: '/productos',
-        },
-        {
-          label: 'Ventas',
-          icon: 'pi pi-shopping-cart',
-          routerLink: '/ventas',
-        },
-        {
-          label: 'Detalle de Ventas',
-          icon: 'pi pi-list',
-          routerLink: '/detalle-ventas',
-        },
-      ],
-    },
-    {
-      label: 'Seguridad',
-      icon: 'pi pi-shield',
-      items: [
-        {
-          label: 'Mi Perfil',
-          icon: 'pi pi-user',
-          routerLink: '/perfil',
-        },
-      ],
-    },
-  ];
 
   constructor() {
     effect(() => {
@@ -129,6 +103,17 @@ export class Shell {
     if (!this.isDesktop()) {
       this.mobileOpen.set(false);
     }
+  }
+
+  handleRefreshPermissions(): void {
+    this.auth.me().subscribe({
+      next: () => {
+        this.notify.success('Permisos actualizados', 'La matriz de permisos y el menú se han refrescado.');
+      },
+      error: () => {
+        this.notify.error('Error', 'No se pudieron actualizar los permisos.');
+      },
+    });
   }
 
   handleLogout(): void {

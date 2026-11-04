@@ -2,7 +2,7 @@
   title="Dashboard"
   subtitle="Métricas globales, alertas de inventario y actividad transaccional en tiempo real."
 >
-  <button pButton type="button" severity="primary" routerLink="/ventas/nueva">
+  <button *appHasPermission="'POST /api/ventas'" pButton type="button" severity="primary" routerLink="/ventas/nueva">
     <i pButtonIcon class="pi pi-plus"></i>
     <span pButtonLabel>Registrar venta</span>
   </button>
@@ -24,7 +24,7 @@
   <!-- Tarjetas KPI -->
   <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
     <!-- KPI Clientes -->
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+    <div *appHasPermission="'GET /api/clientes'" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Clientes activos</p>
         <p class="text-3xl font-black text-slate-800 mt-1">{{ clients().length }}</p>
@@ -36,7 +36,7 @@
     </div>
 
     <!-- KPI Categorías -->
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+    <div *appHasPermission="'GET /api/tipos-producto'" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Categorías de panadería</p>
         <p class="text-3xl font-black text-slate-800 mt-1">{{ typeCount() }}</p>
@@ -60,7 +60,7 @@
     </div>
 
     <!-- KPI Ingresos -->
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
+    <div *appHasPermission="'GET /api/ventas'" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Ingresos acumulados</p>
         <p class="text-2xl font-black text-slate-900 mt-1">{{ revenue() | currency: 'USD' : 'symbol' : '1.0-0' }}</p>

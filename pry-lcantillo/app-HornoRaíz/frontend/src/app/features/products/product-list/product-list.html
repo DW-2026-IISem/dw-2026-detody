@@ -5,7 +5,7 @@
   <div class="flex items-center gap-2">
     <p-tag [value]="rows().length + ' productos'" severity="info" [rounded]="true" />
     <p-tag [value]="lowStockCount() + ' con stock bajo'" severity="warn" [rounded]="true" />
-    <button pButton type="button" (click)="openCreate()">
+    <button *appHasPermission="'POST /api/productos'" pButton type="button" (click)="openCreate()">
       <i pButtonIcon class="pi pi-plus"></i>
       <span pButtonLabel>Nuevo producto</span>
     </button>
@@ -116,6 +116,7 @@
               rounded
               severity="secondary"
               icon="pi pi-pencil"
+              *appHasPermission="'PATCH /api/productos/:id'"
               aria-label="Editar producto"
               pTooltip="Editar"
               (click)="openEdit(row)"
@@ -127,6 +128,7 @@
               rounded
               severity="warn"
               icon="pi pi-ban"
+              *appHasPermission="'PATCH /api/productos/:id/deactivate'"
               aria-label="Dar de baja al producto"
               pTooltip="Baja lógica"
               (click)="deactivate(row)"
@@ -138,6 +140,7 @@
               rounded
               severity="danger"
               icon="pi pi-trash"
+              *appHasPermission="'DELETE /api/productos/:id'"
               aria-label="Eliminar producto"
               pTooltip="Eliminar"
               (click)="remove(row)"
